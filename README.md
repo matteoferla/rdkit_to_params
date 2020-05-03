@@ -54,23 +54,23 @@ Dummy atom (*/R) is assumed to be a CONNECT —ligand only atm.
 
 Here is a conversion:
 
-from rdkit_to_params import Params, pyrosetta
-# note that pyrosetta needs to be started before rdkit.
-pyrosetta.init(extra_options='-mute all')
-from rdkit import Chem
-from rdkit.Chem import AllChem
-
-mol = Chem.MolFromSmiles('NCC(C)C(=O)O')
-mol = AllChem.AddHs(mol)
-display(mol)
-AllChem.EmbedMolecule(mol)
-AllChem.MMFFOptimizeMolecule(mol)
-Params.add_names(mol, names=['N', 'CA', 'CB', 'C', 'O'], name='LIG')
-
-p = Params.from_mol(mol)
-p.NBR_ATOM.append('CB')
-p.NBR_RADIUS.append('12.3')
-p.test().dump_pdb('test.pdb')
+    from rdkit_to_params import Params, pyrosetta
+    # note that pyrosetta needs to be started before rdkit.
+    pyrosetta.init(extra_options='-mute all')
+    from rdkit import Chem
+    from rdkit.Chem import AllChem
+    
+    mol = Chem.MolFromSmiles('NCC(C)C(=O)O')
+    mol = AllChem.AddHs(mol)
+    display(mol)
+    AllChem.EmbedMolecule(mol)
+    AllChem.MMFFOptimizeMolecule(mol)
+    Params.add_names(mol, names=['N', 'CA', 'CB', 'C', 'O'], name='LIG')
+    
+    p = Params.from_mol(mol)
+    p.NBR_ATOM.append('CB')
+    p.NBR_RADIUS.append('12.3')
+    p.test().dump_pdb('test.pdb')
 
 
 ## To Do
