@@ -19,7 +19,6 @@ __citation__ = "None."
 
 
 import pyrosetta, os
-pyrosetta.init(extra_options='-no_optH false -mute all')
 
 from typing import Optional
 

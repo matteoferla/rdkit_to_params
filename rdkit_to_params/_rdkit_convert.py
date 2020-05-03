@@ -3,12 +3,6 @@ __doc__ = \
     """
 There are probably loads of mistakes here ---or more correctly
 in ``_RDKitPrepMixin()._add_rtypes`` or ``_RDKitPrepMixin()._add_genrtypes``.
-
-For the sake of sanity, ``EmbedMolecule``, ``Chem.AddHs(mol)`` or any weird hack is assumed to have been done beforehand.
-The molecule should preferably be **not** Kekulised.
-3letter name of residue is either from the title row (``_Name``) if a 3letter word or from the PDBInfo or 'LIG'.
-
-Dummy atom (*/R) is assumed to be a CONNECT —ligand only atm.
     """
 
 __author__ = "Matteo Ferla. [Github](https://github.com/matteoferla)"
@@ -33,7 +27,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
     _Measure = namedtuple('Measure', ['distance','angle', 'torsion'])
 
     @classmethod
-    def from_mol(cls, mol: Chem.Mol, generic: bool = False, name:Optional[str]=None) -> RDKit2Params:
+    def from_mol(cls, mol: Chem.Mol, generic: bool = False, name:Optional[str]=None) -> _RDKitCovertMixin:
         """
         :param mol: Rdkit molecule, with explicit protons and all.
         :type mol: Chem.Mol
