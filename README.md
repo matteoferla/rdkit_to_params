@@ -60,17 +60,18 @@ Here is a conversion:
     from rdkit import Chem
     from rdkit.Chem import AllChem
     
-    mol = Chem.MolFromSmiles('NCC(C)C(=O)O')
+    mol = Chem.MolFromSmiles('NC(Cc1ccccc1)C(=O)O')
     mol = AllChem.AddHs(mol)
     display(mol)
     AllChem.EmbedMolecule(mol)
     AllChem.MMFFOptimizeMolecule(mol)
-    Params.add_names(mol, names=['N', 'CA', 'CB', 'C', 'O'], name='LIG')
     
+    Params.add_names(mol, names=['N', 'CA', 'CB', 'CG', 'CD1', 'CE1', 'CZ', 'CE2', 'CD2', 'C', 'O', 'OXT'], name='LIG') 
     p = Params.from_mol(mol)
     p.NBR_ATOM.append('CB')
     p.NBR_RADIUS.append('12.3')
     p.test().dump_pdb('test.pdb')
+    Chem.MolToPDBFile('ref.pdb')
 
 
 ## To Do
