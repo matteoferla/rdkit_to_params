@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 ########################################################################################################################
 __doc__ = \
     """
@@ -14,8 +16,6 @@ __citation__ = "None."
 
 ########################################################################################################################
 
-
-from __future__ import annotations
 from ._rdkit_prep import _RDKitPrepMixin
 
 from typing import List, Dict, Union, Optional

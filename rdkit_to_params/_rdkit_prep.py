@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 ########################################################################################################################
 __doc__ = \
     """
@@ -14,8 +16,6 @@ __version__ = "1"
 __citation__ = "None."
 
 ########################################################################################################################
-
-from __future__ import annotations
 
 from typing import List, Dict, Union
 from collections import defaultdict, deque, namedtuple
