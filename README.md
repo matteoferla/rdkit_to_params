@@ -78,4 +78,5 @@ I have not coded yet, because I forgot:
 * an auto-assignment of `NBR_ATOM` and `NBR_RADIUS` for `from_mol`.
 * add rotamer line in `from_mol`
 * change option to override starting atom.
-* tweak the logic of `NAME` after some thinking. 
+* tweak the logic of `NAME` after some thinking.
+* output constrain file for the CONNECT atom.
