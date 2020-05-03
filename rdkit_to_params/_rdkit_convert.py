@@ -54,6 +54,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
             self.NAME = self._get_name_from_PDBInfo()
         # SMILES
         self.comments.append(Chem.MolToSmiles(self.mol))
+        self.TYPE = 'LIGAND'
         # ATOM & CONNECT
         for atom in self.mol.GetAtoms():
             self._parse_atom(atom)
