@@ -4,7 +4,7 @@ Create or modify Rosetta params files (topology files) from scratch, RDKit mols 
 ## Rationale
 This is a fresh rewrite of ``mol_to_params.py``. For three reasons:
 
-* I cannot share my 2to3 port and modded module of ``mol_to_params.py`` due to licence.
+* I cannot share my 2to3 port and modded module-version of ``mol_to_params.py`` due to licence.
 * I want to modify `params` files and more as opposed to use a standalone script.
 * RDKit does not save ``mol2`` files, yet knows about atom names and Gasteiger-Massilli charges and more...
 
@@ -74,5 +74,8 @@ Here is a conversion:
 
 
 ## To Do
-I have not coded yet:
+I have not coded yet, because I forgot:
 * an auto-assignment of `NBR_ATOM` and `NBR_RADIUS` for `from_mol`.
+* add rotamer line in `from_mol`
+* change option to override starting atom.
+* tweak the logic of `NAME` after some thinking. 
