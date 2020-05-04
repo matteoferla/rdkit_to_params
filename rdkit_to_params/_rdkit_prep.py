@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from .entries import Entries
+
 ########################################################################################################################
 __doc__ = \
     """
@@ -23,7 +25,7 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 from warnings import warn
 import re
-from typing import Optional
+from typing import Optional, Sequence
 
 class _RDKitPrepMixin:
 
@@ -31,6 +33,7 @@ class _RDKitPrepMixin:
         # This exists to stop the IDE from getting angry.
         # And for debugging!
         self.NAME = 'LIG'
+        self.TYPE = Entries.from_name('TYPE')
         self.mol = None
         self.generic = False
         self._rtype = []
@@ -40,6 +43,7 @@ class _RDKitPrepMixin:
         self = cls()
         self.mol = mol
         self.generic = generic
+        self.TYPE.append('LIGAND')
         if name is not None:
             self.NAME = name
         self.fix_mol()
@@ -65,6 +69,7 @@ class _RDKitPrepMixin:
         if name is not None:
             self.NAME = name
         self.mol = mol
+        self.TYPE.append('LIGAND')
         self.fix_mol()
         for name, atom in zip(names, self.mol.GetAtoms()):
             info = atom.GetPDBResidueInfo().SetName(name)
@@ -330,33 +335,94 @@ class _RDKitPrepMixin:
             else:
                 raise ValueError(f'No idea what this {atom.GetSymbol()} {atom.GetHybridization()} is')
 
+    def aa_correction(self):
+        pass
+
+    def _set_PDBInfo_atomname(self, atom, name, overwrite=False):
+        info = atom.GetPDBResidueInfo()
+        if info is None:
+            isHeteroAtom = self.TYPE[0].body == 'LIGAND'
+            atom.SetMonomerInfo(Chem.AtomPDBResidueInfo(atomName=name,
+                                                        serialNumber=atom.GetIdx(),
+                                                        residueName=self.NAME,
+                                                        isHeteroAtom=isHeteroAtom))
+            return name
+        elif info.GetName() == name:
+            return name
+        elif overwrite:
+            info.SetName(name)
+            return name
+        else:
+            return info.GetName()
+
+    def rename_by_template(self, backbone: Chem.Mol, names: Sequence[str]):
+        """
+        Assigns to the atoms in self.mol the names and rosetta types based on the backbone template and the names variable.
+        See ``_fix_atom_names`` for example usage.
+
+        """
+        assert self.mol.HasSubstructMatch(backbone), 'Bad backbone match'
+        for name, idx in zip(names, self.mol.GetSubstructMatch(backbone)):
+            atom = self.mol.GetAtomWithIdx(idx)
+            self._set_PDBInfo_atomname(atom, name, overwrite=True)
+
+    def get_atom_by_name(self, name):
+        for atom in self.mol.GetAtoms():
+            info = atom.GetPDBResidueInfo()
+            if info and info.GetName().strip() == name.strip():
+                return atom
+        else:
+            raise ValueError(f'Name {name} not found.')
+
+    def retype_by_name(self, mapping: Dict[str, str]):
+        for name, rtype in mapping.items():
+            atom = self.get_atom_by_name(name)
+            atom.SetProp('_rType', rtype)
+
     def _fix_atom_names(self):
         elemental = defaultdict(int)
         seen = []
+        # Amino acid overwrite.
+        aa = Chem.MolFromSmiles('*NCC(~O)*')
+        if self.mol.HasSubstructMatch(aa):
+            aa_map = dict([('LOWER', None),
+                     (' N  ', 'Nbb'),
+                     (' CA ', 'Cbb'),
+                     (' C  ', 'CObb'),
+                     (' O  ', 'OCbb'),
+                     ('UPPER', None)
+                     ])
+            self.TYPE.append('POLYMER')
+            self.rename_by_template(aa, list(aa_map.keys()))
+            # fix amine and H for secondary
+            amine = self.get_atom_by_name(' N  ')
+            hs = [n for n in amine.GetNeighbors() if n.GetSymbol() == 'H']
+            if len(hs):
+                self._set_PDBInfo_atomname(hs[0], ' H  ', overwrite=True)
+                aa_map[' H  '] = 'HNbb'
+            else:
+                aa_map[' N  '] = 'Npro'
+            # add rtypes
+            self.retype_by_name(aa_map)
+            # change conn
+            elemental['CONN'] = 2 # when LOWER and UPPER exist the CONN is CONN3.
         for i in range(self.mol.GetNumAtoms()):
             atom = self.mol.GetAtomWithIdx(i)
             el = atom.GetSymbol()
             if el == '*':
                 el = 'CONN'
             elemental[el] += 1  # compatible mol_to_params.py
-            info = atom.GetPDBResidueInfo()
             lamename = el + str(elemental[el])
             while lamename in seen:
                 elemental[el] += 1
                 lamename = el + str(elemental[el])
-            if info is None:
-                atom.SetMonomerInfo(Chem.AtomPDBResidueInfo(atomName=lamename,
-                                                            serialNumber=i,
-                                                            residueName=self.NAME,
-                                                            isHeteroAtom=True))
+            name = self._set_PDBInfo_atomname(atom, lamename, overwrite=False)
+            if name in seen:
+                warn(f'Name clash {name}, second one now called {lamename}')
+                atom.GetPDBResidueInfo().SetName(lamename)
                 seen.append(lamename)
             else:
-                if info.GetName() in seen:
-                    warn(f'Name clash {info.GetName()}, second one now called {lamename}')
-                    info.SetName(lamename)
-                    seen.append(lamename)
-                else:
-                    seen.append(info.GetName())
+                seen.append(name)
 
     def _add_partial_charges(self):
         demovalence = {1: 1, 2: 8, 3: 7, 4: 6, 6: 15}
@@ -376,4 +442,13 @@ class _RDKitPrepMixin:
         for i in range(self.mol.GetNumAtoms()):
             gc = mol.GetAtomWithIdx(i).GetDoubleProp('_GasteigerCharge')
             self.mol.GetAtomWithIdx(i).SetDoubleProp('_GasteigerCharge', gc)
+
+
+    def _get_name_from_PDBInfo(self):
+        infos = [atom.GetPDBResidueInfo() for atom in self.mol.GetAtoms()]
+        names = [i.GetResidueName() for i in infos if i is not None]
+        if names:
+            return names[0]
+        else:
+            return 'LIG'
 

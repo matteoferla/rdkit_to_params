@@ -76,8 +76,15 @@ Here is a conversion:
 
 ## To Do
 I have not coded yet, because I forgot:
-* an auto-assignment of `NBR_ATOM` and `NBR_RADIUS` for `from_mol`.
+* ~an auto-assignment of `NBR_ATOM` and `NBR_RADIUS` for `from_mol`.~
 * add rotamer line in `from_mol`
 * change option to override starting atom.
 * tweak the logic of `NAME` after some thinking.
 * output constrain file for the CONNECT atom.
+* run sphynx
+
+## Workshop
+
+The `from_mol` class method actually has code that recognises `*[NH]CC(~O)*` and assigns it as a backbone properly.
+However, `Chem.MolFromSmiles('*[NH]CC(~O)*')` cannot be embedded, so is a bit of a horrible one for users to use.
+Maybe the `CC(=O)NCC(=O)NC`

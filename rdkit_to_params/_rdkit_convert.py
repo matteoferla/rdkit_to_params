@@ -23,6 +23,8 @@ from collections import defaultdict, deque, namedtuple
 from rdkit import Chem
 from warnings import warn
 
+import numpy as np
+
 class _RDKitCovertMixin(_RDKitPrepMixin):
     _Measure = namedtuple('Measure', ['distance','angle', 'torsion'])
 
@@ -38,10 +40,10 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         :rtype: instance
         """
         self = super().from_mol(mol, generic, name) # stores and calls .fix_mol()
-        self._convert_mol()
+        self.convert_mol()
         return self
 
-    def _convert_mol(self):
+    def convert_mol(self):
         # NAME
         if self.mol.HasProp("_Name"):
             title = self.mol.GetProp("_Name").strip()
@@ -65,6 +67,8 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
             self._parse_bond(bond)
         # ICOOR
         self._parse_icoors()
+        # NBR
+        self._find_centroid()
 
     def _parse_icoors(self) -> None:
         undescribed = deque(self.mol.GetAtoms())
@@ -211,14 +215,6 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
                              angle= angle,
                              torsion= tor)
 
-    def _get_name_from_PDBInfo(self):
-        infos = [atom.GetPDBResidueInfo() for atom in self.mol.GetAtoms()]
-        names = [i.GetResidueName() for i in infos if i is not None]
-        if names:
-            return names[0]
-        else:
-            return 'LIG'
-
     def _get_atom_descriptors(self, atom: Chem.Atom) -> dict:
         return {'name': self._get_pdb_atomname(atom),
                'rtype': atom.GetProp('_rType'),
@@ -242,4 +238,14 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
             neighbors = [neighbor for neighbor in neighbors if neighbor.GetSymbol() != '*']
         seenIdx={a.GetIdx() for a in seen}
         return [neighbor for neighbor in neighbors if neighbor.GetIdx() not in seenIdx]
+
+    def _find_centroid(self):
+        a = Chem.Get3DDistanceMatrix(self.mol)
+        n = np.linalg.norm(a, axis=0)  # Frobenius norm
+        i = int(np.argmin(n))
+        s = np.max(a, axis=0)[i]
+        self.NBR_ATOM.append(self.mol.GetAtomWithIdx(i).GetPDBResidueInfo().GetName())
+        self.NBR_RADIUS.append(str(s))
+
+
 
