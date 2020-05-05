@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from .entries import Entries
 
+import os
+
 ########################################################################################################################
 __doc__ = \
     """
@@ -40,6 +42,14 @@ class _RDKitPrepMixin:
 
     @classmethod
     def from_mol(cls, mol: Chem.Mol, generic:bool=False, name:Optional[str]=None) -> _RDKitPrepMixin:
+        """
+        A fully prepared molecule with optional dummy atoms to be coverted into a Params object
+
+        :param mol: fully prepared molecule with optional dummy atoms
+        :param generic: generic or classic atom types
+        :param name: 3 letter name
+        :return:
+        """
         self = cls()
         self.mol = mol
         self.generic = generic
@@ -49,6 +59,15 @@ class _RDKitPrepMixin:
         self.fix_mol()
         # conversion elsewhere
         return self
+
+    @classmethod
+    def from_smiles(cls, smiles: str, name='LIG', generic:bool=False)  -> _RDKitPrepMixin:
+        mol = Chem.MolFromSmiles(smiles)
+        mol.SetProp('_Name', name)
+        mol = AllChem.AddHs(mol)
+        AllChem.EmbedMolecule(mol)
+        AllChem.MMFFOptimizeMolecule(mol)
+        return cls.from_mol(mol, generic, name)
 
     @classmethod
     def add_names(cls, mol: Chem.Mol, names: List[str], name:Optional[str]=None) -> Chem.Mol:
@@ -84,6 +103,53 @@ class _RDKitPrepMixin:
             self._add_genrtypes()
         else:
             self._add_rtypes()
+
+    def dump_pdb(self, filename: str, overwrite=False, stripped=True) -> None:
+        """
+        Write first conformer to a PDB file.
+
+        :param filename: name of file.
+        :param overwrite: error if exists?
+        :param stripped: remove * atoms?
+        :return: None
+        """
+        mol = self._prep_dump_pdb(filename, overwrite, stripped)
+        Chem.MolToPDBFile(self.mol, filename)
+
+    def dump_pdb_conf(self, filename: str, overwrite=False, stripped=True) -> int:
+        """
+        Write conformers to a PDB file.
+
+        :param filename: name of file.
+        :param overwrite: error if exists?
+        :param stripped: remove * atoms?
+        :return: number of conf written
+        """
+        mol = self._prep_dump_pdb(filename, overwrite, stripped)
+        w = Chem.PDBWriter(filename)
+        for cid in mol.GetNumConformers():
+            w.write(mol, confId=cid)
+        n = w.NumMols()
+        w.close()
+        return n
+
+    def _prep_dump_pdb(self, filename: str, overwrite=False, stripped=True) -> Chem.Mol:
+        if os.path.exists(filename) and overwrite:
+            raise FileExistsError('The file already exists')
+        if stripped:
+            return self.dummyless
+        else:
+            return self.mol
+
+    def dumps_pdb(self, stripped=True) -> str:
+        if stripped:
+            Chem.MolToPDBBlock(self.dummyless)
+        else:
+            Chem.MolToPDBBlock(self.mol)
+
+    @property
+    def dummyless(self):
+        return Chem.DeleteSubstructs(self.mol, Chem.MolFromSmiles('*'))
 
     def _add_rtypes(self) -> None:
         """
