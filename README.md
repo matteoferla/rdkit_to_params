@@ -85,7 +85,6 @@ I have not coded yet, because I forgot:
 * change option to override starting atom.
 * tweak the logic of `NAME` after some thinking.
 * output constrain file for the CONNECT atom.
-* run sphynx
 
 ## Workshop
 

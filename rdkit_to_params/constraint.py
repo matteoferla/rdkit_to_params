@@ -45,6 +45,18 @@ class Constraints:
         * ``assign_names(mol, list)`` classmethods that assigns names to a mol in place.
         * ``join_by_dummy(molA, molB)`` classmethods that returns a joined molecule
 
+
+
+        >>> Constraints(smiles=('*C(=N)', '*SC'), names= ['*', 'CX', 'NY', '*', 'SG', 'CB'], covalent_res= '1B', target_res='145A')
+
+        AtomPair SG 145A CX 1B HARMONIC 1.74 0.2
+
+        Angle CB 145A SG 145A CX 1B HARMONIC 1.73 0.35
+
+        Angle SG 145A CX 1B NY 1B HARMONIC 2.08 0.35
+
+        Dihedral CB 145A SG 145A CX 1B NY 1B CIRCULARHARMONIC -3.14 0.35
+
         :param smiles: a tuple/list of two string. The first is the ligand, the second is the peptide.
         :param names: a list of atom names. The '*' will need a name -but will be ignored-, but not the H.
         :param covalent_res: ligand residue in pose or PDB format (12 vs. 12A)
