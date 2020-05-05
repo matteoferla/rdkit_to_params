@@ -26,7 +26,13 @@ from collections import abc
 class Entries(abc.MutableSequence):
     """
     A fancy default list, where the elements are instances of whatver is in ``entry_cls``.
-    ``Entries.from_name(
+    It can be initialised via the class method ``from_name`` which accepst a string that has to be present in the class attribute ``.choices``.
+    The ``.append`` method can work with str, list, dict or instance of the actual class it wants.
+    Note that the string for the string way must be without the header to the line.
+    The entry classes requires a ``from_str`` classmethod that returns an instance for this.
+    They also require __str__ method as this is how the entries are converted into string.
+
+    ``Entries.from_name('BOND')``
     """
 
     choices = {} # this gets filled after each class is declared.
@@ -93,7 +99,7 @@ class Entries(abc.MutableSequence):
 
 class GenericEntry:
     """
-    This is meant to be abstracted.
+    This is meant to be inherited. ``header`` is the entry type. body is a string.
     """
 
     def __init__(self, header: str, body: str):
@@ -114,7 +120,7 @@ class GenericEntry:
 
 class GenericListEntry:
     """
-    This is meant to be abstracted.
+    This is meant to be inherited. ``header`` is the entry type. ``values`` is a list of strings.
     """
 
     def __init__(self, header: str, *args: str):
@@ -176,6 +182,12 @@ Entries.choices['ATOM_ALIAS'] = (ATOM_ALIASEntry, False)
 
 @dataclass
 class IO_STRINGEntry:
+    """
+    * ``.name3`` is three letter name. ``Params().NAME`` is actually a dynamic attribute that uses this.
+    * ``.name1`` is a one letter name.
+
+    These get checked for length.
+    """
     name3: str = 'LIG'
     name1: str = 'Z'
 
@@ -199,6 +211,11 @@ Entries.choices['IO_STRING'] = (IO_STRINGEntry, True)
 
 @dataclass
 class CONNECTEntry:
+    """
+    This is a mess, but it guesses what you mean.
+    Deals with UPPER, LOWER and CONNECT.
+
+    """
     atom_name: str
     index: int = 1
     connect_type: str = ''  # | 'CONNECT' | 'UPPER_CONNECT' | 'LOWER_CONNECT'
@@ -265,8 +282,9 @@ Entries.choices['CHI'] = (CHIEntry, False)
 @dataclass
 class ICOOR_INTERNALEntry:
     """
-    #                 Child  Phi Angle    Theta        Distance   Parent  Angle  Torsion
-    ICOOR_INTERNAL    C14  167.536810   59.880644    1.473042   N2    C11   C12
+    Lines stolen from Rosetta documentation
+    >                     Child  Phi Angle    Theta        Distance   Parent  Angle  Torsion
+    >   ICOOR_INTERNAL    C14  167.536810   59.880644    1.473042   N2    C11   C12
 
     * Child atom (A4)
     * phi angle (torsion angle between A1, A2, A3, A4)
@@ -310,6 +328,10 @@ Entries.choices['ICOOR_INTERNAL'] = (ICOOR_INTERNALEntry, False)
 
 @dataclass
 class BONDEntry:
+    """
+    dataclass class for both BOND and BOND_ENTRY. The ``__str__`` method will know based on ``.order``.
+    The hash is the two atom names sorted. So BOND records with the same names will be equal.
+    """
     first: str
     second: str
     order: int = 1  # 2,3, 4|ARO
@@ -394,6 +416,9 @@ Entries.choices['ATOM'] = (ATOMEntry, False)
 
 @dataclass
 class CUT_BONDEntry:
+    """
+    No idea what CUT_BOND is for.
+    """
     first: str
     second: str
 
@@ -417,6 +442,9 @@ Entries.choices['CUT_BOND'] = (CUT_BONDEntry, False)
 #########################################################################################################
 
 class PDB_ROTAMERSEntry(GenericEntry):
+    """
+    This does zero checks for fine existance.
+    """
     def __init__(self, body: str):
         super().__init__(header='PDB_ROTAMERS', body=body)
 
@@ -449,6 +477,9 @@ Entries.choices['AA'] = (AAEntry, True)
 #########################################################################################################
 
 class TYPEEntry(GenericEntry):
+    """
+    LIGAND or POLYMER. No exceptions.
+    """
     def __init__(self, body: str = 'LIGAND'):
         assert body in ('POLYMER', 'LIGAND'), f'residue TYPE {body} is neither POLYMER or LIGAND'
         super().__init__(header='TYPE', body=body)

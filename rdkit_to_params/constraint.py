@@ -3,6 +3,7 @@ __doc__ = \
     """
 This contains ``make_constraint`` which is creates a constraint file.
 It is completely independent and different in style because it was different.
+It is not integral to the conversion, it's just a utility.
     """
 
 __author__ = "Matteo Ferla. [Github](https://github.com/matteoferla)"
@@ -24,13 +25,13 @@ class Constraints:
                        covalent_res: Union[str, int],
                        target_res: Union[str, int]):
         """
-        Give smiles of the two sides (with *) and the names, residue numbers convert.
+        Give smiles of the two sides (with ``*``) and the names, residue numbers convert.
         It requires 2 atoms on each side in addition to the attachment point.
         Note that the atom names are stored in a non-standard way out of laziness. in the Atom prop '_AtomName'.
         The instance has the following attributes
 
         * ``smiles``: stored input smiles string
-        *``names``: stored input list of names
+        * ``names``: stored input list of names
         * ``covalent_res``: stored input liagnd residue
         * ``target_res``: stored input protein residue
         * ``cov_template``: Chem.Mol from first smiles.
