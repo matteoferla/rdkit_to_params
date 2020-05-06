@@ -19,11 +19,12 @@ from typing import Tuple, List, Union
 from rdkit import Chem
 from rdkit.Chem import AllChem
 
+
 class Constraints:
     def __init__(self, smiles: Tuple[str, str],
-                       names: List[str],
-                       covalent_res: Union[str, int],
-                       target_res: Union[str, int]):
+                 names: List[str],
+                 ligand_res: Union[str, int],
+                 target_res: Union[str, int]):
         """
         Give smiles of the two sides (with ``*``) and the names, residue numbers convert.
         It requires 2 atoms on each side in addition to the attachment point.
@@ -32,7 +33,7 @@ class Constraints:
 
         * ``smiles``: stored input smiles string
         * ``names``: stored input list of names
-        * ``covalent_res``: stored input ligand residue
+        * ``ligand_res``: stored input ligand residue
         * ``target_res``: stored input protein residue
         * ``cov_template``: Chem.Mol from first smiles.
         * ``target_template``: Chem.Mol from first smiles
@@ -48,7 +49,7 @@ class Constraints:
 
 
 
-        >>> Constraints(smiles=('*C(=N)', '*SC'), names= ['*', 'CX', 'NY', '*', 'SG', 'CB'], covalent_res= '1B', target_res='145A')
+        >>> Constraints(smiles=('*C(=N)', '*SC'), names= ['*', 'CX', 'NY', '*', 'SG', 'CB'], ligand_res= '1B', target_res='145A')
 
         AtomPair SG 145A CX 1B HARMONIC 1.74 0.2
 
@@ -60,13 +61,13 @@ class Constraints:
 
         :param smiles: a tuple/list of two string. The first is the ligand, the second is the peptide.
         :param names: a list of atom names. The '*' will need a name -but will be ignored-, but not the H.
-        :param covalent_res: ligand residue in pose or PDB format (12 vs. 12A)
+        :param ligand_res: ligand residue in pose or PDB format (12 vs. 12A)
         :param target_res:  peptide residue in pose or PDB format (12 vs. 12A)
         """
         # store inputs
         self.smiles = smiles
         self.names = names
-        self.covalent_res = covalent_res
+        self.ligand_res = ligand_res
         self.target_res = target_res
         # Convert the smiles
         self.cov_template = Chem.MolFromSmiles(smiles[0])
@@ -92,14 +93,17 @@ class Constraints:
         # do maths
         ## Note: constraint is in Radian not Degree...
         dist = Chem.rdMolTransforms.GetBondLength(conf, cov_con.GetIdx(), target_con.GetIdx())
-        angle_target = Chem.rdMolTransforms.GetAngleRad(conf, target_fore.GetIdx(), target_con.GetIdx(), cov_con.GetIdx())
-        angle_covalent = Chem.rdMolTransforms.GetAngleRad(conf, target_con.GetIdx(), cov_con.GetIdx(), cov_fore.GetIdx())
-        dihedral = Chem.rdMolTransforms.GetDihedralRad(conf, target_fore.GetIdx(), target_con.GetIdx(), cov_con.GetIdx(),
+        angle_target = Chem.rdMolTransforms.GetAngleRad(conf, target_fore.GetIdx(), target_con.GetIdx(),
+                                                        cov_con.GetIdx())
+        angle_covalent = Chem.rdMolTransforms.GetAngleRad(conf, target_con.GetIdx(), cov_con.GetIdx(),
+                                                          cov_fore.GetIdx())
+        dihedral = Chem.rdMolTransforms.GetDihedralRad(conf, target_fore.GetIdx(), target_con.GetIdx(),
+                                                       cov_con.GetIdx(),
                                                        cov_fore.GetIdx())
-        self.atom_pair_constraint = f'AtomPair {self.target_con_name} {target_res} {self.cov_con_name} {covalent_res} HARMONIC {dist:.2f} 0.2\n'
-        self.angle_constraint = f'Angle {target_fore_name} {target_res} {self.target_con_name} {target_res} {self.cov_con_name} {covalent_res} HARMONIC {angle_target:.2f} 0.35\n' +\
-                                f'Angle {self.target_con_name} {target_res} {self.cov_con_name} {covalent_res} {cov_fore_name} {covalent_res} HARMONIC {angle_covalent:.2f} 0.35\n'
-        self.dihedral_constaint = f'Dihedral {target_fore_name} {target_res} {self.target_con_name} {target_res} {self.cov_con_name} {covalent_res} {cov_fore_name} {covalent_res} CIRCULARHARMONIC {dihedral:.2f} 0.35\n'
+        self.atom_pair_constraint = f'AtomPair {self.target_con_name} {target_res} {self.cov_con_name} {ligand_res} HARMONIC {dist:.2f} 0.2\n'
+        self.angle_constraint = f'Angle {target_fore_name} {target_res} {self.target_con_name} {target_res} {self.cov_con_name} {ligand_res} HARMONIC {angle_target:.2f} 0.35\n' + \
+                                f'Angle {self.target_con_name} {target_res} {self.cov_con_name} {ligand_res} {cov_fore_name} {ligand_res} HARMONIC {angle_covalent:.2f} 0.35\n'
+        self.dihedral_constaint = f'Dihedral {target_fore_name} {target_res} {self.target_con_name} {target_res} {self.cov_con_name} {ligand_res} {cov_fore_name} {ligand_res} CIRCULARHARMONIC {dihedral:.2f} 0.35\n'
         self.custom_constaint = ''
 
     @classmethod
@@ -143,7 +147,6 @@ class Constraints:
         AllChem.MMFFOptimizeMolecule(mol)
         return mol.GetConformer()
 
-
     def __str__(self):
         # make
         constraints = [self.atom_pair_constraint,
@@ -175,7 +178,7 @@ class Constraints:
 
 if __name__ == '__main__':
     c = Constraints(smiles=('*C(=N)', '*SC'),
-                          names= ['*', 'CX', 'NY', '*', 'SG', 'CB'],
-                          covalent_res= '1B',
-                          target_res='145A')
+                    names=['*', 'CX', 'NY', '*', 'SG', 'CB'],
+                    ligand_res='1B',
+                    target_res='145A')
     print(c)

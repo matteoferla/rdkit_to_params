@@ -9,11 +9,11 @@ It is completely independent and different in style because it was different.
 It is not integral to the conversion, it’s just a utility.
 
 
-### class rdkit_to_params.constraint.Constraints(smiles, names, covalent_res, target_res)
+### class rdkit_to_params.constraint.Constraints(smiles, names, ligand_res, target_res)
 Bases: `object`
 
 
-#### \__init__(smiles, names, covalent_res, target_res)
+#### \__init__(smiles, names, ligand_res, target_res)
 Give smiles of the two sides (with `\*`) and the names, residue numbers convert.
 It requires 2 atoms on each side in addition to the attachment point.
 Note that the atom names are stored in a non-standard way out of laziness. in the Atom prop ‘_AtomName’.
@@ -26,7 +26,7 @@ The instance has the following attributes
 * `names`: stored input list of names
 
 
-* `covalent_res`: stored input liagnd residue
+* `ligand_res`: stored input liagnd residue
 
 
 * `target_res`: stored input protein residue
@@ -63,7 +63,7 @@ Class methods:
     * **names** (`List`[`str`]) – a list of atom names. The ‘\*’ will need a name -but will be ignored-, but not the H.
 
 
-    * **covalent_res** (`Union`[`str`, `int`]) – ligand residue in pose or PDB format (12 vs. 12A)
+    * **ligand_res** (`Union`[`str`, `int`]) – ligand residue in pose or PDB format (12 vs. 12A)
 
 
     * **target_res** (`Union`[`str`, `int`]) – peptide residue in pose or PDB format (12 vs. 12A)
