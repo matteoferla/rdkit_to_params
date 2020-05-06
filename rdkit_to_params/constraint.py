@@ -152,6 +152,13 @@ class Constraints:
                        self.custom_constaint]
         return ''.join(constraints)
 
+    def dumps(self):
+        return str(self)
+
+    def dump(self, filename):
+        with open(filename, 'w') as w:
+            w.write(str(self))
+
     @classmethod
     def _get_new_index(self, mol: Chem.Mol, index: int) -> int:
         for atom in mol.GetAtoms():
