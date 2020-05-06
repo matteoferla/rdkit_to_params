@@ -234,7 +234,7 @@ class CONNECTEntry:
         elif not self.connect_name:
             self.connect_name = self.connect_type.replace('_CONNECT', '')
         else:
-            raise ValueError('I missed this case in this badly wwritten method')
+            raise ValueError('I missed this case in this badly written method')
 
     def __str__(self) -> str:
         return f'{self.connect_type} {self.atom_name}'

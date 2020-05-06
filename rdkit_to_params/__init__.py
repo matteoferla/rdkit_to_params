@@ -199,13 +199,14 @@ class Params(_ParamsIoMixin, _RDKitCovertMixin, _PoserMixin):
                         if hasattr(entry, key) and getattr(entry, key) == oldname:
                             setattr(entry, key, newname)
                             break
-            # find ICOOR_INTERNAL entries with ``child``,``parent``,``second_parent``,``third_parent`` attributes, which are atom names 5 char
+            # find ICOOR_INTERNAL entries with ``child``,``parent``,``second_parent``,``third_parent`` attributes,
+            # which are atom names 5 char
             for entry in self.ICOOR_INTERNAL:
                 for key in 'child', 'parent', 'second_parent', 'third_parent':
                     if getattr(entry, key).strip() == oldname.strip():
                         setattr(entry, key, newname.ljust(5))
             for conn in self.CONNECT:
-                if conn.atom_name == oldname.strip():
+                if conn.atom_name.strip() == oldname.strip():
                     conn.atom_name = newname
             # find in the Generic entries
             for attr in ('ATOM_ALIAS', 'NBR_ATOM', 'FIRST_SIDECHAIN_ATOM', 'ADD_RING'):
@@ -216,4 +217,7 @@ class Params(_ParamsIoMixin, _RDKitCovertMixin, _PoserMixin):
             for attr in ('METAL_BINDING_ATOMS', 'ACT_COORD_ATOMS'):
                 for entry in getattr(self, attr):
                     entry.values = [v if v.strip() != oldname.strip() else newname for v in entry.values]
+        # rdkit mol
+        if self.mol:
+            self.get_atom_by_name(oldname).GetPDBResidueInfo().SetName(newname)
         return newname

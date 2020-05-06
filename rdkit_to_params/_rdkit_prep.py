@@ -447,8 +447,7 @@ class _RDKitPrepMixin:
             oldname = self._get_PDBInfo_atomname(atom, throw=False)
             if name and oldname:
                 originals.append(oldname)
-                self._set_PDBInfo_atomname(atom, name, overwrite=True)
-                self.rename_atom(oldname, name)
+                self.rename_atom(oldname, name) #alters mol...
             elif name:
                 self._set_PDBInfo_atomname(atom, name, overwrite=True)
             elif oldname:
