@@ -39,7 +39,7 @@ Let's do a roundtrip changing an atomname:
     p.IO_STRING[0].name1 = 'Z'
     p.AA = 'UNK'
     del p.ROTAMER_AA[0]
-    p.change_atomname(' CB ', ' CX ')
+    p.rename_atom(' CB ', ' CX ')
     p.dump('fake.params')
     p.test().dump_pdb('test.pdb')
 
@@ -80,11 +80,12 @@ so checking the code might be clearer.
 
 ## To Do
 I have not coded yet, because I forgot:
-* ~an auto-assignment of `NBR_ATOM` and `NBR_RADIUS` for `from_mol`.~
+* ~~an auto-assignment of `NBR_ATOM` and `NBR_RADIUS` for `from_mol`.~~
 * add rotamer line in `from_mol`
 * change option to override starting atom.
 * tweak the logic of `NAME` after some thinking.
-* output constrain file for the CONNECT atom.
+* ~~output constrain file for the CONNECT atom.~~
+* make a webpage to do the conversion from mol/sdf/pdb/SMILES —suggestions for free JS molecule editor?
 
 ## Workshop
 

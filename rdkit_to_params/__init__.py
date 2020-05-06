@@ -36,12 +36,15 @@ except ImportError:
 #################### rdkit #############################################################################################
 try:
     from ._rdkit_convert import _RDKitCovertMixin  # in turn inherits _ParamsPrepMixin
+    from .constraint import Constraints
 except ImportError:
-    warn('RDkit is required for ``from_mol`` stuff, category=ImportWarning', category=ImportWarning)
+    warn('RDkit is required for ``from_mol`` stuff and ``Constraints``', category=ImportWarning)
 
 
     class _RDKitCovertMixin:
         pass
+
+from typing import List
 
 #################### main class ########################################################################################
 
@@ -60,7 +63,7 @@ class Params(_ParamsIoMixin, _RDKitCovertMixin, _PoserMixin):
     * ``loads`` and ``dumps``for strings.
     * ``p.fields`` will return all header fields.
     * ``p.test`` tests the params file in PyRosetta.
-    * ``p.change_atomname(old, new)`` changes an atom name
+    * ``p.rename_atom(old, new)`` changes an atom name
 
     ## Attributes
 
@@ -79,7 +82,7 @@ class Params(_ParamsIoMixin, _RDKitCovertMixin, _PoserMixin):
     Atomnames...
 
     * ``p.get_correct_atomname`` will return the 4 letter name of the atom with nice spacing.
-    * ``p.change_atomname`` will change one atomname to a new one across all entries.
+    * ``p.rename_atom`` will change one atomname to a new one across all entries.
     * ``BOND``, ``CHI``, ``CUT_BOND`` entries store 4 char atomnames as ``.first``, ``.second``, ``.third``, ``.fourth``.
     * ``ICOOR_INTERNAL`` entries store 5 char atomnames as ``.child``,``.parent``,``.second_parent``,``.third_parent``.
     * ``ATOM_ALIAS``, ``NBR_ATOM``, ``FIRST_SIDECHAIN_ATOM``, ``ADD_RING`` are just ``entries.GenericEntries`` instances, where ``.body`` is a string which will contain the atomname.
@@ -127,7 +130,7 @@ class Params(_ParamsIoMixin, _RDKitCovertMixin, _PoserMixin):
     def get_correct_atomname(self, name: str) -> str:
         """
         Given a name, gets the correctly spaced out one.
-        This has nothing to do with ``._get_pdb_atomname`` which just returns the atom name from a ``Chem.Atom``.
+        This has nothing to do with ``._get_PDBInfo_atomname`` which just returns the atom name from a ``Chem.Atom``.
 
         :param name: dirty name
         :return: correct name
@@ -144,7 +147,7 @@ class Params(_ParamsIoMixin, _RDKitCovertMixin, _PoserMixin):
             else:
                 raise ValueError(f'{name} is not a valid atom name')
 
-    def change_atomname(self, oldname: str, newname: str) -> str:
+    def rename_atom(self, oldname: str, newname: str) -> str:
         """
         Change the atom name from ``oldname`` to ``newname`` and returns the 4 char ``newname``.
 

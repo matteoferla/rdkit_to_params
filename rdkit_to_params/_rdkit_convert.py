@@ -53,7 +53,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
             self.NAME = title
         else:
             self.comments.append(title)
-            self.NAME = self._get_name_from_PDBInfo()
+            self.NAME = self._get_resn_from_PDBInfo()
         # SMILES
         self.comments.append(Chem.MolToSmiles(self.mol))
         self.TYPE = 'LIGAND'
@@ -80,7 +80,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         while undescribed:
             # prevent overcycling.
             if rotation_count > self.mol.GetNumAtoms():
-                d = [f'{a.GetIdx()}: {self._get_pdb_atomname(a)}' for a in described]
+                d = [f'{a.GetIdx()}: {self._get_PDBInfo_atomname(a)}' for a in described]
                 raise StopIteration(f'Too many cycles...{d}')
             atom = undescribed[0]
             if atom.GetSymbol() == '*' and len(described) < 3:
@@ -95,7 +95,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
                     if len(siblings) != 0:
                         break
                 else:
-                    warn(f'DEBUG. First row: No siblings for {self._get_pdb_atomname(atom)}!')
+                    warn(f'DEBUG. First row: No siblings for {self._get_PDBInfo_atomname(atom)}!')
                     undescribed.rotate(-1)
                     continue
                 atoms = [atom, atom, parent, siblings[0]]
@@ -112,7 +112,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
                 d_idx = [d.GetIdx() for d in described]
                 d_neighs = [n for n in self._get_unseen_neighbors(atom, [], False) if n.GetIdx() in d_idx]
                 if len(d_neighs) == 0:
-                    warn(f'DEBUG. Other row: No parent for {self._get_pdb_atomname(atom)}!')
+                    warn(f'DEBUG. Other row: No parent for {self._get_PDBInfo_atomname(atom)}!')
                     undescribed.rotate(-1)
                     rotation_count += 1
                     continue
@@ -120,7 +120,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
                 d_neighs = [n for n in self._get_unseen_neighbors(parent, [atom], False) if n.GetIdx() in d_idx]
                 if len(d_neighs) == 0:
                     undescribed.rotate(-1)
-                    warn(f'DEBUG. Other row: No siblings for  {self._get_pdb_atomname(atom)}!')
+                    warn(f'DEBUG. Other row: No siblings for  {self._get_PDBInfo_atomname(atom)}!')
                     rotation_count += 1
                     continue
                 elif len(d_neighs) == 1:
@@ -128,7 +128,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
                     d_neighs = [n for n in self._get_unseen_neighbors(sibling, [parent, atom], False) if n.GetIdx() in d_idx]
                     if len(d_neighs) == 0:
                         undescribed.rotate(-1)
-                        warn(f'DEBUG. Other row: No cousins for  {self._get_pdb_atomname(atom)}')
+                        warn(f'DEBUG. Other row: No cousins for  {self._get_PDBInfo_atomname(atom)}')
                         rotation_count += 1
                         continue
                     else:
@@ -139,18 +139,18 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
             undescribed.remove(atom)
             described.append(atom)
             m = self._get_measurements(conf, *atoms)
-            self.ICOOR_INTERNAL.append(dict(child=self._get_pdb_atomname(atoms[0]),
+            self.ICOOR_INTERNAL.append(dict(child=self._get_PDBInfo_atomname(atoms[0]),
                                             phi=m.torsion,
                                             theta= m.angle,
                                             distance=m.distance,
-                                            parent=self._get_pdb_atomname(atoms[1]),
-                                            second_parent=self._get_pdb_atomname(atoms[2]),
-                                            third_parent=self._get_pdb_atomname(atoms[3])))
+                                            parent=self._get_PDBInfo_atomname(atoms[1]),
+                                            second_parent=self._get_PDBInfo_atomname(atoms[2]),
+                                            third_parent=self._get_PDBInfo_atomname(atoms[3])))
 
     def _parse_atom(self, atom: Chem.Atom) -> None:
         if atom.GetSymbol() == '*':
             neighbor = atom.GetNeighbors()[0]
-            n_name = self._get_pdb_atomname(neighbor)
+            n_name = self._get_PDBInfo_atomname(neighbor)
             self.CONNECT.append([n_name, len(self.CONNECT) + 1, 'CONNECT'])
         else:
             d = self._get_atom_descriptors(atom)
@@ -179,10 +179,10 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
                             ggneighbors = self._get_unseen_neighbors(grandneighbor, [atom, neighbor])
                             if ggneighbors: # 3-4 bond does not need to be single, nor does it matter which is the 4th atom
                                 self.CHI.append(dict(index=len(self.CHI) + 1,
-                                                first=self._get_pdb_atomname(atom),
-                                                second=self._get_pdb_atomname(neighbor),
-                                                third=self._get_pdb_atomname(grandneighbor),
-                                                fourth=self._get_pdb_atomname(ggneighbors[0])))
+                                                first=self._get_PDBInfo_atomname(atom),
+                                                second=self._get_PDBInfo_atomname(neighbor),
+                                                third=self._get_PDBInfo_atomname(grandneighbor),
+                                                fourth=self._get_PDBInfo_atomname(ggneighbors[0])))
 
     def _parse_bond(self, bond: Chem.Bond) -> None:
         if any([atom.GetSymbol() == '*' for atom in (bond.GetBeginAtom(), bond.GetEndAtom())]):
@@ -191,8 +191,8 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
             order = 4
         else:
             order = int(bond.GetBondTypeAsDouble())
-        self.BOND.append([self._get_pdb_atomname(bond.GetBeginAtom()),
-                   self._get_pdb_atomname(bond.GetEndAtom()),
+        self.BOND.append([self._get_PDBInfo_atomname(bond.GetBeginAtom()),
+                   self._get_PDBInfo_atomname(bond.GetEndAtom()),
                    order])
 
     def _get_measurements(self, conf: Chem.Conformer, a:Chem.Atom, b:Chem.Atom, c:Chem.Atom, d:Chem.Atom):
@@ -216,21 +216,14 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
                              torsion= tor)
 
     def _get_atom_descriptors(self, atom: Chem.Atom) -> dict:
-        return {'name': self._get_pdb_atomname(atom),
+        return {'name': self._get_PDBInfo_atomname(atom),
                'rtype': atom.GetProp('_rType'),
                'mtype': ' X  ',
                'partial': atom.GetDoubleProp('_GasteigerCharge')}
 
-    def _get_pdb_atomname(self, atom) -> str:
-        info = atom.GetPDBResidueInfo()
-        if info is not None:
-            return info.GetName()
-        else:
-            raise ValueError('Atoms changed but `fix_mol` was not called.')
-
     def _get_nondummy_neighbors(self, atom) -> List[str]:
             # returns list of names!
-            return [self._get_pdb_atomname(neighbor) for neighbor in atom.GetNeighbors() if neighbor.GetSymbol() != '*']
+            return [self._get_PDBInfo_atomname(neighbor) for neighbor in atom.GetNeighbors() if neighbor.GetSymbol() != '*']
 
     def _get_unseen_neighbors(self, atom:Chem.Atom, seen: List[Chem.Atom], nondummy:bool=True):
         neighbors = atom.GetNeighbors()

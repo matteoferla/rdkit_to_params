@@ -61,7 +61,7 @@ class _RDKitPrepMixin:
         return self
 
     @classmethod
-    def from_smiles(cls, smiles: str, name='LIG', generic:bool=False)  -> _RDKitPrepMixin:
+    def from_smiles(cls, smiles: str, name='LIG', generic:bool=False) -> _RDKitPrepMixin:
         mol = Chem.MolFromSmiles(smiles)
         mol.SetProp('_Name', name)
         mol = AllChem.AddHs(mol)
@@ -404,6 +404,15 @@ class _RDKitPrepMixin:
     def aa_correction(self):
         pass
 
+    def _get_PDBInfo_atomname(self, atom, throw=True) -> str:
+        info = atom.GetPDBResidueInfo()
+        if info is not None:
+            return info.GetName()
+        elif throw:
+            raise ValueError('Atoms changed but `fix_mol` was not called.')
+        else:
+            return ''
+
     def _set_PDBInfo_atomname(self, atom, name, overwrite=False):
         info = atom.GetPDBResidueInfo()
         if info is None:
@@ -421,16 +430,37 @@ class _RDKitPrepMixin:
         else:
             return info.GetName()
 
-    def rename_by_template(self, backbone: Chem.Mol, names: Sequence[str]):
+    def rename_by_template(self, backbone: Chem.Mol, names: Sequence[str]) -> List[str]:
         """
         Assigns to the atoms in self.mol the names and rosetta types based on the backbone template and the names variable.
         See ``_fix_atom_names`` for example usage.
+        Does not change the Params.
 
+        :param backbone:
+        :param names: the list oof new names. Falsey names will not be set.
+        :return: the list of the old names
         """
         assert self.mol.HasSubstructMatch(backbone), 'Bad backbone match'
+        originals = []
         for name, idx in zip(names, self.mol.GetSubstructMatch(backbone)):
             atom = self.mol.GetAtomWithIdx(idx)
-            self._set_PDBInfo_atomname(atom, name, overwrite=True)
+            oldname = self._get_PDBInfo_atomname(atom, throw=False)
+            if name and oldname:
+                originals.append(oldname)
+                self._set_PDBInfo_atomname(atom, name, overwrite=True)
+                self.rename_atom(oldname, name)
+            elif name:
+                self._set_PDBInfo_atomname(atom, name, overwrite=True)
+            elif oldname:
+                originals.append(oldname)
+            else:
+                pass
+        return originals
+
+    def rename_atom(self, oldname: str, newname: str):
+        # this will overwritten by inheriting params mixins
+        # this weirdness is to not have any rdkit methods in regular params
+        pass
 
     def get_atom_by_name(self, name):
         for atom in self.mol.GetAtoms():
@@ -510,7 +540,12 @@ class _RDKitPrepMixin:
             self.mol.GetAtomWithIdx(i).SetDoubleProp('_GasteigerCharge', gc)
 
 
-    def _get_name_from_PDBInfo(self):
+    def _get_resn_from_PDBInfo(self):
+        """
+        Gets the residue name for PDB info.
+
+        :return:
+        """
         infos = [atom.GetPDBResidueInfo() for atom in self.mol.GetAtoms()]
         names = [i.GetResidueName() for i in infos if i is not None]
         if names:

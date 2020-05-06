@@ -530,7 +530,7 @@ dumps\`\`for strings.
 * `p.test` tests the params file in PyRosetta.
 
 
-* `p.change_atomname(old, new)` changes an atom name
+* `p.rename_atom(old, new)` changes an atom name
 
 ## Attributes
 
@@ -557,7 +557,7 @@ Atomnames…
 * `p.get_correct_atomname` will return the 4 letter name of the atom with nice spacing.
 
 
-* `p.change_atomname` will change one atomname to a new one across all entries.
+* `p.rename_atom` will change one atomname to a new one across all entries.
 
 
 * `BOND`, `CHI`, `CUT_BOND` entries store 4 char atomnames as `.first`, `.second`, `.third`, `.fourth`.
@@ -596,7 +596,7 @@ The pyrosetta and rdkit functionality are dependent on these being installed.
 
 #### property NAME()
 
-#### change_atomname(oldname, newname)
+#### rename_atom(oldname, newname)
 Change the atom name from `oldname` to `newname` and returns the 4 char `newname`.
 
 
@@ -624,7 +624,7 @@ Change the atom name from `oldname` to `newname` and returns the 4 char `newname
 
 #### get_correct_atomname(name)
 Given a name, gets the correctly spaced out one.
-This has nothing to do with `._get_pdb_atomname` which just returns the atom name from a `Chem.Atom`.
+This has nothing to do with `._get_PDBInfo_atomname` which just returns the atom name from a `Chem.Atom`.
 
 
 * **Parameters**
