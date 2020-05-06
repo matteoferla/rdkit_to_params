@@ -155,49 +155,65 @@ class Params(_ParamsIoMixin, _RDKitCovertMixin, _PoserMixin):
         :param newname: atom name, preferably 4 char long.
         :return: 4 char newname
         """
-        # fix names
-        oldname = self.get_correct_atomname(oldname)
-        if len(newname) > 4:
-            raise ValueError(f'{newname} is too long.')
-        if len(newname) == 4:
-            pass
-        elif newname[0] == ' ':
-            newname = newname.ljust(4)
-        else:
-            newname = ' ' + newname.ljust(3)
-        newname = newname.upper()
-        if newname == 'END':
-            warn('I thing END may be an old keyword - What is ``ACT_COORD_ATOMS``?. BEST AVOID IT.')
-        # find in atom.
-        for atom in self.ATOM:
-            if atom.name == newname:
-                raise ValueError(f'{newname} is already taken.')
-            elif atom.name == oldname:
-                atom.name = newname
-                break
-        # find in entries of the kind with ``first``, ``second``, ``third``, ``fourth`` attributes, which are atom names 4 char
-        for attr in ('BOND', 'CHI', 'CUT_BOND'):  # ICOOR_INTERNAL ATOM_ALIAS
-            for entry in getattr(self, attr):
-                for key in 'first', 'second', 'third', 'fourth':
-                    if hasattr(entry, key) and getattr(entry, key) == oldname:
-                        setattr(entry, key, newname)
-                        break
-        # find ICOOR_INTERNAL entries with ``child``,``parent``,``second_parent``,``third_parent`` attributes, which are atom names 5 char
-        for entry in self.ICOOR_INTERNAL:
-            for key in 'child', 'parent', 'second_parent', 'third_parent':
-                if getattr(entry, key) == oldname.rjust(5):
-                    setattr(entry, key, newname.rjust(5))
+        if oldname == newname:
+            return newname
+        # check if it is a connect atom
+        if oldname.strip() in ('CONN1', 'CONN2', 'CONN3', 'LOWER', 'UPPER'):
+            for conn in self.CONNECT:
+                if conn.connect_name.strip() == oldname.strip():
+                    conn.connect_name = newname
+                    # TODO fix this properly. LOWER UPPER CONN3 should be the preferred order.
                     break
-        for conn in self.CONNECT:
-            if conn.atom_name == oldname.strip():
-                conn.atom_name = newname
-        # find in the Generic entries
-        for attr in ('ATOM_ALIAS', 'NBR_ATOM', 'FIRST_SIDECHAIN_ATOM', 'ADD_RING'):
-            for entry in getattr(self, attr):
-                if oldname.strip() in entry.body:
-                    entry.body = re.sub('(?<!\w)' + oldname.strip() + '(?!\w)', newname, entry.body)
-        # find in the Generic list entries
-        for attr in ('METAL_BINDING_ATOMS', 'ACT_COORD_ATOMS'):
-            for entry in getattr(self, attr):
-                entry.values = [v if v.strip() != oldname.strip() else newname for v in entry.values]
+            else:
+                raise ValueError(f'{oldname} does not appear amid the connections')
+            for entry in self.ICOOR_INTERNAL:
+                for key in 'child', 'parent', 'second_parent', 'third_parent':
+                    if getattr(entry, key) == oldname.rjust(5):
+                        setattr(entry, key, newname.rjust(5))
+
+        else:
+            # fix names
+            oldname = self.get_correct_atomname(oldname)
+            if len(newname) > 4:
+                raise ValueError(f'{newname} is too long.')
+            if len(newname) == 4:
+                pass
+            elif newname[0] == ' ':
+                newname = newname.ljust(4)
+            else:
+                newname = ' ' + newname.ljust(3)
+            newname = newname.upper()
+            if newname == 'END':
+                warn('I thing END may be an old keyword - What is ``ACT_COORD_ATOMS``?. BEST AVOID IT.')
+            # find in atom.
+            for atom in self.ATOM:
+                if atom.name == newname:
+                    raise ValueError(f'{newname} is already taken.')
+                elif atom.name == oldname:
+                    atom.name = newname
+                    break
+            # find in entries of the kind with ``first``, ``second``, ``third``, ``fourth`` attributes, which are atom names 4 char
+            for attr in ('BOND', 'CHI', 'CUT_BOND'):  # ICOOR_INTERNAL ATOM_ALIAS
+                for entry in getattr(self, attr):
+                    for key in 'first', 'second', 'third', 'fourth':
+                        if hasattr(entry, key) and getattr(entry, key) == oldname:
+                            setattr(entry, key, newname)
+                            break
+            # find ICOOR_INTERNAL entries with ``child``,``parent``,``second_parent``,``third_parent`` attributes, which are atom names 5 char
+            for entry in self.ICOOR_INTERNAL:
+                for key in 'child', 'parent', 'second_parent', 'third_parent':
+                    if getattr(entry, key).strip() == oldname.strip():
+                        setattr(entry, key, newname.ljust(5))
+            for conn in self.CONNECT:
+                if conn.atom_name == oldname.strip():
+                    conn.atom_name = newname
+            # find in the Generic entries
+            for attr in ('ATOM_ALIAS', 'NBR_ATOM', 'FIRST_SIDECHAIN_ATOM', 'ADD_RING'):
+                for entry in getattr(self, attr):
+                    if oldname.strip() in entry.body:
+                        entry.body = re.sub('(?<!\w)' + oldname.strip() + '(?!\w)', newname, entry.body)
+            # find in the Generic list entries
+            for attr in ('METAL_BINDING_ATOMS', 'ACT_COORD_ATOMS'):
+                for entry in getattr(self, attr):
+                    entry.values = [v if v.strip() != oldname.strip() else newname for v in entry.values]
         return newname

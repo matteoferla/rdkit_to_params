@@ -190,8 +190,8 @@ class _RDKitPrepMixin:
                   {'name': '2amine', 'SMARTS': 'CNC', 'types': [None, 'Nbb', None]}, # actually Nbb is a amide.
                   {'name': 'azo', 'SMARTS': 'NN', 'types': ['NtrR', 'NtrR']},
                   {'name': 'azo', 'SMARTS': 'nn', 'types': ['NtrR', 'NtrR']},
-                  {'name': 'aramid?', 'SMARTS': 'nc(o)c', 'types': ['NtrR', 'Caro', 'Oaro', None]}, # unsure how it's written
-                  {'name': 'nitrile', 'SMARTS': 'C#N', 'types': ['Caro', 'NtrR']}, ## ???
+                  {'name': 'aramid?', 'SMARTS': 'nc(o)c', 'types': ['NtrR', 'aroC', 'Oaro', None]}, # unsure how it's written
+                  {'name': 'nitrile', 'SMARTS': 'C#N', 'types': ['aroC', 'NtrR']}, ## ???
                   {'name': 'imino', 'SMARTS': 'C=N', 'types': [None, 'Nhis']},
                   {'name': 'nitro', 'SMARTS': '[N+](=O)[O-]', 'types': ['Nhis','OOC', 'OOC']},
                   {'name': 'nitro_aro', 'SMARTS': 'n(=o)o', 'types': ['Nhis','OOC', 'OOC']},
@@ -509,6 +509,10 @@ class _RDKitPrepMixin:
                 el = 'CONN'
             elemental[el] += 1  # compatible mol_to_params.py
             lamename = el + str(elemental[el])
+            if len(lamename) < 4 and len(atom.GetSymbol()) == 1:
+                lamename = ' '+ lamename.ljust(3)
+            else:
+                lamename = lamename.ljust(3)
             while lamename in seen:
                 elemental[el] += 1
                 lamename = el + str(elemental[el])

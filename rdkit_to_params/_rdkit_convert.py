@@ -170,6 +170,8 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         for atom in self.mol.GetAtoms():
             if atom.GetSymbol() == 'H':
                 continue #PROTON_CHI 3 SAMPLES 2 0 180 EXTRA 1 20 thing...
+            elif atom.GetSymbol() == '*':
+                continue
             for neighbor in self._get_unseen_neighbors(atom, []):
                 if atom.GetIdx() > neighbor.GetIdx():
                     continue
