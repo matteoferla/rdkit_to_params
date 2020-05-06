@@ -32,7 +32,7 @@ class Constraints:
 
         * ``smiles``: stored input smiles string
         * ``names``: stored input list of names
-        * ``covalent_res``: stored input liagnd residue
+        * ``covalent_res``: stored input ligand residue
         * ``target_res``: stored input protein residue
         * ``cov_template``: Chem.Mol from first smiles.
         * ``target_template``: Chem.Mol from first smiles
@@ -40,6 +40,7 @@ class Constraints:
         * ``atom_pair_constraint``: AtomPair
         * ``angle_constraint``: Angle . NB. this is two lines.
         * ``dihedral_constaint``: dihedral
+        * ``custom_constaint``: user added these
 
         Class methods:
         * ``assign_names(mol, list)`` classmethods that assigns names to a mol in place.
@@ -76,16 +77,16 @@ class Constraints:
         # assign names
         self.assign_names(self.cov_template, self.names[:self.cov_template.GetNumAtoms()])
         self.assign_names(self.target_template, self.names[self.cov_template.GetNumAtoms():])
-        cov_con_name = self.get_conn(self.cov_template).GetProp('_AtomName')
-        target_con_name = self.get_conn(self.target_template).GetProp('_AtomName')
+        self.cov_con_name = self.get_conn(self.cov_template).GetProp('_AtomName')
+        self.target_con_name = self.get_conn(self.target_template).GetProp('_AtomName')
         # combine and embed
         self.combo = self.join_by_dummy(self.cov_template, self.target_template)
         conf = self._get_conformer(self.combo)
         # get key atoms
-        cov_con = self.get_atom(self.combo, cov_con_name)
+        cov_con = self.get_atom(self.combo, self.cov_con_name)
         cov_fore = cov_con.GetNeighbors()[0]
         cov_fore_name = cov_fore.GetProp('_AtomName')
-        target_con = self.get_atom(self.combo, target_con_name)
+        target_con = self.get_atom(self.combo, self.target_con_name)
         target_fore = target_con.GetNeighbors()[0]
         target_fore_name = target_fore.GetProp('_AtomName')
         # do maths
@@ -95,10 +96,11 @@ class Constraints:
         angle_covalent = Chem.rdMolTransforms.GetAngleRad(conf, target_con.GetIdx(), cov_con.GetIdx(), cov_fore.GetIdx())
         dihedral = Chem.rdMolTransforms.GetDihedralRad(conf, target_fore.GetIdx(), target_con.GetIdx(), cov_con.GetIdx(),
                                                        cov_fore.GetIdx())
-        self.atom_pair_constraint = f'AtomPair {target_con_name} {target_res} {cov_con_name} {covalent_res} HARMONIC {dist:.2f} 0.2\n'
-        self.angle_constraint = f'Angle {target_fore_name} {target_res} {target_con_name} {target_res} {cov_con_name} {covalent_res} HARMONIC {angle_target:.2f} 0.35\n' +\
-                                f'Angle {target_con_name} {target_res} {cov_con_name} {covalent_res} {cov_fore_name} {covalent_res} HARMONIC {angle_covalent:.2f} 0.35\n'
-        self.dihedral_constaint = f'Dihedral {target_fore_name} {target_res} {target_con_name} {target_res} {cov_con_name} {covalent_res} {cov_fore_name} {covalent_res} CIRCULARHARMONIC {dihedral:.2f} 0.35\n'
+        self.atom_pair_constraint = f'AtomPair {self.target_con_name} {target_res} {self.cov_con_name} {covalent_res} HARMONIC {dist:.2f} 0.2\n'
+        self.angle_constraint = f'Angle {target_fore_name} {target_res} {self.target_con_name} {target_res} {self.cov_con_name} {covalent_res} HARMONIC {angle_target:.2f} 0.35\n' +\
+                                f'Angle {self.target_con_name} {target_res} {self.cov_con_name} {covalent_res} {cov_fore_name} {covalent_res} HARMONIC {angle_covalent:.2f} 0.35\n'
+        self.dihedral_constaint = f'Dihedral {target_fore_name} {target_res} {self.target_con_name} {target_res} {self.cov_con_name} {covalent_res} {cov_fore_name} {covalent_res} CIRCULARHARMONIC {dihedral:.2f} 0.35\n'
+        self.custom_constaint = ''
 
     @classmethod
     def assign_names(cls, mol: Chem.Mol, names: List[str]) -> None:
@@ -146,7 +148,8 @@ class Constraints:
         # make
         constraints = [self.atom_pair_constraint,
                        self.angle_constraint,
-                       self.dihedral_constaint]
+                       self.dihedral_constaint,
+                       self.custom_constaint]
         return ''.join(constraints)
 
     @classmethod
