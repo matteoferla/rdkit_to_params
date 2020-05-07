@@ -198,7 +198,7 @@ class _RDKitPrepMixin:
                   {'name': 'furan', 'SMARTS': 'coc', 'types': ['aroC', 'Oaro', 'aroC']},
                   {'name': 'ether', 'SMARTS': 'COC', 'types': [None, 'Oet3', None]},
                   {'name': 'hydroxyl', 'SMARTS': '[OH]', 'types': ['OH']},
-                  {'name': 'guanidium', 'SMARTS': 'NC(=N)N', 'types': ['Narg', 'apoC', 'Narg', 'Narg']},
+                  {'name': 'guanidium', 'SMARTS': 'NC(=N)N', 'types': ['Narg', 'aroC', 'Narg', 'Narg']},
                   ]
         for group in groups:
             template = Chem.MolFromSmarts(group['SMARTS'])
@@ -292,7 +292,7 @@ class _RDKitPrepMixin:
                   {'name': 'furan', 'SMARTS': 'coc', 'types': ['aroC', 'Ofu', 'aroC']},
                   {'name': 'ether', 'SMARTS': 'COC', 'types': [None, 'Oet', None]},
                   {'name': 'hydroxyl', 'SMARTS': '[OH]', 'types': ['OH']},
-                  {'name': 'guanidium', 'SMARTS': 'NC(=N)N', 'types': ['Narg', 'apoC', 'Narg', 'Narg']}
+                  {'name': 'guanidium', 'SMARTS': 'NC(=N)N', 'types': ['Narg', 'aroC', 'Narg', 'Narg']}
                   ]
         for group in groups:
             template = Chem.MolFromSmarts(group['SMARTS'])
@@ -503,15 +503,12 @@ class _RDKitPrepMixin:
             elemental['CONN'] = 2 # when LOWER and UPPER exist the CONN is CONN3.
         for i in range(self.mol.GetNumAtoms()):
             atom = self.mol.GetAtomWithIdx(i)
-            el = atom.GetSymbol()
+            el = atom.GetSymbol().upper()
             if el == '*':
                 el = 'CONN'
             elemental[el] += 1  # compatible mol_to_params.py
             lamename = el + str(elemental[el])
-            if len(lamename) < 4 and len(atom.GetSymbol()) == 1:
-                lamename = ' '+ lamename.ljust(3)
-            else:
-                lamename = lamename.ljust(3)
+            lamename = self.pad_name(lamename, atom)
             while lamename in seen:
                 elemental[el] += 1
                 lamename = el + str(elemental[el])
@@ -555,4 +552,19 @@ class _RDKitPrepMixin:
             return names[0]
         else:
             return 'LIG'
+
+    @classmethod
+    def pad_name(self, name, atom=None):
+        if name in ('CONN1','CONN2','CONN3','CONN4', 'LOWER', 'UPPER'):
+            return name
+        elif len(name) == 4:
+            return name
+        elif len(name) > 4:
+            return name[:4]
+        elif name[0] == ' ':
+            return name.ljust(4)
+        elif len(name) < 4 and (atom is None or len(atom.GetSymbol()) == 1):
+            return ' ' + name.ljust(3)
+        else:
+            return name.ljust(4)
 

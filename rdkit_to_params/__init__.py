@@ -155,10 +155,14 @@ class Params(_ParamsIoMixin, _RDKitCovertMixin, _PoserMixin):
         :param newname: atom name, preferably 4 char long.
         :return: 4 char newname
         """
-        if oldname == newname:
+        if newname is None:
+            return None
+        elif oldname == newname:
             return newname
         # check if it is a connect atom
-        if oldname.strip() in ('CONN1', 'CONN2', 'CONN3', 'LOWER', 'UPPER'):
+        elif oldname.strip() == 'CONN':
+            pass # ...
+        elif oldname.strip() in ('CONN1', 'CONN2', 'CONN3', 'LOWER', 'UPPER'):
             for conn in self.CONNECT:
                 if conn.connect_name.strip() == oldname.strip():
                     conn.connect_name = newname
@@ -176,15 +180,9 @@ class Params(_ParamsIoMixin, _RDKitCovertMixin, _PoserMixin):
             oldname = self.get_correct_atomname(oldname)
             if len(newname) > 4:
                 raise ValueError(f'{newname} is too long.')
-            if len(newname) == 4:
-                pass
-            elif newname[0] == ' ':
-                newname = newname.ljust(4)
-            else:
-                newname = ' ' + newname.ljust(3)
-            newname = newname.upper()
-            if newname == 'END':
+            elif newname == 'END':
                 warn('I thing END may be an old keyword - What is ``ACT_COORD_ATOMS``?. BEST AVOID IT.')
+            newname = self.pad_name(newname).upper()
             # find in atom.
             for atom in self.ATOM:
                 if atom.name == newname:
