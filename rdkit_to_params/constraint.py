@@ -107,7 +107,7 @@ class Constraints:
         self.custom_constaint = ''
 
     @classmethod
-    def falsify(cls):
+    def mock(cls):
         self = cls.__new__()
         self.atom_pair_constraint = ''
         self.angle_constraint = ''
