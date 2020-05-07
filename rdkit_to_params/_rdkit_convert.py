@@ -242,5 +242,17 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         self.NBR_ATOM.append(self.mol.GetAtomWithIdx(i).GetPDBResidueInfo().GetName())
         self.NBR_RADIUS.append(str(s))
 
+    def polish_mol(self):
+        """
+        The mol may be inconsistent.
+        :return:
+        """
+        name = self.NAME[:3]
+        index = 1
+        for atom in self.mol.GetAtoms():
+            atom.GetPDBResidueInfo().SetResidueName(name)
+            atom.GetPDBResidueInfo().SetResidueIdx(name)
+
+
 
 

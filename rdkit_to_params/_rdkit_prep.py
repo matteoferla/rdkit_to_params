@@ -191,7 +191,7 @@ class _RDKitPrepMixin:
                   {'name': 'azo', 'SMARTS': 'NN', 'types': ['NtrR', 'NtrR']},
                   {'name': 'azo', 'SMARTS': 'nn', 'types': ['NtrR', 'NtrR']},
                   {'name': 'aramid?', 'SMARTS': 'nc(o)c', 'types': ['NtrR', 'aroC', 'Oaro', None]}, # unsure how it's written
-                  {'name': 'nitrile', 'SMARTS': 'C#N', 'types': ['aroC', 'NtrR']}, ## ???
+                  {'name': 'nitrile', 'SMARTS': 'C#N', 'types': ['COO', 'NtrR']}, ## the old one uses Nhis??!
                   {'name': 'imino', 'SMARTS': 'C=N', 'types': [None, 'Nhis']},
                   {'name': 'nitro', 'SMARTS': '[N+](=O)[O-]', 'types': ['Nhis','OOC', 'OOC']},
                   {'name': 'nitro_aro', 'SMARTS': 'n(=o)o', 'types': ['Nhis','OOC', 'OOC']},
