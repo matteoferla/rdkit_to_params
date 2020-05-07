@@ -107,6 +107,15 @@ class Constraints:
         self.custom_constaint = ''
 
     @classmethod
+    def falsify(cls):
+        self = cls.__new__()
+        self.atom_pair_constraint = ''
+        self.angle_constraint = ''
+        self.dihedral_constaint = ''
+        self.custom_constaint = ''
+        return self
+
+    @classmethod
     def assign_names(cls, mol: Chem.Mol, names: List[str]) -> None:
         """
         Stores names of atoms as given in the list.
