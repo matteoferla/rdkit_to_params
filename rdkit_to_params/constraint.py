@@ -103,16 +103,16 @@ class Constraints:
         self.atom_pair_constraint = f'AtomPair {self.target_con_name} {target_res} {self.cov_con_name} {ligand_res} HARMONIC {dist:.2f} 0.2\n'
         self.angle_constraint = f'Angle {target_fore_name} {target_res} {self.target_con_name} {target_res} {self.cov_con_name} {ligand_res} HARMONIC {angle_target:.2f} 0.35\n' + \
                                 f'Angle {self.target_con_name} {target_res} {self.cov_con_name} {ligand_res} {cov_fore_name} {ligand_res} HARMONIC {angle_covalent:.2f} 0.35\n'
-        self.dihedral_constaint = f'Dihedral {target_fore_name} {target_res} {self.target_con_name} {target_res} {self.cov_con_name} {ligand_res} {cov_fore_name} {ligand_res} CIRCULARHARMONIC {dihedral:.2f} 0.35\n'
-        self.custom_constaint = ''
+        self.dihedral_constraint = f'Dihedral {target_fore_name} {target_res} {self.target_con_name} {target_res} {self.cov_con_name} {ligand_res} {cov_fore_name} {ligand_res} CIRCULARHARMONIC {dihedral:.2f} 0.35\n'
+        self.custom_constraint = ''
 
     @classmethod
     def mock(cls):
-        self = cls.__new__()
+        self = cls.__new__(cls)
         self.atom_pair_constraint = ''
         self.angle_constraint = ''
-        self.dihedral_constaint = ''
-        self.custom_constaint = ''
+        self.dihedral_constraint = ''
+        self.custom_constraint = ''
         return self
 
     @classmethod
@@ -160,8 +160,8 @@ class Constraints:
         # make
         constraints = [self.atom_pair_constraint,
                        self.angle_constraint,
-                       self.dihedral_constaint,
-                       self.custom_constaint]
+                       self.dihedral_constraint,
+                       self.custom_constraint]
         return ''.join(constraints)
 
     def dumps(self):
