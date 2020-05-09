@@ -24,7 +24,7 @@ __citation__ = "None."
 from typing import List, Dict, Union
 from collections import defaultdict, deque, namedtuple
 from rdkit import Chem
-from rdkit.Chem import AllChem
+from rdkit.Chem import AllChem, rdFMCS
 from warnings import warn
 import re
 from typing import Optional, Sequence
@@ -432,7 +432,7 @@ class _RDKitPrepMixin:
 
     def rename_by_template(self, backbone: Chem.Mol, names: Sequence[str]) -> List[str]:
         """
-        Assigns to the atoms in self.mol the names and rosetta types based on the backbone template and the names variable.
+        Assigns to the atoms in self.mol the names based on the backbone template and the names variable.
         See ``_fix_atom_names`` for example usage.
         Does not change the Params.
 
@@ -455,6 +455,28 @@ class _RDKitPrepMixin:
             else:
                 pass
         return originals
+
+    def rename_from_template(self, template: Chem.Mol, overwrite:bool=True):
+        """
+        Assigns to the atoms in self.mol the names based on the template, which does not need to be a perfect match.
+        See ``_fix_atom_names`` for example usage.
+        Does not change the Params.
+
+        :param template: mol object with atom names
+
+        :return: None for now.
+        """
+        mcs = rdFMCS.FindMCS([self.mol, template],
+                             atomCompare=rdFMCS.AtomCompare.CompareElements,
+                             bondCompare=rdFMCS.BondCompare.CompareAny,
+                             ringMatchesRingOnly=True)
+        common = Chem.MolFromSmarts(mcs.smartsString)
+        for acceptor, donor in zip(self.mol.GetSubstructMatch(common), template.GetSubstructMatch(common)):
+            a_atom = self.mol.GetAtomWithIdx(acceptor)
+            d_atom = template.GetAtomWithIdx(donor)
+            info = d_atom.GetPDBResidueInfo()
+            if info:
+                self._set_PDBInfo_atomname(a_atom, info.GetName(), overwrite=overwrite)
 
     def rename_atom(self, oldname: str, newname: str):
         # this will overwritten by inheriting params mixins
@@ -538,7 +560,6 @@ class _RDKitPrepMixin:
         for i in range(self.mol.GetNumAtoms()):
             gc = mol.GetAtomWithIdx(i).GetDoubleProp('_GasteigerCharge')
             self.mol.GetAtomWithIdx(i).SetDoubleProp('_GasteigerCharge', gc)
-
 
     def _get_resn_from_PDBInfo(self):
         """

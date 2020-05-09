@@ -21,6 +21,7 @@ from ._rdkit_prep import _RDKitPrepMixin
 from typing import List, Dict, Union, Optional
 from collections import defaultdict, deque, namedtuple
 from rdkit import Chem
+from rdkit.Chem import AllChem
 from warnings import warn
 
 import numpy as np
@@ -40,6 +41,32 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         :rtype: instance
         """
         self = super().from_mol(mol, generic, name) # stores and calls .fix_mol()
+        self.convert_mol()
+        return self
+
+    @classmethod
+    def from_smiles_w_pdbfile(cls, pdb_file:str, smiles:str, generic: bool = False, name='LIG', proximityBonding:bool=True):
+        """
+        Assumes there is only one residue of the resn/name3
+
+        :param pdb_file:
+        :param generic: convert mol with generic or classic AtomTypes?
+        :type generic: bool
+        :param name: 3-letter name
+        :type name: str
+        :param proximityBonding: rdkit option for Chem.MolFromPDBFile. Did the author of the pdb **not** add CONECT?
+        :type proximityBonding: bool
+        :rtype: instance
+        """
+        pdb = Chem.MolFromPDBFile(pdb_file, removeHs=False, proximityBonding=proximityBonding)
+        dodgy = Chem.SplitMolByPDBResidues(pdb, whiteList=[name])[name]
+        good = Chem.MolFromSmiles(smiles)
+        good.SetProp('_Name', name)
+        good = AllChem.AddHs(good)
+        AllChem.EmbedMolecule(good)
+        AllChem.MMFFOptimizeMolecule(good)
+        self = super().from_mol(good, generic=generic, name=name)
+        self.rename_from_template(dodgy)
         self.convert_mol()
         return self
 
@@ -251,7 +278,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         index = 1
         for atom in self.mol.GetAtoms():
             atom.GetPDBResidueInfo().SetResidueName(name)
-            atom.GetPDBResidueInfo().SetResidueIdx(name)
+            atom.GetPDBResidueInfo().SetResidueIdx(index)
 
 
 
