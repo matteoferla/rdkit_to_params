@@ -41,7 +41,7 @@ class _RDKitPrepMixin:
         self._rtype = []
 
     @classmethod
-    def from_mol(cls, mol: Chem.Mol, generic:bool=False, name:Optional[str]=None) -> _RDKitPrepMixin:
+    def load_mol(cls, mol: Chem.Mol, generic:bool=False, name:Optional[str]=None) -> _RDKitPrepMixin:
         """
         A fully prepared molecule with optional dummy atoms to be coverted into a Params object
 
@@ -59,15 +59,6 @@ class _RDKitPrepMixin:
         self.fix_mol()
         # conversion elsewhere
         return self
-
-    @classmethod
-    def from_smiles(cls, smiles: str, name='LIG', generic:bool=False) -> _RDKitPrepMixin:
-        mol = Chem.MolFromSmiles(smiles)
-        mol.SetProp('_Name', name)
-        mol = AllChem.AddHs(mol)
-        AllChem.EmbedMolecule(mol)
-        AllChem.MMFFOptimizeMolecule(mol)
-        return cls.from_mol(mol, generic, name)
 
     @classmethod
     def add_names(cls, mol: Chem.Mol, names: List[str], name:Optional[str]=None) -> Chem.Mol:

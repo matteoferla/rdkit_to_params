@@ -40,9 +40,18 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         :type name: str
         :rtype: instance
         """
-        self = super().from_mol(mol, generic, name) # stores and calls .fix_mol()
+        self = cls.load_mol(mol, generic, name) # stores and calls .fix_mol()
         self.convert_mol()
         return self
+
+    @classmethod
+    def from_smiles(cls, smiles: str, name='LIG', generic:bool=False) -> _RDKitPrepMixin:
+        mol = Chem.MolFromSmiles(smiles)
+        mol.SetProp('_Name', name)
+        mol = AllChem.AddHs(mol)
+        AllChem.EmbedMolecule(mol)
+        AllChem.MMFFOptimizeMolecule(mol)
+        return cls.from_mol(mol, generic, name)
 
     @classmethod
     def from_smiles_w_pdbfile(cls, pdb_file:str, smiles:str, generic: bool = False, name='LIG', proximityBonding:bool=True):
@@ -65,7 +74,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         good = AllChem.AddHs(good)
         AllChem.EmbedMolecule(good)
         AllChem.MMFFOptimizeMolecule(good)
-        self = super().from_mol(good, generic=generic, name=name)
+        self = cls.load_mol(good, generic=generic, name=name)
         self.rename_from_template(dodgy)
         self.convert_mol()
         return self
