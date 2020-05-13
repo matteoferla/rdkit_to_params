@@ -306,5 +306,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         name = self.NAME[:3]
         index = 1
         for atom in self.mol.GetAtoms():
-            atom.GetPDBResidueInfo().SetResidueName(name)
-            atom.GetPDBResidueInfo().SetResidueIdx(index)
+            info = atom.GetPDBResidueInfo()
+            info.SetResidueName(name)
+            info.SetResidueNumber(index)
+            info.SetIsHeteroAtom(True)
