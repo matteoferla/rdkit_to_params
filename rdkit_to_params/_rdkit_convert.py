@@ -66,7 +66,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         if isinstance(atomnames, dict):
             for k, v in atomnames.items():
                 self._set_PDBInfo_atomname(mol.GetAtomWithIdx(k), v, overwrite=True)
-            self.polish_mol(name)
+            self.polish_mol()
         self.convert_mol()
         return self
 
