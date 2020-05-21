@@ -460,7 +460,7 @@ class _RDKitPrepMixin:
         mcs = rdFMCS.FindMCS([self.mol, template],
                              atomCompare=rdFMCS.AtomCompare.CompareElements,
                              bondCompare=rdFMCS.BondCompare.CompareAny,
-                             ringMatchesRingOnly=True)
+                             ringMatchesRingOnly=False)
         common = Chem.MolFromSmarts(mcs.smartsString)
         for acceptor, donor in zip(self.mol.GetSubstructMatch(common), template.GetSubstructMatch(common)):
             a_atom = self.mol.GetAtomWithIdx(acceptor)
@@ -468,6 +468,8 @@ class _RDKitPrepMixin:
             info = d_atom.GetPDBResidueInfo()
             if info:
                 self._set_PDBInfo_atomname(a_atom, info.GetName(), overwrite=overwrite)
+            else:
+                warn(f'No info in template for atom {d_atom.GetSymbol()} #{donor}')
 
     def rename_atom(self, oldname: str, newname: str):
         # this will overwritten by inheriting params mixins

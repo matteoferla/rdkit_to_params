@@ -89,9 +89,16 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         dodgy = Chem.SplitMolByPDBResidues(pdb, whiteList=[name])[name]
         good = Chem.MolFromSmiles(smiles)
         good.SetProp('_Name', name)
+        dummies = []
+        for atom in good.GetAtoms():
+            if atom.GetSymbol() == '*':
+                atom.SetAtomicNum(9)
+                dummies.append(atom.GetIdx())
         good = AllChem.AddHs(good)
         AllChem.EmbedMolecule(good)
         AllChem.MMFFOptimizeMolecule(good)
+        for d in dummies:
+            good.GetAtomWithIdx(d).SetAtomicNum(0)
         self = cls.load_mol(good, generic=generic, name=name)
         self.rename_from_template(dodgy)
         self.convert_mol()
