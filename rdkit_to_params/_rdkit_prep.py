@@ -486,8 +486,13 @@ class _RDKitPrepMixin:
 
     def retype_by_name(self, mapping: Dict[str, str]):
         for name, rtype in mapping.items():
+            if rtype is None:
+                continue
             atom = self.get_atom_by_name(name)
-            atom.SetProp('_rType', rtype)
+            if atom is not None:
+                atom.SetProp('_rType', rtype)
+            else:
+                warn(f'Could not find "{name}"')
 
     def _fix_atom_names(self):
         elemental = defaultdict(int)
@@ -495,9 +500,10 @@ class _RDKitPrepMixin:
         # Amino acid overwrite.
         aa = Chem.MolFromSmiles('*NCC(~O)*')
         if self.mol.HasSubstructMatch(aa):
+            warn('Ligand detected to be polymer!')
             aa_map = dict([('LOWER', None),
                      (' N  ', 'Nbb'),
-                     (' CA ', 'Cbb'),
+                     (' CA ', 'CAbb'),
                      (' C  ', 'CObb'),
                      (' O  ', 'OCbb'),
                      ('UPPER', None)

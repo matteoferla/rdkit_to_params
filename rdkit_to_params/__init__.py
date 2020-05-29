@@ -118,6 +118,11 @@ class Params(_ParamsIoMixin, _RDKitCovertMixin, _PoserMixin):
         else:
             self.IO_STRING[0].name3 = name
 
+    def is_aminoacid(self):
+        if len(self.TYPE) == 0:
+            self.TYPE.append('LIGAND')
+        return self.TYPE[0].body == 'POLYMER'
+
     def validate(self):
         warn('This is not finished.')
         if 'CANONICAL_AA' in self.PROPERTIES[0].values:

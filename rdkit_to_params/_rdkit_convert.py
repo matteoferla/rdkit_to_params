@@ -60,8 +60,19 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         mol = Chem.MolFromSmiles(smiles)
         mol.SetProp('_Name', name)
         mol = AllChem.AddHs(mol)
+        # cannot embed more than one dummy
+        changed = []
+        for atom in mol.GetAtoms():
+            if atom.GetSymbol() == '*':
+                atom.SetAtomicNum(6)
+                atom.SetHybridization(Chem.HybridizationType.SP3)
+                changed.append(atom.GetIdx())
         AllChem.EmbedMolecule(mol)
         AllChem.MMFFOptimizeMolecule(mol)
+        AllChem.ComputeGasteigerCharges(mol)
+        for atomIdx in changed:
+            mol.GetAtomWithIdx(atomIdx).SetAtomicNum(0)
+        # operate upon!
         self = cls.load_mol(mol, generic, name)
         if isinstance(atomnames, dict):
             for k, v in atomnames.items():
@@ -117,7 +128,8 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
             self.NAME = self._get_resn_from_PDBInfo()
         # SMILES
         self.comments.append(Chem.MolToSmiles(self.mol))
-        self.TYPE.append('LIGAND')
+        if len(self.TYPE) == 0:
+            self.TYPE.append('LIGAND')
         # ATOM & CONNECT
         for atom in self.mol.GetAtoms():
             self._parse_atom(atom)
@@ -139,6 +151,20 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         # TODO add override to specific first atom?
         described = []
         conf = self.mol.GetConformer()
+
+        def add_icoor(atom, atoms):
+            # due to madness the same atom objects differ.
+            undescribed.remove([this for this in undescribed if atom.GetIdx() == this.GetIdx()][0])
+            described.append(atom)
+            m = self._get_measurements(conf, *atoms)
+            self.ICOOR_INTERNAL.append(dict(child=self._get_PDBInfo_atomname(atoms[0]),
+                                            phi=m.torsion,
+                                            theta=m.angle,
+                                            distance=m.distance,
+                                            parent=self._get_PDBInfo_atomname(atoms[1]),
+                                            second_parent=self._get_PDBInfo_atomname(atoms[2]),
+                                            third_parent=self._get_PDBInfo_atomname(atoms[3])))
+
         aforementioned = []
         rotation_count = 0
         while undescribed:
@@ -153,7 +179,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
                 rotation_count += 1
                 continue  # This cannot be in the first three lines, whereas the R group is first in a canonical SMILES.
             elif len(described) == 0:  # First line
-                # I assume in some cases Virtual atoms are called for...
+                # I assume in some cases Virtual atoms are called for... but for now, no!
                 for parent in self._get_unseen_neighbors(atom, [], True):
                     siblings = self._get_unseen_neighbors(parent, [atom], True)
                     if len(siblings) != 0:
@@ -162,16 +188,14 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
                     warn(f'DEBUG. First row: No siblings for {self._get_PDBInfo_atomname(atom)}!')
                     undescribed.rotate(-1)
                     continue
-                atoms = [atom, atom, parent, siblings[0]]
-                aforementioned = [atom, parent, siblings[0]]
-            elif len(described) == 1:  # Second line
-                parent = described[0]
-                sibling = [a for a in aforementioned if a.GetIdx() not in (parent.GetIdx(), atom.GetIdx())][0]
-                atoms = [atom, parent, atom, sibling]
-            elif len(described) == 2:  # Third line
-                parent = described[1]
-                sibling = described[0]
-                atoms = [atom, parent, sibling, atom]
+                grandparent = siblings[0]
+                aforementioned = [atom, parent, grandparent]
+                # first line
+                add_icoor(atom, [atom, atom, parent, grandparent])
+                # Second line
+                add_icoor(parent, [parent, atom, parent, grandparent])
+                # Third line
+                add_icoor(grandparent, [grandparent, parent, atom, grandparent])
             else:
                 d_idx = [d.GetIdx() for d in described]
                 d_neighs = [n for n in self._get_unseen_neighbors(atom, [], False) if n.GetIdx() in d_idx]
@@ -198,25 +222,26 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
                         continue
                     else:
                         atoms = [atom, parent, sibling, d_neighs[0]]
-
                 else:
                     atoms = [atom, parent, d_neighs[0], d_neighs[1]]
-            undescribed.remove(atom)
-            described.append(atom)
-            m = self._get_measurements(conf, *atoms)
-            self.ICOOR_INTERNAL.append(dict(child=self._get_PDBInfo_atomname(atoms[0]),
-                                            phi=m.torsion,
-                                            theta=m.angle,
-                                            distance=m.distance,
-                                            parent=self._get_PDBInfo_atomname(atoms[1]),
-                                            second_parent=self._get_PDBInfo_atomname(atoms[2]),
-                                            third_parent=self._get_PDBInfo_atomname(atoms[3])))
+                add_icoor(atom, atoms)
+
 
     def _parse_atom(self, atom: Chem.Atom) -> None:
         if atom.GetSymbol() == '*':
             neighbor = atom.GetNeighbors()[0]
             n_name = self._get_PDBInfo_atomname(neighbor)
-            self.CONNECT.append([n_name, len(self.CONNECT) + 1, 'CONNECT'])
+            if self.is_aminoacid() and neighbor.GetSymbol() == 'N':
+                #atom_name, index, connect_type, connect_name
+                self.CONNECT.append([n_name, 1, 'LOWER_CONNECT', 'LOWER'])
+            elif self.is_aminoacid() and neighbor.GetSymbol() == 'C':
+                #atom_name, index, connect_type, connect_name
+                self.CONNECT.append([n_name, 2, 'UPPER_CONNECT', 'UPPER'])
+            elif self.is_aminoacid():
+                i = max(3, len(self.CONNECT) + 1)
+                self.CONNECT.append([n_name, i, 'CONNECT'])
+            else:
+                self.CONNECT.append([n_name, len(self.CONNECT) + 1, 'CONNECT'])
         else:
             d = self._get_atom_descriptors(atom)
             self.ATOM.append(d)

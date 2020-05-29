@@ -222,10 +222,12 @@ class CONNECTEntry:
     connect_name: str = ''  # 'CONN1' | 'UPPER' | 'LOWER'
 
     def __post_init__(self):
-        if not self.connect_type and not self.connect_name:
+        if self.connect_type and self.connect_name:
+            pass
+        elif not self.connect_type and not self.connect_name:
             self.connect_type = 'CONNECT'
             self.connect_name = f'CONN{self.index}'
-        if not self.connect_type and 'CONN' not in self.connect_name:
+        elif not self.connect_type and 'CONN' not in self.connect_name:
             self.connect_type = f'{self.connect_name}_CONNECT'
         elif not self.connect_type:
             self.connect_type = 'CONNECT'
@@ -234,7 +236,7 @@ class CONNECTEntry:
         elif not self.connect_name:
             self.connect_name = self.connect_type.replace('_CONNECT', '')
         else:
-            raise ValueError('I missed this case in this badly written method')
+            raise ValueError(f'I missed this case ({self.connect_name}, {self.connect_type}) in this badly written method')
 
     def __str__(self) -> str:
         return f'{self.connect_type} {self.atom_name}'
