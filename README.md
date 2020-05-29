@@ -23,7 +23,7 @@ I like this generic atom type business, but I am not sure how to use them in RL.
 I made several guesses with the classic atom types and I am sure many things are wrong...
 
 ### Rings and cis-trans
-I don't know what `CUT_BOND` does. I think it is to do with rings.
+I don't really understand what `CUT_BOND` does. It has to do with rings, 
 `ADD_RING` is not implemented in the `from_mol` conversion as I think it's an old command.
 Does a cis-trans tautomer bond (say `C(=O)-C=O`) gets a `CHI` entry? I am assuming no, but not sure.
 
@@ -148,6 +148,23 @@ for it:
 
 This is not to be confused with CCP4 REFMAC's `LINKR`, which are however easy to covert.
 Alternatively, you can add it after importing the pose, _cf._ `pose.residue(lig_pos).connect_map`.
+
+## Bond order
+It is worth mentioning that the bond order specified in the topology file in the `BOND_ORDER` lines is mostly ignored 
+and the bond order is derived from the rosetta types that get assigned. 
+To extract and correct a ligand, consider the following
+
+    
+    # pose to string
+    buffer = pyrosetta.rosetta.std.stringbuf()
+    pose.dump_pdb(pyrosetta.rosetta.std.ostream(buffer))
+    pdbblock = buffer.str()
+    # get the residue
+    mol = Chem.MolFromPDBBlock(pdbblock, proximityBonding=False, removeHs=False)
+    ligand = Chem.SplitMolByPDBResidues(mol, whiteList=[params.NAME])[params.NAME]
+    # fix bond order
+    template = AllChem.DeleteSubstructs(params.mol, Chem.MolFromSmiles('*'))
+    AllChem.AssignBondOrdersFromTemplate(template, ligand)
 
 ## To Do
 I have not coded yet, because I forgot:

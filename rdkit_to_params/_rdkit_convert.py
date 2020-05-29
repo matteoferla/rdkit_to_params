@@ -47,7 +47,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
 
     @classmethod
     def from_smiles(cls, smiles: str, name='LIG', generic: bool = False,
-                    atomnames: Optional[Dict[int, str]]=None) -> _RDKitPrepMixin:
+                    atomnames: Optional[Dict[int, str]] = None) -> _RDKitPrepMixin:
         """
         Make a Params instance from a smiles.
 
@@ -126,6 +126,9 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         # BOND
         for bond in self.mol.GetBonds():
             self._parse_bond(bond)
+        for ring_set in self.mol.GetRingInfo().AtomRings():
+            self.CUT_BOND.append({'first': self._get_PDBInfo_atomname(self.mol.GetAtomWithIdx(ring_set[0])),
+                                 'second': self._get_PDBInfo_atomname(self.mol.GetAtomWithIdx(ring_set[-1]))})
         # ICOOR
         self._parse_icoors()
         # NBR
@@ -230,6 +233,12 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
             bond = self.mol.GetBondBetweenAtoms(a.GetIdx(), b.GetIdx())
             return bond.GetBondType() == Chem.BondType.SINGLE
 
+        cuts = [tuple(sorted([ring_set[0], ring_set[-1]])) for ring_set in self.mol.GetRingInfo().AtomRings()]
+
+        def is_cut(a, b):
+            pair = tuple(sorted([a.GetIdx(), b.GetIdx()]))
+            return pair in cuts
+
         for atom in self.mol.GetAtoms():
             if atom.GetSymbol() == 'H':
                 continue  # PROTON_CHI 3 SAMPLES 2 0 180 EXTRA 1 20 thing...
@@ -238,8 +247,12 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
             for neighbor in self._get_unseen_neighbors(atom, []):
                 if atom.GetIdx() > neighbor.GetIdx():
                     continue
+                if is_cut(atom, neighbor):
+                    continue  # dont cross a cut!
                 elif is_single(atom, neighbor):
                     for grandneighbor in self._get_unseen_neighbors(neighbor, [atom]):
+                        if is_cut(neighbor, grandneighbor):
+                            continue
                         if is_single(grandneighbor, neighbor):
                             ggneighbors = self._get_unseen_neighbors(grandneighbor, [atom, neighbor])
                             if ggneighbors:  # 3-4 bond does not need to be single, nor does it matter which is the 4th atom
@@ -256,8 +269,10 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
             order = 4
         else:
             order = int(bond.GetBondTypeAsDouble())
-        self.BOND.append([self._get_PDBInfo_atomname(bond.GetBeginAtom()),
-                          self._get_PDBInfo_atomname(bond.GetEndAtom()),
+        begin = bond.GetBeginAtom()
+        end = bond.GetEndAtom()
+        self.BOND.append([self._get_PDBInfo_atomname(begin),
+                          self._get_PDBInfo_atomname(end),
                           order])
 
     def _get_measurements(self, conf: Chem.Conformer, a: Chem.Atom, b: Chem.Atom, c: Chem.Atom, d: Chem.Atom):
