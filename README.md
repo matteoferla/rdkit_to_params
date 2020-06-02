@@ -3,6 +3,20 @@ Create or modify Rosetta params files (topology files) from scratch, RDKit mols 
 
 > RDKit is actually an optional module, but most of the useful functionality comes from it!
 
+To install from pip type:
+
+    pip install rdkit-to-params
+    
+To install the latest version (probably the same) from GitHub
+
+    git clone https://github.com/matteoferla/rdkit_to_params.git
+    pip install .
+
+## Legal thingamabob
+The author, Matteo Ferla, is not affiliated with either Rosetta or RDKit and the presence of the latter's
+name in the package's title is completely coincidental.
+And yes, I am copying my legal mumbojumbo from South Park.
+
 ## Rationale
 This is a fresh rewrite of ``mol_to_params.py``. For three reasons:
 
