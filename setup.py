@@ -4,15 +4,13 @@ import os
 this_directory = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
-with open(os.path.join(this_directory, 'sphinx-documentation.md'), encoding='utf-8') as f:
-    long_description += f.read()
 
 print('rdkit and pyrosetta are optional... but are the main reason this was written.')
 print('The former is conda, the latter is downloaded from RosettaCommons.')
 
 setup(
     name='rdkit_to_params',
-    version='1.0.1',
+    version='1.0.2',
     python_requires='>3.6',
     packages=['rdkit_to_params'],
     url='https://github.com/matteoferla/rdkit_to_params',
