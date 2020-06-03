@@ -26,28 +26,13 @@ This is a fresh rewrite of ``mol_to_params.py``. For three reasons:
 
 It sounds mad, but did not actually take too long.
 
-## Caveat: I do not know many things!
-
-### Chemical
-I suspect I am doing stuff weirdly and I am meant to create ligands via ``pyrosetta.rosetta.core.chemical`` and not via params files... If this is so let me know. I don't mind knowing I made a mistake!
-
-### Generic
-I like this generic atom type business, but I am not sure how to use them in RL.
-``from_mol(mol, generic=True)`` will make generic atom types.
-I made several guesses with the classic atom types and I am sure many things are wrong...
-
-### Rings and cis-trans
-I don't really understand what `CUT_BOND` does. It has to do with rings, 
-`ADD_RING` is not implemented in the `from_mol` conversion as I think it's an old command.
-Does a cis-trans tautomer bond (say `C(=O)-C=O`) gets a `CHI` entry? I am assuming no, but not sure.
-
 ## Roundtrip
 Native amino acid params files can be found in the Rosetta folder
 `rosetta/main/database/chemical/residue_type_sets/fa_standard/residue_types/l-caa`
 Let's do a roundtrip changing an atomname:
 
     import pyrosetta
-    pyrosetta.init(extra_options='-mute all')
+    pyrosetta.init(extra_options='-mute all') # required for test
     from rdkit_to_params import Params
     
     p = Params.load('PHE.params')
@@ -70,27 +55,39 @@ The molecule should preferably be **not** Kekulised.
 
 Dummy atom (*/R) is assumed to be a CONNECT —ligand only atm.
 
-Here is a conversion:
+Here is a conversion to an amino acid:
+
+    import pyrosetta
+    pyrosetta.init(extra_options='-mute all')
+    from rdkit_to_params import Params
+    p = Params.from_smiles('*C(=O)C(Cc1ccccc1)[NH]*', #recognised as amino acid.
+            name='PHX', #optional.
+            atomnames={3: 'CZ'} #optional, rando atom name as see in previous edit
+            )
+    print(p.is_aminoacid()) # True
+    p.dump('fake.params')
+    p.test().dump_pdb('test.pdb')
+    Chem.MolToPDBFile(mol, 'ref.pdb')
+            
+Here is a conversion to a ligand the circuitous way, just for fun:
 
     import pyrosetta
     pyrosetta.init(extra_options='-mute all')
     # note that pyrosetta needs to be started before rdkit.
     from rdkit_to_params import Params
-    from rdkit import Chem
-    from rdkit.Chem import AllChem
-    
-    mol = Chem.MolFromSmiles('NC(Cc1ccccc1)C(=O)O')
+    # make the molecule in RDKit or chemdraw or download it or whatever.
+    mol = Chem.MolFromSmiles('NC(C(=O)O)Cc1ccccc1')
     mol = AllChem.AddHs(mol)
-    display(mol)
     AllChem.EmbedMolecule(mol)
     AllChem.MMFFOptimizeMolecule(mol)
-    
     # add names to the mol beforehand
-    Params.add_names(mol, names=['N', 'CA', 'CB', 'CG', 'CD1', 'CE1', 'CZ', 'CE2', 'CD2', 'C', 'O', 'OXT'], name='LIG') 
+    Params.add_names(mol, names=['N', 'CA', 'C', 'O', 'OXT', 'CB'], name='PHZ') 
     # parameterise
+    p = Params.from_mol(mol, name='PHZ')
     p = Params.from_mol(mol, name='XYZ') 
     p.test().dump_pdb('test.pdb')
     Chem.MolToPDBFile('ref.pdb')
+    
     
 Note that conformer generation is not fully automatic and is not done by default.
 
@@ -180,6 +177,21 @@ To extract and correct a ligand, consider the following
     template = AllChem.DeleteSubstructs(params.mol, Chem.MolFromSmiles('*'))
     AllChem.AssignBondOrdersFromTemplate(template, ligand)
 
+## Caveat: I do not know many things!
+
+### Chemical
+I suspect I am doing stuff weirdly and I am meant to create ligands via ``pyrosetta.rosetta.core.chemical`` and not via params files... If this is so let me know. I don't mind knowing I made a mistake!
+
+### Generic
+I like this generic atom type business, but I am not sure how to use them in RL.
+``from_mol(mol, generic=True)`` will make generic atom types.
+I made several guesses with the classic atom types and I am sure many things are wrong...
+
+### Rings and cis-trans
+I don't really understand what `CUT_BOND` does. It has to do with rings, 
+`ADD_RING` is not implemented in the `from_mol` conversion as I think it's an old command.
+Does a cis-trans tautomer bond (say `C(=O)-C=O`) gets a `CHI` entry? I am assuming no, but not sure.
+
 ## To Do
 I have not coded yet, because I forgot:
 * ~~an auto-assignment of `NBR_ATOM` and `NBR_RADIUS` for `from_mol`.~~
@@ -189,8 +201,8 @@ I have not coded yet, because I forgot:
 * ~~output constrain file for the CONNECT atom.~~
 * make a webpage to do the conversion from mol/sdf/pdb/SMILES —suggestions for free JS molecule editor?
 
-## Workshop
-
-The `from_mol` class method actually has code that recognises `*[NH]CC(~O)*` and assigns it as a backbone properly.
+The `from_mol` class method recognises `*[NH]CC(~O)*` and assigns it as a backbone properly.
 However, `Chem.MolFromSmiles('*[NH]CC(~O)*')` cannot be embedded, so is a bit of a horrible one for users to use.
+Cystathionine and similar amino acids are the problem as I cannot simply make an amino acid backbone be recognised,
+however if protonated as is the case '[NH1]C[CH0](=O)'
 Maybe the `CC(=O)NCC(=O)NC` option may be a better choice after all.
