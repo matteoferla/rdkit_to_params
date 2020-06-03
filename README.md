@@ -43,10 +43,17 @@ Let's do a roundtrip changing an atomname:
     p.rename_atom(' CB ', ' CX ')
     p.dump('fake.params')
     p.test().dump_pdb('test.pdb')
+    
+`p.test()` returns a pyrosetta pose. The static method `params_to_pose('something.params', name3)` accepts a params file
+    
+    import nglview
+    pose = Params.params_to_pose('some_topology_I_found.params', name3)
+    view = nglview.show_rosetta(pose)
+    view
 
 ## From mol object
 ### Requirements
-For the sake of sanity, `EmbedMolecule`, `Chem.AddHs(mol)` or any weird hack is assumed to have been done beforehand.
+For the sake of sanity, `EmbedMolecule`, `Chem.AddHs(mol)` or any other operation is assumed to have been done beforehand.
 And that the user is going to do `Chem.MolToPDBFile(mol)` or `Chem.MolToPDBBlock(mol)` or use the bound methods of `Params`,
 `dump_pdb` and `dump_pdb_conf` (see below).
 
@@ -55,7 +62,7 @@ The molecule should preferably be **not** Kekulised.
 
 Dummy atom (*/R) is assumed to be a CONNECT —ligand only atm.
 
-Here is a conversion to an amino acid:
+Here is a conversion to an amino acid from a SMILES (quickest way):
 
     import pyrosetta
     pyrosetta.init(extra_options='-mute all')
@@ -81,13 +88,15 @@ Here is a conversion to a ligand the circuitous way, just for fun:
     AllChem.EmbedMolecule(mol)
     AllChem.MMFFOptimizeMolecule(mol)
     # add names to the mol beforehand
-    Params.add_names(mol, names=['N', 'CA', 'C', 'O', 'OXT', 'CB'], name='PHZ') 
+    Params.add_names(mol, names=['N', 'CA', 'C', 'O', 'OXT', 'CB'], name='PHZ')
     # parameterise
     p = Params.from_mol(mol, name='PHZ')
-    p = Params.from_mol(mol, name='XYZ') 
     p.test().dump_pdb('test.pdb')
     Chem.MolToPDBFile('ref.pdb')
-    
+ 
+The class method `add_names` is based upon atom index
+(which is derived from the SMILES or sdf/mol file unless atoms have been replaced).
+The instance method `rename_by_template` accepts a substructure and a list of atom names in the order they are in the substructure.
     
 Note that conformer generation is not fully automatic and is not done by default.
 
@@ -125,6 +134,7 @@ If you have two mol objects from whatever routes, the basic operation is:
 
     p = Params.load_mol(mol, generic=False, name='LIG')
     p.rename_from_template(template) # or whatever middle step
+    
     p.convert_mol()
 
 Note that `convert_mol` should be called once and is already called in the two `from_XXX` classmethods.
