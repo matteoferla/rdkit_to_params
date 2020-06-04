@@ -7,9 +7,9 @@ in the initialisation of ``Params`` (which happens in ``_ParamsInitMixin`` __e.g
 
 __author__ = "Matteo Ferla. [Github](https://github.com/matteoferla)"
 __email__ = "matteo.ferla@gmail.com"
-__date__ = "2020 A.D."
+__date__ = "4 June 2020 A.D."
 __license__ = "MIT"
-__version__ = "1"
+__version__ = "1.0.3"
 __citation__ = "None."
 
 ########################################################################################################################

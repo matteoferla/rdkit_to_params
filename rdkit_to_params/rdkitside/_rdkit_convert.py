@@ -3,15 +3,16 @@ from __future__ import annotations
 ########################################################################################################################
 __doc__ = \
     """
-There are probably loads of mistakes here ---or more correctly
-in ``_RDKitPrepMixin()._add_rtypes`` or ``_RDKitPrepMixin()._add_genrtypes``.
+    THis the core conversion. the method ``convert_mol`` does something you'd never have guessed. 
+    There are probably loads of mistakes here ---or more correctly
+    in ``_RDKitPrepMixin()._add_rtypes`` or ``_RDKitPrepMixin()._add_genrtypes``.
     """
 
 __author__ = "Matteo Ferla. [Github](https://github.com/matteoferla)"
 __email__ = "matteo.ferla@gmail.com"
-__date__ = "2020 A.D."
+__date__ = "4 June 2020 A.D."
 __license__ = "MIT"
-__version__ = "1"
+__version__ = "1.0.3"
 __citation__ = "None."
 
 ########################################################################################################################
@@ -30,92 +31,12 @@ import numpy as np
 class _RDKitCovertMixin(_RDKitPrepMixin):
     _Measure = namedtuple('Measure', ['distance', 'angle', 'torsion'])
 
-    @classmethod
-    def from_mol(cls, mol: Chem.Mol, generic: bool = False, name: Optional[str] = None) -> _RDKitCovertMixin:
+    def convert_mol(self):
         """
-        :param mol: Rdkit molecule, with explicit protons and all.
-        :type mol: Chem.Mol
-        :param generic: convert mol with generic or classic AtomTypes?
-        :type generic: bool
-        :param name: 3-letter name
-        :type name: str
-        :rtype: instance
-        """
-        self = cls.load_mol(mol, generic, name)  # stores and calls .fix_mol()
-        self.convert_mol()
-        return self
+        This method does the actual conversion to params entries
 
-    @classmethod
-    def from_smiles(cls, smiles: str, name='LIG', generic: bool = False,
-                    atomnames: Optional[Dict[int, str]] = None) -> _RDKitPrepMixin:
-        """
-        Make a Params instance from a smiles.
-
-        :param smiles: SMILES to use.
-        :param name: name3/resn
-        :param generic: use generic atoms types
-        :param atomnames: optional dictionary to set names.
         :return:
         """
-        mol = Chem.MolFromSmiles(smiles)
-        mol.SetProp('_Name', name)
-        mol = AllChem.AddHs(mol)
-        # cannot embed more than one dummy
-        changed = []
-        for atom in mol.GetAtoms():
-            if atom.GetSymbol() == '*':
-                atom.SetAtomicNum(6)
-                atom.SetHybridization(Chem.HybridizationType.SP3)
-                changed.append(atom.GetIdx())
-        AllChem.EmbedMolecule(mol)
-        AllChem.MMFFOptimizeMolecule(mol)
-        AllChem.ComputeGasteigerCharges(mol)
-        for atomIdx in changed:
-            mol.GetAtomWithIdx(atomIdx).SetAtomicNum(0)
-        # operate upon!
-        self = cls.load_mol(mol, generic, name)
-        if isinstance(atomnames, dict):
-            for k, v in atomnames.items():
-                self._set_PDBInfo_atomname(mol.GetAtomWithIdx(k), v, overwrite=True)
-            self.polish_mol()
-        self.convert_mol()
-        return self
-
-    @classmethod
-    def from_smiles_w_pdbfile(cls, pdb_file: str, smiles: str, generic: bool = False, name='LIG',
-                              proximityBonding: bool = True):
-        """
-        Assumes there is only one residue of the resn/name3
-
-        :param pdb_file:
-        :param generic: convert mol with generic or classic AtomTypes?
-        :type generic: bool
-        :param name: 3-letter name
-        :type name: str
-        :param proximityBonding: rdkit option for Chem.MolFromPDBFile. Did the author of the pdb **not** add CONECT?
-        :type proximityBonding: bool
-        :rtype: instance
-        """
-        pdb = Chem.MolFromPDBFile(pdb_file, removeHs=False, proximityBonding=proximityBonding)
-        dodgy = Chem.SplitMolByPDBResidues(pdb, whiteList=[name])[name]
-        good = Chem.MolFromSmiles(smiles)
-        good.SetProp('_Name', name)
-        dummies = []
-        for atom in good.GetAtoms():
-            if atom.GetSymbol() == '*':
-                atom.SetAtomicNum(9)
-                dummies.append(atom.GetIdx())
-        good = AllChem.AddHs(good)
-        AllChem.EmbedMolecule(good)
-        AllChem.MMFFOptimizeMolecule(good)
-        for d in dummies:
-            good.GetAtomWithIdx(d).SetAtomicNum(0)
-        self = cls.load_mol(good, generic=generic, name=name)
-        self.rename_from_template(dodgy)
-        self.convert_mol()
-        return self
-
-    def convert_mol(self):
         # NAME
         if self.mol.HasProp("_Name"):
             title = self.mol.GetProp("_Name").strip()

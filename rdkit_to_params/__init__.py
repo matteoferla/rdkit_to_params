@@ -7,9 +7,9 @@ __doc__ = \
 
 __author__ = "Matteo Ferla. [Github](https://github.com/matteoferla)"
 __email__ = "matteo.ferla@gmail.com"
-__date__ = "2020 A.D."
+__date__ = "4 June 2020 A.D."
 __license__ = "MIT"
-__version__ = "1"
+__version__ = "1.0.3"
 __citation__ = "None."
 
 ########################################################################################################################
@@ -17,6 +17,7 @@ __citation__ = "None."
 
 from warnings import warn
 import os, re
+from typing import Union
 
 #################### base classes ######################################################################################
 
@@ -35,21 +36,23 @@ except ImportError:
 
 #################### rdkit #############################################################################################
 try:
-    from ._rdkit_convert import _RDKitCovertMixin  # in turn inherits _ParamsPrepMixin
+    from .rdkitside import _RDKitMixin
     from .constraint import Constraints
+    from rdkit import Chem
 except ImportError:
     warn('RDkit is required for ``from_mol`` stuff and ``Constraints``', category=ImportWarning)
 
+    class Chem:
+        Atom = None
 
-    class _RDKitCovertMixin:
+    class _RDKitMixin:
         pass
 
-from typing import List
 
 #################### main class ########################################################################################
 
 
-class Params(_ParamsIoMixin, _RDKitCovertMixin, _PoserMixin):
+class Params(_ParamsIoMixin, _RDKitMixin, _PoserMixin):
     """
 
     ``Params`` creates and manipulates params files. It can handles several types of params operations,
@@ -134,7 +137,8 @@ class Params(_ParamsIoMixin, _RDKitCovertMixin, _PoserMixin):
 
     def get_correct_atomname(self, name: str) -> str:
         """
-        Given a name, gets the correctly spaced out one.
+        Given a name, gets the correctly spaced out one as appears in the ATOM entry.
+        To pad out a name use pad_name
         This has nothing to do with ``._get_PDBInfo_atomname`` which just returns the atom name from a ``Chem.Atom``.
 
         :param name: dirty name
@@ -152,7 +156,29 @@ class Params(_ParamsIoMixin, _RDKitCovertMixin, _PoserMixin):
             else:
                 raise ValueError(f'{name} is not a valid atom name')
 
-    def rename_atom(self, oldname: str, newname: str) -> str:
+    def rename_atom(self, atom_or_atomname: Union[str, 'Chem.Atom'], newname: str, overwrite=True) -> str:
+        """
+        rename an atom by atomname or Chem.Atom (the former just calls ``rename_atom_by_name`` as is just for legacy)
+
+        :param atom_or_atomname:
+        :param newname:
+        :return:
+        """
+        if newname is None:
+            return None
+        elif isinstance(atom_or_atomname, str): #atom name
+            oldname = atom_or_atomname
+            return self.rename_atom_by_name(oldname, newname)
+        elif isinstance(atom_or_atomname, Chem.Atom):
+            atom = atom_or_atomname
+            oldname = self._get_PDBInfo_atomname(atom, throw=False)
+            if oldname:
+                return self.rename_atom_by_name(oldname, newname)  # alters entry & rdkit
+            else:
+                return self._set_PDBInfo_atomname(atom, newname, overwrite=overwrite) # alters rdkit
+
+
+    def rename_atom_by_name(self, oldname: str, newname: str) -> str:
         """
         Change the atom name from ``oldname`` to ``newname`` and returns the 4 char ``newname``.
 
@@ -164,9 +190,23 @@ class Params(_ParamsIoMixin, _RDKitCovertMixin, _PoserMixin):
             return None
         elif oldname == newname:
             return newname
+        else:
+            # rdkit mol
+            if self.mol:
+                atom = self.get_atom_by_name(oldname)
+                newname = self.pad_name(newname, atom)
+                atom.GetPDBResidueInfo().SetName(newname)
+            else:
+                newname = self.pad_name(newname)
+            # params
+            self._rename_atom_in_entries(oldname, newname)
+            return newname
+
+    def _rename_atom_in_entries(self, oldname, newname):
+        # if params is not filled nothing happens.
         # check if it is a connect atom
-        elif oldname.strip() == 'CONN':
-            pass # ...
+        if oldname.strip() == 'CONN':
+            pass  # ...
         elif oldname.strip() in ('CONN1', 'CONN2', 'CONN3', 'LOWER', 'UPPER'):
             for conn in self.CONNECT:
                 if conn.connect_name.strip() == oldname.strip():
@@ -179,7 +219,6 @@ class Params(_ParamsIoMixin, _RDKitCovertMixin, _PoserMixin):
                 for key in 'child', 'parent', 'second_parent', 'third_parent':
                     if getattr(entry, key) == oldname.rjust(5):
                         setattr(entry, key, newname.rjust(5))
-
         else:
             # fix names
             oldname = self.get_correct_atomname(oldname)
@@ -220,7 +259,4 @@ class Params(_ParamsIoMixin, _RDKitCovertMixin, _PoserMixin):
             for attr in ('METAL_BINDING_ATOMS', 'ACT_COORD_ATOMS'):
                 for entry in getattr(self, attr):
                     entry.values = [v if v.strip() != oldname.strip() else newname for v in entry.values]
-        # rdkit mol
-        if self.mol:
-            self.get_atom_by_name(oldname).GetPDBResidueInfo().SetName(newname)
-        return newname
+

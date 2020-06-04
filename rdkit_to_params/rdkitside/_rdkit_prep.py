@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from .entries import Entries
+from rdkit_to_params.entries import Entries
 
 import os
 
@@ -14,9 +14,9 @@ It does not rely on any ``Params`` entry stuff. So can be used by itself for tes
 
 __author__ = "Matteo Ferla. [Github](https://github.com/matteoferla)"
 __email__ = "matteo.ferla@gmail.com"
-__date__ = "2020 A.D."
+__date__ = "4 June 2020 A.D."
 __license__ = "MIT"
-__version__ = "1"
+__version__ = "1.0.3"
 __citation__ = "None."
 
 ########################################################################################################################
@@ -27,9 +27,11 @@ from rdkit import Chem
 from rdkit.Chem import AllChem, rdFMCS
 from warnings import warn
 import re
-from typing import Optional, Sequence
+from typing import Optional
 
-class _RDKitPrepMixin:
+from ._rdkit_rename import _RDKitRenameMixin
+
+class _RDKitPrepMixin(_RDKitRenameMixin):
 
     def __init__(self):
         # This exists to stop the IDE from getting angry.
@@ -61,29 +63,33 @@ class _RDKitPrepMixin:
         return self
 
     @classmethod
-    def add_names(cls, mol: Chem.Mol, names: List[str], name:Optional[str]=None) -> Chem.Mol:
+    def load_smiles(cls, smiles:str, generic:bool=False, name:Optional[str]=None) -> _RDKitPrepMixin:
         """
-        Quick way to add atom names to a mol object --adds them the normal way.
+        A SMILES with optional dummy atoms to be coverted into a Params object
 
-        :param mol: Chem.Mol, will actually be edited in place.
-        :param names: list of unique names.
-        :param name: 3letter code for the molecule.
-        :return: the mol
+        :param smiles: can contain multiple *
+        :param generic: generic or classic atom types
+        :param name: 3 letter name
+        :return:
         """
-        assert len(set(names)) == len(names), 'Atom Names are repeated.'
-        if mol.GetNumAtoms() > len(names):
-            warn('There are more atoms in mol than were provided.')
-        elif mol.GetNumAtoms() < len(names):
-            raise ValueError('There are less atoms in mol than were provided.')
-        self = cls()
-        if name is not None:
-            self.NAME = name
-        self.mol = mol
-        self.TYPE.append('LIGAND')
-        self.fix_mol()
-        for name, atom in zip(names, self.mol.GetAtoms()):
-            info = atom.GetPDBResidueInfo().SetName(name)
-        return self.mol
+        mol = Chem.MolFromSmiles(smiles)
+        mol.SetProp('_Name', name)
+        mol = AllChem.AddHs(mol)
+        # cannot embed more than one dummy
+        changed = []
+        for atom in mol.GetAtoms():
+            if atom.GetSymbol() == '*':
+                atom.SetAtomicNum(6)
+                atom.SetHybridization(Chem.HybridizationType.SP3)
+                changed.append(atom.GetIdx())
+        AllChem.EmbedMolecule(mol)
+        AllChem.MMFFOptimizeMolecule(mol)
+        AllChem.ComputeGasteigerCharges(mol)
+        for atomIdx in changed:
+            mol.GetAtomWithIdx(atomIdx).SetAtomicNum(0)
+        # operate upon!
+        return cls.load_mol(mol, generic, name)
+
 
     def fix_mol(self):
         # partial charges.
@@ -392,108 +398,6 @@ class _RDKitPrepMixin:
             else:
                 raise ValueError(f'No idea what this {atom.GetSymbol()} {atom.GetHybridization()} is')
 
-    def aa_correction(self):
-        pass
-
-    def _get_PDBInfo_atomname(self, atom, throw=True) -> str:
-        info = atom.GetPDBResidueInfo()
-        if info is not None:
-            return info.GetName()
-        elif throw:
-            raise ValueError('Atoms changed but `fix_mol` was not called.')
-        else:
-            return ''
-
-    def _set_PDBInfo_atomname(self, atom, name, overwrite=False):
-        info = atom.GetPDBResidueInfo()
-        if info is None:
-            isHeteroAtom = self.TYPE[0].body == 'LIGAND'
-            atom.SetMonomerInfo(Chem.AtomPDBResidueInfo(atomName=name,
-                                                        serialNumber=atom.GetIdx(),
-                                                        residueName=self.NAME,
-                                                        isHeteroAtom=isHeteroAtom))
-            return name
-        elif info.GetName() == name:
-            return name
-        elif overwrite:
-            info.SetName(name)
-            return name
-        else:
-            return info.GetName()
-
-    def rename_by_template(self, backbone: Chem.Mol, names: Sequence[str]) -> List[str]:
-        """
-        Assigns to the atoms in self.mol the names based on the backbone template and the names variable.
-        See ``_fix_atom_names`` for example usage.
-        Does not change the Params.
-
-        :param backbone:
-        :param names: the list oof new names. Falsey names will not be set.
-        :return: the list of the old names
-        """
-        assert self.mol.HasSubstructMatch(backbone), 'Bad backbone match'
-        originals = []
-        for name, idx in zip(names, self.mol.GetSubstructMatch(backbone)):
-            atom = self.mol.GetAtomWithIdx(idx)
-            oldname = self._get_PDBInfo_atomname(atom, throw=False)
-            if name and oldname:
-                originals.append(oldname)
-                self.rename_atom(oldname, name) #alters mol...
-            elif name:
-                self._set_PDBInfo_atomname(atom, name, overwrite=True)
-            elif oldname:
-                originals.append(oldname)
-            else:
-                pass
-        return originals
-
-    def rename_from_template(self, template: Chem.Mol, overwrite:bool=True):
-        """
-        Assigns to the atoms in self.mol the names based on the template, which does not need to be a perfect match.
-        See ``_fix_atom_names`` for example usage.
-        Does not change the Params.
-
-        :param template: mol object with atom names
-
-        :return: None for now.
-        """
-        mcs = rdFMCS.FindMCS([self.mol, template],
-                             atomCompare=rdFMCS.AtomCompare.CompareElements,
-                             bondCompare=rdFMCS.BondCompare.CompareAny,
-                             ringMatchesRingOnly=False)
-        common = Chem.MolFromSmarts(mcs.smartsString)
-        for acceptor, donor in zip(self.mol.GetSubstructMatch(common), template.GetSubstructMatch(common)):
-            a_atom = self.mol.GetAtomWithIdx(acceptor)
-            d_atom = template.GetAtomWithIdx(donor)
-            info = d_atom.GetPDBResidueInfo()
-            if info:
-                self._set_PDBInfo_atomname(a_atom, info.GetName(), overwrite=overwrite)
-            else:
-                warn(f'No info in template for atom {d_atom.GetSymbol()} #{donor}')
-
-    def rename_atom(self, oldname: str, newname: str):
-        # this will overwritten by inheriting params mixins
-        # this weirdness is to not have any rdkit methods in regular params
-        pass
-
-    def get_atom_by_name(self, name):
-        for atom in self.mol.GetAtoms():
-            info = atom.GetPDBResidueInfo()
-            if info and info.GetName().strip() == name.strip():
-                return atom
-        else:
-            raise ValueError(f'Name {name} not found.')
-
-    def retype_by_name(self, mapping: Dict[str, str]):
-        for name, rtype in mapping.items():
-            if rtype is None:
-                continue
-            atom = self.get_atom_by_name(name)
-            if atom is not None:
-                atom.SetProp('_rType', rtype)
-            else:
-                warn(f'Could not find "{name}"')
-
     def _fix_atom_names(self):
         elemental = defaultdict(int)
         seen = []
@@ -509,7 +413,7 @@ class _RDKitPrepMixin:
                      ('UPPER', None)
                      ])
             self.TYPE.append('POLYMER')
-            self.rename_by_template(aa, list(aa_map.keys()))
+            self.rename_by_substructure(aa, list(aa_map.keys()))
             # fix amine and H for secondary
             amine = self.get_atom_by_name(' N  ')
             hs = [n for n in amine.GetNeighbors() if n.GetSymbol() == 'H']
