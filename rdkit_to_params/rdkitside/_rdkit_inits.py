@@ -77,6 +77,7 @@ class _RDKitInitMixin(_RDKitCovertMixin):
         """
         pdb = Chem.MolFromPDBFile(pdb_file, removeHs=False, proximityBonding=proximityBonding)
         dodgy = Chem.SplitMolByPDBResidues(pdb, whiteList=[name])[name]
+        AllChem.SanitizeMol(dodgy)
         good = Chem.MolFromSmiles(smiles)
         good.SetProp('_Name', name)
         dummies = []

@@ -1,5 +1,5 @@
 from rdkit import Chem
-from rdkit.Chem import rdFMCS
+from rdkit.Chem import rdFMCS, AllChem
 
 from typing import Sequence, List, Dict, Optional, Any, Union
 from warnings import warn
@@ -168,10 +168,11 @@ class _RDKitRenameMixin:
 
         :return: None for now.
         """
+        AllChem.SanitizeMol(template) #this is where half my issues come from.
         mcs = rdFMCS.FindMCS([self.mol, template],
                              atomCompare=rdFMCS.AtomCompare.CompareElements,
                              bondCompare=rdFMCS.BondCompare.CompareAny,
-                             ringMatchesRingOnly=False) # so weird.
+                             ringMatchesRingOnly=True)
         common = Chem.MolFromSmarts(mcs.smartsString)
         for acceptor, donor in zip(self.mol.GetSubstructMatch(common), template.GetSubstructMatch(common)):
             a_atom = self.mol.GetAtomWithIdx(acceptor)
