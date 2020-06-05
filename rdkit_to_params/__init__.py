@@ -164,9 +164,24 @@ class Params(_ParamsIoMixin, _RDKitMixin, _PoserMixin):
         :param newname:
         :return:
         """
+        # sanity
         if newname is None:
             return None
-        elif isinstance(atom_or_atomname, str): #atom name
+        try:
+            if self.mol:
+                atom = self.get_atom_by_name(newname)
+                if isinstance(atom_or_atomname, str):
+                    raise AssertionError(f'New name {newname} already exists')
+                elif isinstance(atom_or_atomname, Chem.Mol) and atom_or_atomname.GetIdx() != atom.GetIdx():
+                    raise AssertionError(f'New name {newname} already exists')
+                else:
+                    pass # already changed.
+            if len(self.ATOM) > 0:
+                self.get_correct_atomname(newname)
+        except ValueError:
+            pass # absent
+        # change.
+        if isinstance(atom_or_atomname, str): #atom name
             oldname = atom_or_atomname
             return self.rename_atom_by_name(oldname, newname)
         elif isinstance(atom_or_atomname, Chem.Atom):

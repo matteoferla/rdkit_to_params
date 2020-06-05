@@ -32,7 +32,7 @@ class _RDKitRenameMixin:
         self.NAME = ''
         self.is_aminoacid = lambda: True # main class
         self.polish = lambda: None # covert class. makes sure all atoms have the same rdkit residue info
-        self.rename_atom = lambda oldname, newname: None
+        self.rename_atom = lambda oldname, newname, overwrite=False: None
         self.pad_name = lambda name: name
 
     # ============= set and get ========================================================================================
@@ -171,7 +171,7 @@ class _RDKitRenameMixin:
         mcs = rdFMCS.FindMCS([self.mol, template],
                              atomCompare=rdFMCS.AtomCompare.CompareElements,
                              bondCompare=rdFMCS.BondCompare.CompareAny,
-                             ringMatchesRingOnly=False)
+                             ringMatchesRingOnly=False) # so weird.
         common = Chem.MolFromSmarts(mcs.smartsString)
         for acceptor, donor in zip(self.mol.GetSubstructMatch(common), template.GetSubstructMatch(common)):
             a_atom = self.mol.GetAtomWithIdx(acceptor)

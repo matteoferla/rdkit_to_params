@@ -90,6 +90,7 @@ class _RDKitInitMixin(_RDKitCovertMixin):
         for d in dummies:
             good.GetAtomWithIdx(d).SetAtomicNum(0)
         self = cls.load_mol(good, generic=generic, name=name)
+        self.move_aside()
         self.rename_from_template(dodgy)
         self.convert_mol()
         return self

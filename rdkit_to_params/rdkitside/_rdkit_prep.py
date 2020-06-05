@@ -492,3 +492,11 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         else:
             return name.ljust(4)
 
+    def move_aside(self):
+        """
+        Changes the names of the atoms to not clash.
+
+        :return:
+        """
+        for i in range(self.mol.GetNumAtoms()):
+            self._set_PDBInfo_atomname(self.mol.GetAtomWithIdx(i), f'XX{i: <2}', overwrite=True)
