@@ -154,7 +154,7 @@ class Params(_ParamsIoMixin, _RDKitMixin, _PoserMixin):
                 if atom.name.strip() == name.strip():
                     return atom.name
             else:
-                raise ValueError(f'{name} is not a valid atom name')
+                raise ValueError(f'{name} is not a valid atom name (does not appear in the entries)')
 
     def rename_atom(self, atom_or_atomname: Union[str, 'Chem.Atom'], newname: str, overwrite=True) -> str:
         """
@@ -205,7 +205,9 @@ class Params(_ParamsIoMixin, _RDKitMixin, _PoserMixin):
     def _rename_atom_in_entries(self, oldname, newname):
         # if params is not filled nothing happens.
         # check if it is a connect atom
-        if oldname.strip() == 'CONN':
+        if len(self.ATOM) == 0:
+            return None # N/A: unparameterise atm.
+        elif oldname.strip() == 'CONN':
             pass  # ...
         elif oldname.strip() in ('CONN1', 'CONN2', 'CONN3', 'LOWER', 'UPPER'):
             for conn in self.CONNECT:
