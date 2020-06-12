@@ -152,6 +152,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
                 else:
                     atoms = [atom, parent, d_neighs[0], d_neighs[1]]
                 add_icoor(atom, atoms)
+                rotation_count -= 1
 
 
     def _parse_atom(self, atom: Chem.Atom) -> None:
