@@ -223,9 +223,10 @@ I like this generic atom type business, but I am not sure how to use them in RL.
 I made several guesses with the classic atom types and I am sure many things are wrong...
 
 ### Rings and cis-trans
-I don't really understand what `CUT_BOND` does. It has to do with rings, 
-`ADD_RING` is not implemented in the `from_mol` conversion as I think it's an old command.
-Does a cis-trans tautomer bond (say `C(=O)-C=O`) gets a `CHI` entry? I am assuming no, but not sure.
+* `CUT_BOND` is implemented, but I am not sure it does anything. `CHI` entries cannot work across a cut bond,
+even when undeclared, so is likely redudant.
+* `ADD_RING` is not implemented in the `from_mol` conversion as I think it's an old command.
+* Does a cis-trans tautomer bond (say `C(=O)-C=O`) gets a `CHI` entry? I am assuming no, but not sure.
 
 ## To Do
 I have not coded yet, because I forgot:

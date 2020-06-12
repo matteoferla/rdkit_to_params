@@ -51,6 +51,11 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         self.comments.append(Chem.MolToSmiles(self.mol))
         if len(self.TYPE) == 0:
             self.TYPE.append('LIGAND')
+        # remove all previous entries.
+        self.ATOM.data = []
+        self.CUT_BOND.data = []
+        self.CHI.data = []
+        self.BOND.data = []
         # ATOM & CONNECT
         for atom in self.mol.GetAtoms():
             self._parse_atom(atom)
@@ -92,7 +97,8 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
             # prevent overcycling.
             if rotation_count > self.mol.GetNumAtoms():
                 d = [f'{a.GetIdx()}: {self._get_PDBInfo_atomname(a)}' for a in described]
-                raise StopIteration(f'Too many cycles...{d}')
+                u = [f'{a.GetIdx()}: {self._get_PDBInfo_atomname(a)}' for a in undescribed]
+                raise StopIteration(f'Too many cycles. described: {d}, undescribed: {u}')
             atom = undescribed[0]
             if atom.GetSymbol() == '*' and len(described) < 3:
                 warn(f'DEBUG. Dummy not allowed in first three lines...')
