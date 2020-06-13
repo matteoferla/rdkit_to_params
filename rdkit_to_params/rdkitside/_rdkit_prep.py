@@ -445,10 +445,20 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
             else:
                 seen.append(name)
 
-    def _add_partial_charges(self):
+    def _add_partial_charges_OLD(self):
+        """
+        This is pointless convoluted.
+        :return:
+        """
+        raise DeprecationWarning
         demovalence = {1: 1, 2: 8, 3: 7, 4: 6, 6: 15}
+        # Not using Chem PeriodicTable because this was meant to be a quickfix...
         mol = Chem.Mol(self.mol)
+        AllChem.ComputeGasteigerCharges(mol, throwOnParamFailure=False)
+        tries = 0
         while True:
+            if tries > 5:
+                AllChem.ComputeGasteigerCharges(mol, throwOnParamFailure=False)
             try:
                 AllChem.ComputeGasteigerCharges(mol, throwOnParamFailure=True)
             except ValueError as err:
@@ -458,11 +468,22 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
                     if atom.GetSymbol() == dodgy:
                         valence = atom.GetExplicitValence()
                         atom.SetAtomicNum(demovalence[valence])
+                tries += 1
             else:
                 break
         for i in range(self.mol.GetNumAtoms()):
             gc = mol.GetAtomWithIdx(i).GetDoubleProp('_GasteigerCharge')
-            self.mol.GetAtomWithIdx(i).SetDoubleProp('_GasteigerCharge', gc)
+            if str(gc) != 'nan':
+                self.mol.GetAtomWithIdx(i).SetDoubleProp('_GasteigerCharge', gc)
+            else:
+                self.mol.GetAtomWithIdx(i).SetDoubleProp('_GasteigerCharge', 0.)
+
+    def _add_partial_charges(self):
+        AllChem.ComputeGasteigerCharges(self.mol, throwOnParamFailure=False)
+        for i in range(self.mol.GetNumAtoms()):
+            gc = self.mol.GetAtomWithIdx(i).GetDoubleProp('_GasteigerCharge')
+            if str(gc) != 'nan':
+                self.mol.GetAtomWithIdx(i).SetDoubleProp('_GasteigerCharge', 0.)
 
     def _get_resn_from_PDBInfo(self):
         """
