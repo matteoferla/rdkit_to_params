@@ -479,11 +479,19 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
                 self.mol.GetAtomWithIdx(i).SetDoubleProp('_GasteigerCharge', 0.)
 
     def _add_partial_charges(self):
+        changed = []
+        for atom in self.mol.GetAtoms():
+            if atom.GetSymbol() == '*':
+                atom.SetAtomicNum(6)
+                atom.SetHybridization(Chem.HybridizationType.SP3)
+                changed.append(atom.GetIdx())
         AllChem.ComputeGasteigerCharges(self.mol, throwOnParamFailure=False)
-        for i in range(self.mol.GetNumAtoms()):
-            gc = self.mol.GetAtomWithIdx(i).GetDoubleProp('_GasteigerCharge')
+        for i, atom in enumerate(self.mol.GetAtoms()):
+            if i in changed:
+                atom.SetAtomicNum(0)
+            gc = atom.GetDoubleProp('_GasteigerCharge')
             if str(gc) != 'nan':
-                self.mol.GetAtomWithIdx(i).SetDoubleProp('_GasteigerCharge', 0.)
+                atom.SetDoubleProp('_GasteigerCharge', 0.)
 
     def _get_resn_from_PDBInfo(self):
         """
@@ -521,3 +529,23 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         """
         for i in range(self.mol.GetNumAtoms()):
             self._set_PDBInfo_atomname(self.mol.GetAtomWithIdx(i), f'XX{i: <2}', overwrite=True)
+
+    def add_Hs(self):
+        """
+        Add Hs before convert_mol step!
+        :return:
+        """
+        self.mol = AllChem.AddHs(self.mol)
+        changed = []
+        for atom in self.mol.GetAtoms():
+            if atom.GetSymbol() == '*':
+                atom.SetAtomicNum(6)
+                atom.SetHybridization(Chem.HybridizationType.SP3)
+                changed.append(atom.GetIdx())
+        AllChem.EmbedMolecule(self.mol)
+        AllChem.MMFFOptimizeMolecule(self.mol)
+        AllChem.ComputeGasteigerCharges(self.mol, throwOnParamFailure=False)
+        for i, atom in enumerate(self.mol.GetAtoms()):
+            if i in changed:
+                atom.SetAtomicNum(0)
+        self.fix_mol()
