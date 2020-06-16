@@ -542,7 +542,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
                 atom.SetAtomicNum(6)
                 atom.SetHybridization(Chem.HybridizationType.SP3)
                 changed.append(atom.GetIdx())
-        AllChem.EmbedMolecule(self.mol)
+        AllChem.EmbedMolecule(self.mol, useRandomCoords=True)
         AllChem.MMFFOptimizeMolecule(self.mol)
         AllChem.ComputeGasteigerCharges(self.mol, throwOnParamFailure=False)
         for i, atom in enumerate(self.mol.GetAtoms()):
