@@ -95,7 +95,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         rotation_count = 0
         while undescribed:
             # prevent overcycling.
-            if rotation_count > self.mol.GetNumAtoms():
+            if rotation_count > 3 * self.mol.GetNumAtoms():
                 d = [f'{a.GetIdx()}: {self._get_PDBInfo_atomname(a)}' for a in described]
                 u = [f'{a.GetIdx()}: {self._get_PDBInfo_atomname(a)}' for a in undescribed]
                 raise StopIteration(f'Too many cycles. described: {d}, undescribed: {u}')
