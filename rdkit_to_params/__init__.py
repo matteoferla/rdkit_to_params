@@ -7,16 +7,16 @@ __doc__ = \
 
 __author__ = "Matteo Ferla. [Github](https://github.com/matteoferla)"
 __email__ = "matteo.ferla@gmail.com"
-__date__ = "4 June 2020 A.D."
+__date__ = "25 June 2020 A.D."
 __license__ = "MIT"
-__version__ = "1.0.3"
+__version__ = "1.0.4"
 __citation__ = "None."
 
 ########################################################################################################################
 
 
 from warnings import warn
-import os, re
+import os, re, logging
 from typing import Union
 
 #################### base classes ######################################################################################
@@ -105,13 +105,14 @@ class Params(_ParamsIoMixin, _RDKitMixin, _PoserMixin):
     * ``_RDKitParamsPrepMixin``, which prepares the molecule for `_RDKitCovertMixin.from_mol``.
 
     """
+    log = logging.getLogger(__name__)
 
     @property
     def NAME(self):
         if len(self.IO_STRING):
             return self.IO_STRING[0].name3
         else:
-            warn('Attempted access to empty IO_STRING/NAME')
+            self.log.warning('Attempted access to empty IO_STRING/NAME')
             return 'XXX'
 
     @NAME.setter
@@ -127,7 +128,7 @@ class Params(_ParamsIoMixin, _RDKitMixin, _PoserMixin):
         return self.TYPE[0].body == 'POLYMER'
 
     def validate(self):
-        warn('This is not finished.')
+        self.log.critical('This is not finished.')
         if 'CANONICAL_AA' in self.PROPERTIES[0].values:
             assert self.AA != 'UNK', 'CANONICAL_AA property requires a AA type not UNK'
         if 'METALBINDING' in self.PROPERTIES[0].values:
@@ -244,7 +245,7 @@ class Params(_ParamsIoMixin, _RDKitMixin, _PoserMixin):
             if len(newname) > 4:
                 raise ValueError(f'{newname} is too long.')
             elif newname == 'END':
-                warn('I thing END may be an old keyword - What is ``ACT_COORD_ATOMS``?. BEST AVOID IT.')
+                self.log.info('I thing END may be an old keyword - What is ``ACT_COORD_ATOMS``?. BEST AVOID IT.')
             newname = self.pad_name(newname).upper()
             # find in atom.
             for atom in self.ATOM:

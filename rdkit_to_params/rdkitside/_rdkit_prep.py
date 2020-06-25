@@ -14,9 +14,9 @@ It does not rely on any ``Params`` entry stuff. So can be used by itself for tes
 
 __author__ = "Matteo Ferla. [Github](https://github.com/matteoferla)"
 __email__ = "matteo.ferla@gmail.com"
-__date__ = "4 June 2020 A.D."
+__date__ = "25 June 2020 A.D."
 __license__ = "MIT"
-__version__ = "1.0.3"
+__version__ = "1.0.4"
 __citation__ = "None."
 
 ########################################################################################################################
@@ -34,8 +34,7 @@ from ._rdkit_rename import _RDKitRenameMixin
 class _RDKitPrepMixin(_RDKitRenameMixin):
 
     def __init__(self):
-        # This exists to stop the IDE from getting angry.
-        # And for debugging!
+        self.log.critical('This is init should not have been called! This exists to stop the IDE from getting angry/ for debugging.')
         self.NAME = 'LIG'
         self.TYPE = Entries.from_name('TYPE')
         self.mol = None
@@ -53,6 +52,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         :return:
         """
         self = cls()
+        self.log.debug('`load_mol` called...')
         self.mol = mol
         self.generic = generic
         self.TYPE.append('LIGAND')
@@ -72,6 +72,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         :param name: 3 letter name
         :return:
         """
+        cls.log.debug('`load_smiles` called...')
         mol = Chem.MolFromSmiles(smiles)
         mol.SetProp('_Name', name)
         mol = Chem.AddHs(mol)
@@ -92,8 +93,10 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
 
 
     def fix_mol(self):
+        self.log.debug('`fix_mol` called...')
         # partial charges.
         if not self.mol.GetAtomWithIdx(0).HasProp('_GasteigerCharge'):
+            self.log.debug('... Adding Gasteiger')
             self._add_partial_charges()
         self._fix_atom_names()
         if self.generic is True:
@@ -110,8 +113,9 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         :param stripped: remove * atoms?
         :return: None
         """
+        self.log.debug(f'Writing PDB to file {filename}')
         mol = self._prep_dump_pdb(filename, overwrite, stripped)
-        Chem.MolToPDBFile(self.mol, filename)
+        Chem.MolToPDBFile(mol, filename)
 
     def dump_pdb_conf(self, filename: str, overwrite=False, stripped=True) -> int:
         """
@@ -122,6 +126,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         :param stripped: remove * atoms?
         :return: number of conf written
         """
+        self.log.debug(f'Writing PDB conformers to file {filename}')
         mol = self._prep_dump_pdb(filename, overwrite, stripped)
         w = Chem.PDBWriter(filename)
         for cid in mol.GetNumConformers():
@@ -207,8 +212,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
                     atom = self.mol.GetAtomWithIdx(j)
                     if n is not None and not (atom.HasProp('_rType') and atom.GetProp('_rType').strip()):
                         atom.SetProp('_rType', n)
-        # Generic atoms
-
+        # Simple atoms
         for atom in self.mol.GetAtoms():
             symbol = atom.GetSymbol()
             Hs = [a for a in atom.GetNeighbors() if a.GetSymbol() == 'H']
@@ -265,7 +269,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
             elif symbol.upper() in element_to_type:
                 atom.SetProp('_rType', element_to_type[symbol.upper()])
             else:
-                warn(f'No idea what this {atom.GetSymbol()} {atom.GetHybridization()} is. assigning it REPLS')
+                self.log.warning(f'No idea what this {atom.GetSymbol()} {atom.GetHybridization()} is. assigning it REPLS')
                 atom.SetProp('_rType', 'REPLS')
 
     def _add_genrtypes(self) -> None:
@@ -402,7 +406,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
     def _aminoacid_override(self, elemental):
         aa = Chem.MolFromSmiles('*NCC(~O)*')
         if self.mol.HasSubstructMatch(aa):
-            warn('Ligand detected to be polymer!')
+            self.log.info('Ligand detected to be polymer!')
             self.TYPE.append('POLYMER')
             aa_map = dict([('LOWER', None),
                            (' N  ', 'Nbb'),
@@ -476,7 +480,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
                 lamename = el + str(elemental[el])
             name = self._set_PDBInfo_atomname(atom, lamename, overwrite=False)
             if name in seen:
-                warn(f'Name clash {name}, second one now called {lamename}')
+                self.log.warning(f'Name clash {name}, second one now called {lamename}')
                 atom.GetPDBResidueInfo().SetName(lamename)
                 seen.append(lamename)
             else:
@@ -572,6 +576,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         Add Hs before convert_mol step!
         :return:
         """
+        self.log.debug('Adding hydrogens')
         self.mol = AllChem.AddHs(self.mol)
         changed = []
         for atom in self.mol.GetAtoms():

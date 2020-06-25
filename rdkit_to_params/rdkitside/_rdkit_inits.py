@@ -7,9 +7,9 @@ __doc__ = \
 
 __author__ = "Matteo Ferla. [Github](https://github.com/matteoferla)"
 __email__ = "matteo.ferla@gmail.com"
-__date__ = "4 June 2020 A.D."
+__date__ = "25 June 2020 A.D."
 __license__ = "MIT"
-__version__ = "1.0.3"
+__version__ = "1.0.4"
 __citation__ = "None."
 
 ########################################################################################################################
@@ -20,6 +20,7 @@ from typing import Optional, Dict, List
 from ._rdkit_convert import _RDKitCovertMixin
 
 class _RDKitInitMixin(_RDKitCovertMixin):
+
     @classmethod
     def from_mol(cls, mol: Chem.Mol,
                  name: Optional[str] = None,
@@ -35,6 +36,7 @@ class _RDKitInitMixin(_RDKitCovertMixin):
         :param atomnames: optional dictionary to set names.
         :rtype: instance
         """
+        cls.log.debug('`from_mol` called...')
         self = cls.load_mol(mol, generic, name)  # stores and calls .fix_mol() method in prep file.
         self.convert_mol()
         return self
@@ -51,6 +53,7 @@ class _RDKitInitMixin(_RDKitCovertMixin):
         :param atomnames: optional dictionary to set names.
         :return:
         """
+        cls.log.debug('`from_smiles` called...')
         self = cls.load_smiles(smiles=smiles, name=name, generic=generic)
         if atomnames is None:
             pass
@@ -75,6 +78,7 @@ class _RDKitInitMixin(_RDKitCovertMixin):
         :type proximityBonding: bool
         :rtype: instance
         """
+        cls.log.debug('`from_smiles_w_pdbfile` called...')
         pdb = Chem.MolFromPDBFile(pdb_file, removeHs=False, proximityBonding=proximityBonding)
         dodgy = Chem.SplitMolByPDBResidues(pdb, whiteList=[name])[name]
         AllChem.SanitizeMol(dodgy)

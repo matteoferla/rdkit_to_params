@@ -7,9 +7,9 @@ in the initialisation of ``Params`` (which happens in ``_ParamsInitMixin`` __e.g
 
 __author__ = "Matteo Ferla. [Github](https://github.com/matteoferla)"
 __email__ = "matteo.ferla@gmail.com"
-__date__ = "4 June 2020 A.D."
+__date__ = "25 June 2020 A.D."
 __license__ = "MIT"
-__version__ = "1.0.3"
+__version__ = "1.0.4"
 __citation__ = "None."
 
 ########################################################################################################################
@@ -469,7 +469,7 @@ Entries.choices['ROTAMER_AA'] = (ROTAMER_AAEntry, True)
 class AAEntry(GenericEntry):
     def __init__(self, body: str = 'UNK'):
         if body != 'UNK':
-            warn('AA should be UNK... tolerating oddity.')
+            self.log.info('AA should be UNK... tolerating oddity.')
         super().__init__(header='AA', body=body)
 
 
@@ -495,7 +495,7 @@ Entries.choices['TYPE'] = (TYPEEntry, True)
 class ADD_RINGEntry(GenericEntry):
     ## To be fixed. Spacing drama...
     def __init__(self, body: str):
-        warn('ADD_RING is sloppily coded. the values are stored as an unsplit string!')
+        self.log.info('ADD_RING is sloppily coded. the values are stored as an unsplit string!')
         super().__init__(header='ADD_RING', body=body)
 
 

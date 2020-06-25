@@ -3,7 +3,7 @@ from rdkit.Chem import rdFMCS, AllChem
 
 from typing import Sequence, List, Dict, Optional, Any, Union
 from warnings import warn
-import re
+import re, logging
 
 
 ########################################################################################################################
@@ -15,19 +15,21 @@ The main class here is ``_RDKitRenameMixin``, which adds the various atom renami
 
 __author__ = "Matteo Ferla. [Github](https://github.com/matteoferla)"
 __email__ = "matteo.ferla@gmail.com"
-__date__ = "4 June 2020 A.D."
+__date__ = "25 June 2020 A.D."
 __license__ = "MIT"
-__version__ = "1.0.3"
+__version__ = "1.0.4"
 __citation__ = "None."
 
 ########################################################################################################################
 
 class _RDKitRenameMixin:
+    log = logging.getLogger(__name__)
 
     # ============= overridden =========================================================================================
 
     def __init__(self):
         # will be overridden. Just here for typehinting...
+        self.log.critical('WRONG INIT CALLED')
         self.mol = Chem.Mol()
         self.NAME = ''
         self.is_aminoacid = lambda: True # main class
@@ -88,7 +90,7 @@ class _RDKitRenameMixin:
             if atom is not None:
                 atom.SetProp('_rType', rtype)
             else:
-                warn(f'Could not find "{name}"')
+                self.log.warning(f'Could not find "{name}"')
         for entry in self.ATOM:
             if entry.name.strip() == name.strip():
                 entry.rtype = rtype
@@ -182,7 +184,7 @@ class _RDKitRenameMixin:
             if info:
                 self.rename_atom(a_atom, info.GetName(), overwrite=overwrite)
             else:
-                warn(f'No info in template for atom {d_atom.GetSymbol()} #{donor}')
+                self.log.debug.info(f'No info in template for atom {d_atom.GetSymbol()} #{donor}')
 
     def rename_from_dict(self, atomnames: Dict[int, str]):
         """
@@ -194,7 +196,7 @@ class _RDKitRenameMixin:
         # sanity check
         assert len(set(atomnames.values())) == len(atomnames), 'Atom Names are repeated.'
         if self.mol.GetNumAtoms() > len(atomnames):
-            warn('There are more atoms in mol than were provided.')
+            self.log.info('There are more atoms in mol than were provided.')
         elif self.mol.GetNumAtoms() < len(atomnames):
             #raise ValueError('There are less atoms in mol than were provided.')
             pass # this is fine.
@@ -213,7 +215,7 @@ class _RDKitRenameMixin:
         # sanity check
         assert len(set(atomnames)) == len(atomnames), 'Atom Names are repeated.'
         if self.mol.GetNumAtoms() > len(atomnames):
-            warn('There are more atoms in mol than were provided.')
+            self.log.info('There are more atoms in mol than were provided.')
         elif self.mol.GetNumAtoms() < len(atomnames):
             raise ValueError('There are less atoms in mol than were provided.')
         # rename
@@ -233,6 +235,8 @@ class _RDKitRenameMixin:
         :return: the mol
         """
         self = cls()
+
+        self.log.debug(f'`add_names` called...')
         if name is not None:
             self.NAME = name
         self.mol = mol

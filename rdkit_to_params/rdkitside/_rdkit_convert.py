@@ -10,9 +10,9 @@ __doc__ = \
 
 __author__ = "Matteo Ferla. [Github](https://github.com/matteoferla)"
 __email__ = "matteo.ferla@gmail.com"
-__date__ = "4 June 2020 A.D."
+__date__ = "25 June 2020 A.D."
 __license__ = "MIT"
-__version__ = "1.0.3"
+__version__ = "1.0.4"
 __citation__ = "None."
 
 ########################################################################################################################
@@ -32,7 +32,7 @@ import numpy as np
 class _RDKitCovertMixin(_RDKitPrepMixin):
     _Measure = namedtuple('Measure', ['distance', 'angle', 'torsion'])
 
-    greekification = True # controls whether to change the atom names to greek for amino acids for CB and beyond.
+    greekification = True  # controls whether to change the atom names to greek for amino acids for CB and beyond.
 
     def convert_mol(self):
         """
@@ -50,6 +50,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         else:
             self.comments.append(title)
             self.NAME = self._get_resn_from_PDBInfo()
+        self.log.debug(f'{title} is being converted (`.convert_mol`)')
         assert len(Chem.GetMolFrags(self.mol)) == 1, f'{title} is split in {len(Chem.GetMolFrags(self.mol))}'
         # SMILES
         self.comments.append(Chem.MolToSmiles(self.mol))
@@ -61,26 +62,21 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         self.CHI.data = []
         self.BOND.data = []
         # ICOOR
-        self._parse_icoors() # fills self.ordered_atoms
+        self._parse_icoors()  # fills self.ordered_atoms
         # ATOM & CONNECT
-        for atom in self.ordered_atoms:
-            self._parse_atom(atom)
+        self._parse_atoms()
         # CHI
         self._parse_rotatables()
         # BOND
-        for bond in self.mol.GetBonds():
-            self._parse_bond(bond)
-        for ring_set in self.mol.GetRingInfo().AtomRings():
-            self.CUT_BOND.append({'first': self._get_PDBInfo_atomname(self.mol.GetAtomWithIdx(ring_set[0])),
-                                 'second': self._get_PDBInfo_atomname(self.mol.GetAtomWithIdx(ring_set[-1]))})
-        
+        self._parse_bonds()
+
         # NBR
         self._find_centroid()
-        
+
     ## ============= internal coordinates ==============================================================================
 
-
     def _parse_icoors(self) -> None:
+        self.log.debug(f'Filling ICOOR')
         self._undescribed = deque(self.mol.GetAtoms())
         self.ordered_atoms = []
         self._rotation_count = 0
@@ -103,20 +99,21 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
             while self._undescribed:
                 self._prevent_overcycling()
                 atom = self._undescribed[0]
-                if atom.GetSymbol() == '*' and len(self.ordered_atoms) < 3:
-                    warn(f'DEBUG. Dummy not allowed in first three lines...')
+                if atom.GetSymbol() == '*':
+                    self.log.debug(f'Dummy not allowed in first three lines...')
                     self._undescribed.rotate(-1)
                     self._rotation_count += 1
                     continue  # This cannot be in the first three lines, whereas the R group is first in a canonical SMILES.
-                elif len(self.ordered_atoms) == 0:  # First line
+                else:
                     # I assume in some cases Virtual atoms are called for... but for now, no!
                     for parent in self._get_unseen_neighbors(atom, [], True):
                         siblings = self._get_unseen_neighbors(parent, [atom], True)
                         if len(siblings) != 0:
                             break
                     else:
-                        warn(f'DEBUG. First row: No siblings for {self._get_PDBInfo_atomname(atom)}!')
+                        self.log.debug(f'First row: No siblings for {self._get_PDBInfo_atomname(atom)}!')
                         self._undescribed.rotate(-1)
+                        self._rotation_count += 1
                         continue
                     grandparent = siblings[0]
                     # first line
@@ -125,6 +122,8 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
                     self._add_icoor([parent, atom, parent, grandparent])
                     # Third line
                     self._add_icoor([grandparent, parent, atom, grandparent])
+                    break
+        self.log.debug('Parsing forth line onwards')
         # not first three lines
         while self._undescribed:
             self._prevent_overcycling()
@@ -132,7 +131,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
             d_idx = [d.GetIdx() for d in self.ordered_atoms]
             d_neighs = [n for n in self._get_unseen_neighbors(atom, [], False) if n.GetIdx() in d_idx]
             if len(d_neighs) == 0:
-                warn(f'DEBUG. Other row: No parent for {self._get_PDBInfo_atomname(atom)}!')
+                self.log.debug(f'Other row: No parent for {self._get_PDBInfo_atomname(atom)}!')
                 self._undescribed.rotate(-1)
                 self._rotation_count += 1
                 continue
@@ -140,7 +139,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
             d_neighs = [n for n in self._get_unseen_neighbors(parent, [atom], False) if n.GetIdx() in d_idx]
             if len(d_neighs) == 0:
                 self._undescribed.rotate(-1)
-                warn(f'DEBUG. Other row: No siblings for  {self._get_PDBInfo_atomname(atom)}!')
+                self.log.debug(f'Other row: No siblings for  {self._get_PDBInfo_atomname(atom)}!')
                 self._rotation_count += 1
                 continue
             elif len(d_neighs) == 1:
@@ -149,7 +148,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
                             n.GetIdx() in d_idx]
                 if len(d_neighs) == 0:
                     self._undescribed.rotate(-1)
-                    warn(f'DEBUG. Other row: No cousins for  {self._get_PDBInfo_atomname(atom)}')
+                    self.log.debug(f'Other row: No cousins for  {self._get_PDBInfo_atomname(atom)}')
                     self._rotation_count += 1
                     continue
                 else:
@@ -174,6 +173,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
 
     def _prevent_overcycling(self):
         # prevent overcycling...
+        self.log.debug(f'Current deque rotation count {self._rotation_count}')
         if self._rotation_count > 5 * self.mol.GetNumAtoms():
             d = [f'{a.GetIdx()}: {self._get_PDBInfo_atomname(a)}' for a in self.ordered_atoms]
             u = [f'{a.GetIdx()}: {self._get_PDBInfo_atomname(a)}' for a in self._undescribed]
@@ -181,19 +181,24 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         elif self._rotation_count % self.mol.GetNumAtoms() == 0:
             # it has done a full rotation.
             if self._rotation_count != 0:
-                random.shuffle(self._undescribed) # mix up equal tier ones
+                self.log.debug(f'Ordering atoms with a shuffle first')
+                random.shuffle(self._undescribed)  # mix up equal tier ones
+            else:
+                self.log.debug(f'Ordering atoms without a shuffle first')
             if len(self.ordered_atoms) != 0:
+                self.log.debug(f'Ordering atoms by distance from root, and being not hydrogen or dummy')
                 root = self.ordered_atoms[0]
                 distance_penaltifier = lambda atom: len(Chem.GetShortestPath(self.mol, root.GetIdx(), atom.GetIdx()))
             else:
+                self.log.debug(f'Ordering atoms by being not hydrogen or dummy')
                 distance_penaltifier = lambda atom: 0
             hydrogen_penaltifier = lambda atom: 0 if atom.GetSymbol() != 'H' else 100
             dummy_penaltifier = lambda atom: 0 if atom.GetSymbol() != '*' else 200
             scorer = lambda atom: distance_penaltifier(atom) + \
-                                    hydrogen_penaltifier(atom) + \
-                                    dummy_penaltifier(atom)
+                                  hydrogen_penaltifier(atom) + \
+                                  dummy_penaltifier(atom)
             self._undescribed = deque(sorted(self._undescribed, key=scorer))
-            
+
     def _get_measurements(self, conf: Chem.Conformer, a: Chem.Atom, b: Chem.Atom, c: Chem.Atom, d: Chem.Atom):
         ai = a.GetIdx()
         bi = b.GetIdx()
@@ -214,18 +219,22 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
                              angle=angle,
                              torsion=tor)
 
-
     ## ============= Atom entries ======================================================================================
+
+    def _parse_atoms(self):
+        self.log.debug(f'Filling ATOM')
+        for atom in self.ordered_atoms:
+            self._parse_atom(atom)
 
     def _parse_atom(self, atom: Chem.Atom) -> None:
         if atom.GetSymbol() == '*':
             neighbor = atom.GetNeighbors()[0]
             n_name = self._get_PDBInfo_atomname(neighbor)
             if self.is_aminoacid() and neighbor.GetSymbol() == 'N':
-                #atom_name, index, connect_type, connect_name
+                # atom_name, index, connect_type, connect_name
                 self.CONNECT.append([n_name, 1, 'LOWER_CONNECT', 'LOWER'])
             elif self.is_aminoacid() and neighbor.GetSymbol() == 'C':
-                #atom_name, index, connect_type, connect_name
+                # atom_name, index, connect_type, connect_name
                 self.CONNECT.append([n_name, 2, 'UPPER_CONNECT', 'UPPER'])
             elif self.is_aminoacid():
                 i = max(3, len(self.CONNECT) + 1)
@@ -245,6 +254,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
 
         :return:
         """
+        self.log.debug(f'Filling CHI')
 
         def is_single(a, b):
             bond = self.mol.GetBondBetweenAtoms(a.GetIdx(), b.GetIdx())
@@ -288,10 +298,19 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
             neighbors = [neighbor for neighbor in neighbors if neighbor.GetSymbol() != '*']
         seenIdx = {a.GetIdx() for a in seen}
         return [neighbor for neighbor in neighbors if neighbor.GetIdx() not in seenIdx]
-    
+
     ## ============= Bond entries ======================================================================================
 
+    def _parse_bonds(self):
+        for bond in self.mol.GetBonds():
+            self._parse_bond(bond)
+        for ring_set in self.mol.GetRingInfo().AtomRings():
+            self.log.debug(f'Mol has a ring, adding a `CUT_BOND` entry (`.convert_mol`)')
+            self.CUT_BOND.append({'first': self._get_PDBInfo_atomname(self.mol.GetAtomWithIdx(ring_set[0])),
+                                  'second': self._get_PDBInfo_atomname(self.mol.GetAtomWithIdx(ring_set[-1]))})
+
     def _parse_bond(self, bond: Chem.Bond) -> None:
+        self.log.debug(f'Filling BOND')
         if any([atom.GetSymbol() == '*' for atom in (bond.GetBeginAtom(), bond.GetEndAtom())]):
             return None  # CONNECT.
         if bond.GetBondTypeAsDouble() == 1.5:
@@ -322,17 +341,19 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         self.NBR_ATOM.append(self.mol.GetAtomWithIdx(i).GetPDBResidueInfo().GetName())
         self.NBR_RADIUS.append(str(s))
 
-    def polish_mol(self):
+    def polish_mol(self, resi=1, chain='X'):
         """
         The mol may be inconsistent in its PDBResidueInfo
         :return:
         """
-        name = self.NAME[:3]
-        index = 1
+        resn = self.NAME[:3]
+        self.log.debug(f'Making all PDBResidueInfo resn={resn} resi={resi} chain={chain}')
         for atom in self.mol.GetAtoms():
             info = atom.GetPDBResidueInfo()
-            info.SetResidueName(name)
-            info.SetResidueNumber(index)
+            info.SetResidueName(resn)
+            info.SetResidueNumber(resi)
+            info.SetChainId(chain)
+            #info.SetSegmentNumber(segi) commented out because it is an int not string
             if self.is_aminoacid:
                 info.SetIsHeteroAtom(False)
             else:
