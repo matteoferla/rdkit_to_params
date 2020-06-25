@@ -203,6 +203,12 @@ To extract and correct a ligand, consider the following
     template = AllChem.DeleteSubstructs(params.mol, Chem.MolFromSmiles('*'))
     AllChem.AssignBondOrdersFromTemplate(template, ligand)
 
+## Greek
+In the amino acid case, the class attribute `greekification` changes the atomnames to CB, CD2 etc.
+It is by default `True`. It is called during `fix_mol`, a step in `load_mol`/`load_smiles`,
+so should be safe for rename methods.
+
+
 ### Optionals
 Installing RDKit with conda is easy (`conda install rdkit`).
 With apt-get likewise (`sudo apt-get install python3-rdkit  librdkit1 rdkit-data`).

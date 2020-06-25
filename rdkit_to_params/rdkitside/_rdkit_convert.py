@@ -24,12 +24,15 @@ from collections import defaultdict, deque, namedtuple
 from rdkit import Chem
 from rdkit.Chem import AllChem
 from warnings import warn
+import random
 
 import numpy as np
 
 
 class _RDKitCovertMixin(_RDKitPrepMixin):
     _Measure = namedtuple('Measure', ['distance', 'angle', 'torsion'])
+
+    greekification = True # controls whether to change the atom names to greek for amino acids for CB and beyond.
 
     def convert_mol(self):
         """
@@ -47,6 +50,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         else:
             self.comments.append(title)
             self.NAME = self._get_resn_from_PDBInfo()
+        assert len(Chem.GetMolFrags(self.mol)) == 1, f'{title} is split in {len(Chem.GetMolFrags(self.mol))}'
         # SMILES
         self.comments.append(Chem.MolToSmiles(self.mol))
         if len(self.TYPE) == 0:
@@ -56,8 +60,10 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         self.CUT_BOND.data = []
         self.CHI.data = []
         self.BOND.data = []
+        # ICOOR
+        self._parse_icoors() # fills self.ordered_atoms
         # ATOM & CONNECT
-        for atom in self.mol.GetAtoms():
+        for atom in self.ordered_atoms:
             self._parse_atom(atom)
         # CHI
         self._parse_rotatables()
@@ -67,167 +73,127 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         for ring_set in self.mol.GetRingInfo().AtomRings():
             self.CUT_BOND.append({'first': self._get_PDBInfo_atomname(self.mol.GetAtomWithIdx(ring_set[0])),
                                  'second': self._get_PDBInfo_atomname(self.mol.GetAtomWithIdx(ring_set[-1]))})
-        # ICOOR
-        self._parse_icoors()
+        
         # NBR
         self._find_centroid()
+        
+    ## ============= internal coordinates ==============================================================================
+
 
     def _parse_icoors(self) -> None:
-        undescribed = deque(self.mol.GetAtoms())
-        # TODO add override to specific first atom?
-        described = []
-        conf = self.mol.GetConformer()
-
-        def add_icoor(atom, atoms):
-            # due to madness the same atom objects differ.
-            undescribed.remove([this for this in undescribed if atom.GetIdx() == this.GetIdx()][0])
-            described.append(atom)
-            m = self._get_measurements(conf, *atoms)
-            self.ICOOR_INTERNAL.append(dict(child=self._get_PDBInfo_atomname(atoms[0]),
-                                            phi=m.torsion,
-                                            theta=m.angle,
-                                            distance=m.distance,
-                                            parent=self._get_PDBInfo_atomname(atoms[1]),
-                                            second_parent=self._get_PDBInfo_atomname(atoms[2]),
-                                            third_parent=self._get_PDBInfo_atomname(atoms[3])))
-
-        aforementioned = []
-        rotation_count = 0
-        while undescribed:
-            # prevent overcycling.
-            if rotation_count > 3 * self.mol.GetNumAtoms():
-                d = [f'{a.GetIdx()}: {self._get_PDBInfo_atomname(a)}' for a in described]
-                u = [f'{a.GetIdx()}: {self._get_PDBInfo_atomname(a)}' for a in undescribed]
-                raise StopIteration(f'Too many cycles. described: {d}, undescribed: {u}')
-            atom = undescribed[0]
-            if atom.GetSymbol() == '*' and len(described) < 3:
-                warn(f'DEBUG. Dummy not allowed in first three lines...')
-                undescribed.rotate(-1)
-                rotation_count += 1
-                continue  # This cannot be in the first three lines, whereas the R group is first in a canonical SMILES.
-            elif len(described) == 0:  # First line
-                # I assume in some cases Virtual atoms are called for... but for now, no!
-                for parent in self._get_unseen_neighbors(atom, [], True):
-                    siblings = self._get_unseen_neighbors(parent, [atom], True)
-                    if len(siblings) != 0:
-                        break
-                else:
-                    warn(f'DEBUG. First row: No siblings for {self._get_PDBInfo_atomname(atom)}!')
-                    undescribed.rotate(-1)
-                    continue
-                grandparent = siblings[0]
-                aforementioned = [atom, parent, grandparent]
-                # first line
-                add_icoor(atom, [atom, atom, parent, grandparent])
-                # Second line
-                add_icoor(parent, [parent, atom, parent, grandparent])
-                # Third line
-                add_icoor(grandparent, [grandparent, parent, atom, grandparent])
-            else:
-                d_idx = [d.GetIdx() for d in described]
-                d_neighs = [n for n in self._get_unseen_neighbors(atom, [], False) if n.GetIdx() in d_idx]
-                if len(d_neighs) == 0:
-                    warn(f'DEBUG. Other row: No parent for {self._get_PDBInfo_atomname(atom)}!')
-                    undescribed.rotate(-1)
-                    rotation_count += 1
-                    continue
-                parent = d_neighs[0]
-                d_neighs = [n for n in self._get_unseen_neighbors(parent, [atom], False) if n.GetIdx() in d_idx]
-                if len(d_neighs) == 0:
-                    undescribed.rotate(-1)
-                    warn(f'DEBUG. Other row: No siblings for  {self._get_PDBInfo_atomname(atom)}!')
-                    rotation_count += 1
-                    continue
-                elif len(d_neighs) == 1:
-                    sibling = d_neighs[0]
-                    d_neighs = [n for n in self._get_unseen_neighbors(sibling, [parent, atom], False) if
-                                n.GetIdx() in d_idx]
-                    if len(d_neighs) == 0:
-                        undescribed.rotate(-1)
-                        warn(f'DEBUG. Other row: No cousins for  {self._get_PDBInfo_atomname(atom)}')
-                        rotation_count += 1
-                        continue
+        self._undescribed = deque(self.mol.GetAtoms())
+        self.ordered_atoms = []
+        self._rotation_count = 0
+        if self.is_aminoacid():
+            # you have to start with N.
+            N = self.get_atom_by_name('N')
+            CA = self.get_atom_by_name('CA')
+            C = self.get_atom_by_name('C')
+            O = self.get_atom_by_name('O')
+            UPPER = self.get_atom_by_name('UPPER')
+            LOWER = self.get_atom_by_name('LOWER')
+            self._add_icoor([N, N, CA, C])
+            self._add_icoor([CA, N, CA, C])
+            self._add_icoor([C, CA, N, C])
+            self._add_icoor([UPPER, C, CA, N])
+            self._add_icoor([O, C, CA, UPPER])
+            self._add_icoor([LOWER, N, CA, C])
+        else:
+            # cycle through until a good root is found!
+            while self._undescribed:
+                self._prevent_overcycling()
+                atom = self._undescribed[0]
+                if atom.GetSymbol() == '*' and len(self.ordered_atoms) < 3:
+                    warn(f'DEBUG. Dummy not allowed in first three lines...')
+                    self._undescribed.rotate(-1)
+                    self._rotation_count += 1
+                    continue  # This cannot be in the first three lines, whereas the R group is first in a canonical SMILES.
+                elif len(self.ordered_atoms) == 0:  # First line
+                    # I assume in some cases Virtual atoms are called for... but for now, no!
+                    for parent in self._get_unseen_neighbors(atom, [], True):
+                        siblings = self._get_unseen_neighbors(parent, [atom], True)
+                        if len(siblings) != 0:
+                            break
                     else:
-                        atoms = [atom, parent, sibling, d_neighs[0]]
-                else:
-                    atoms = [atom, parent, d_neighs[0], d_neighs[1]]
-                add_icoor(atom, atoms)
-                rotation_count -= 1
-
-
-    def _parse_atom(self, atom: Chem.Atom) -> None:
-        if atom.GetSymbol() == '*':
-            neighbor = atom.GetNeighbors()[0]
-            n_name = self._get_PDBInfo_atomname(neighbor)
-            if self.is_aminoacid() and neighbor.GetSymbol() == 'N':
-                #atom_name, index, connect_type, connect_name
-                self.CONNECT.append([n_name, 1, 'LOWER_CONNECT', 'LOWER'])
-            elif self.is_aminoacid() and neighbor.GetSymbol() == 'C':
-                #atom_name, index, connect_type, connect_name
-                self.CONNECT.append([n_name, 2, 'UPPER_CONNECT', 'UPPER'])
-            elif self.is_aminoacid():
-                i = max(3, len(self.CONNECT) + 1)
-                self.CONNECT.append([n_name, i, 'CONNECT'])
-            else:
-                self.CONNECT.append([n_name, len(self.CONNECT) + 1, 'CONNECT'])
-        else:
-            d = self._get_atom_descriptors(atom)
-            self.ATOM.append(d)
-
-    def _parse_rotatables(self):
-        """
-        I am not sure if this is right...
-        I do not know if a C(=O)-C=O is rotatable (cis-trans).
-
-        :return:
-        """
-
-        def is_single(a, b):
-            bond = self.mol.GetBondBetweenAtoms(a.GetIdx(), b.GetIdx())
-            return bond.GetBondType() == Chem.BondType.SINGLE
-
-        cuts = [tuple(sorted([ring_set[0], ring_set[-1]])) for ring_set in self.mol.GetRingInfo().AtomRings()]
-
-        def is_cut(a, b):
-            pair = tuple(sorted([a.GetIdx(), b.GetIdx()]))
-            return pair in cuts
-
-        for atom in self.mol.GetAtoms():
-            if atom.GetSymbol() == 'H':
-                continue  # PROTON_CHI 3 SAMPLES 2 0 180 EXTRA 1 20 thing...
-            elif atom.GetSymbol() == '*':
+                        warn(f'DEBUG. First row: No siblings for {self._get_PDBInfo_atomname(atom)}!')
+                        self._undescribed.rotate(-1)
+                        continue
+                    grandparent = siblings[0]
+                    # first line
+                    self._add_icoor([atom, atom, parent, grandparent])
+                    # Second line
+                    self._add_icoor([parent, atom, parent, grandparent])
+                    # Third line
+                    self._add_icoor([grandparent, parent, atom, grandparent])
+        # not first three lines
+        while self._undescribed:
+            self._prevent_overcycling()
+            atom = self._undescribed[0]
+            d_idx = [d.GetIdx() for d in self.ordered_atoms]
+            d_neighs = [n for n in self._get_unseen_neighbors(atom, [], False) if n.GetIdx() in d_idx]
+            if len(d_neighs) == 0:
+                warn(f'DEBUG. Other row: No parent for {self._get_PDBInfo_atomname(atom)}!')
+                self._undescribed.rotate(-1)
+                self._rotation_count += 1
                 continue
-            for neighbor in self._get_unseen_neighbors(atom, []):
-                if atom.GetIdx() > neighbor.GetIdx():
+            parent = d_neighs[0]
+            d_neighs = [n for n in self._get_unseen_neighbors(parent, [atom], False) if n.GetIdx() in d_idx]
+            if len(d_neighs) == 0:
+                self._undescribed.rotate(-1)
+                warn(f'DEBUG. Other row: No siblings for  {self._get_PDBInfo_atomname(atom)}!')
+                self._rotation_count += 1
+                continue
+            elif len(d_neighs) == 1:
+                sibling = d_neighs[0]
+                d_neighs = [n for n in self._get_unseen_neighbors(sibling, [parent, atom], False) if
+                            n.GetIdx() in d_idx]
+                if len(d_neighs) == 0:
+                    self._undescribed.rotate(-1)
+                    warn(f'DEBUG. Other row: No cousins for  {self._get_PDBInfo_atomname(atom)}')
+                    self._rotation_count += 1
                     continue
-                if is_cut(atom, neighbor):
-                    continue  # dont cross a cut!
-                elif is_single(atom, neighbor):
-                    for grandneighbor in self._get_unseen_neighbors(neighbor, [atom]):
-                        if is_cut(neighbor, grandneighbor):
-                            continue
-                        if is_single(grandneighbor, neighbor):
-                            ggneighbors = self._get_unseen_neighbors(grandneighbor, [atom, neighbor])
-                            if ggneighbors:  # 3-4 bond does not need to be single, nor does it matter which is the 4th atom
-                                self.CHI.append(dict(index=len(self.CHI) + 1,
-                                                     first=self._get_PDBInfo_atomname(atom),
-                                                     second=self._get_PDBInfo_atomname(neighbor),
-                                                     third=self._get_PDBInfo_atomname(grandneighbor),
-                                                     fourth=self._get_PDBInfo_atomname(ggneighbors[0])))
+                else:
+                    atoms = [atom, parent, sibling, d_neighs[0]]
+            else:
+                atoms = [atom, parent, d_neighs[0], d_neighs[1]]
+            self._add_icoor(atoms)
+            self._rotation_count -= 1
 
-    def _parse_bond(self, bond: Chem.Bond) -> None:
-        if any([atom.GetSymbol() == '*' for atom in (bond.GetBeginAtom(), bond.GetEndAtom())]):
-            return None  # CONNECT.
-        if bond.GetBondTypeAsDouble() == 1.5:
-            order = 4
-        else:
-            order = int(bond.GetBondTypeAsDouble())
-        begin = bond.GetBeginAtom()
-        end = bond.GetEndAtom()
-        self.BOND.append([self._get_PDBInfo_atomname(begin),
-                          self._get_PDBInfo_atomname(end),
-                          order])
+    def _add_icoor(self, atoms):
+        # due to madness the same atom objects differ.
+        self._undescribed.remove([this for this in self._undescribed if atoms[0].GetIdx() == this.GetIdx()][0])
+        self.ordered_atoms.append(atoms[0])
+        m = self._get_measurements(self.mol.GetConformer(), *atoms)
+        self.ICOOR_INTERNAL.append(dict(child=self._get_PDBInfo_atomname(atoms[0]),
+                                        phi=m.torsion,
+                                        theta=m.angle,
+                                        distance=m.distance,
+                                        parent=self._get_PDBInfo_atomname(atoms[1]),
+                                        second_parent=self._get_PDBInfo_atomname(atoms[2]),
+                                        third_parent=self._get_PDBInfo_atomname(atoms[3])))
 
+    def _prevent_overcycling(self):
+        # prevent overcycling...
+        if self._rotation_count > 5 * self.mol.GetNumAtoms():
+            d = [f'{a.GetIdx()}: {self._get_PDBInfo_atomname(a)}' for a in self.ordered_atoms]
+            u = [f'{a.GetIdx()}: {self._get_PDBInfo_atomname(a)}' for a in self._undescribed]
+            raise StopIteration(f'Too many cycles. described: {d}, undescribed: {u}')
+        elif self._rotation_count % self.mol.GetNumAtoms() == 0:
+            # it has done a full rotation.
+            if self._rotation_count != 0:
+                random.shuffle(self._undescribed) # mix up equal tier ones
+            if len(self.ordered_atoms) != 0:
+                root = self.ordered_atoms[0]
+                distance_penaltifier = lambda atom: len(Chem.GetShortestPath(self.mol, root.GetIdx(), atom.GetIdx()))
+            else:
+                distance_penaltifier = lambda atom: 0
+            hydrogen_penaltifier = lambda atom: 0 if atom.GetSymbol() != 'H' else 100
+            dummy_penaltifier = lambda atom: 0 if atom.GetSymbol() != '*' else 200
+            scorer = lambda atom: distance_penaltifier(atom) + \
+                                    hydrogen_penaltifier(atom) + \
+                                    dummy_penaltifier(atom)
+            self._undescribed = deque(sorted(self._undescribed, key=scorer))
+            
     def _get_measurements(self, conf: Chem.Conformer, a: Chem.Atom, b: Chem.Atom, c: Chem.Atom, d: Chem.Atom):
         ai = a.GetIdx()
         bi = b.GetIdx()
@@ -248,6 +214,96 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
                              angle=angle,
                              torsion=tor)
 
+
+    ## ============= Atom entries ======================================================================================
+
+    def _parse_atom(self, atom: Chem.Atom) -> None:
+        if atom.GetSymbol() == '*':
+            neighbor = atom.GetNeighbors()[0]
+            n_name = self._get_PDBInfo_atomname(neighbor)
+            if self.is_aminoacid() and neighbor.GetSymbol() == 'N':
+                #atom_name, index, connect_type, connect_name
+                self.CONNECT.append([n_name, 1, 'LOWER_CONNECT', 'LOWER'])
+            elif self.is_aminoacid() and neighbor.GetSymbol() == 'C':
+                #atom_name, index, connect_type, connect_name
+                self.CONNECT.append([n_name, 2, 'UPPER_CONNECT', 'UPPER'])
+            elif self.is_aminoacid():
+                i = max(3, len(self.CONNECT) + 1)
+                self.CONNECT.append([n_name, i, 'CONNECT'])
+            else:
+                self.CONNECT.append([n_name, len(self.CONNECT) + 1, 'CONNECT'])
+        else:
+            d = self._get_atom_descriptors(atom)
+            self.ATOM.append(d)
+
+    ## ============= Chi entries =======================================================================================
+
+    def _parse_rotatables(self):
+        """
+        I am not sure if this is right...
+        I do not know if a C(=O)-C=O is rotatable (cis-trans).
+
+        :return:
+        """
+
+        def is_single(a, b):
+            bond = self.mol.GetBondBetweenAtoms(a.GetIdx(), b.GetIdx())
+            return bond.GetBondType() == Chem.BondType.SINGLE
+
+        cuts = [tuple(sorted([ring_set[0], ring_set[-1]])) for ring_set in self.mol.GetRingInfo().AtomRings()]
+
+        def is_cut(a, b):
+            pair = tuple(sorted([a.GetIdx(), b.GetIdx()]))
+            return pair in cuts
+
+        ordered_indices = [a.GetIdx() for a in self.ordered_atoms]
+        get_place = lambda atom: ordered_indices.index(atom.GetIdx())
+
+        for atom in self.ordered_atoms:
+            if atom.GetSymbol() == 'H':
+                continue  # PROTON_CHI 3 SAMPLES 2 0 180 EXTRA 1 20 thing...
+            elif atom.GetSymbol() == '*':
+                continue
+            for neighbor in self._get_unseen_neighbors(atom, []):
+                if get_place(atom) > get_place(neighbor):
+                    continue
+                if is_cut(atom, neighbor):
+                    continue  # dont cross a cut!
+                elif is_single(atom, neighbor):
+                    for grandneighbor in self._get_unseen_neighbors(neighbor, [atom]):
+                        if is_cut(neighbor, grandneighbor):
+                            continue
+                        if is_single(grandneighbor, neighbor):
+                            ggneighbors = self._get_unseen_neighbors(grandneighbor, [atom, neighbor])
+                            if ggneighbors:  # 3-4 bond does not need to be single, nor does it matter which is the 4th atom
+                                self.CHI.append(dict(index=len(self.CHI) + 1,
+                                                     first=self._get_PDBInfo_atomname(atom),
+                                                     second=self._get_PDBInfo_atomname(neighbor),
+                                                     third=self._get_PDBInfo_atomname(grandneighbor),
+                                                     fourth=self._get_PDBInfo_atomname(ggneighbors[0])))
+
+    def _get_unseen_neighbors(self, atom: Chem.Atom, seen: List[Chem.Atom], nondummy: bool = True):
+        neighbors = atom.GetNeighbors()
+        if nondummy:
+            neighbors = [neighbor for neighbor in neighbors if neighbor.GetSymbol() != '*']
+        seenIdx = {a.GetIdx() for a in seen}
+        return [neighbor for neighbor in neighbors if neighbor.GetIdx() not in seenIdx]
+    
+    ## ============= Bond entries ======================================================================================
+
+    def _parse_bond(self, bond: Chem.Bond) -> None:
+        if any([atom.GetSymbol() == '*' for atom in (bond.GetBeginAtom(), bond.GetEndAtom())]):
+            return None  # CONNECT.
+        if bond.GetBondTypeAsDouble() == 1.5:
+            order = 4
+        else:
+            order = int(bond.GetBondTypeAsDouble())
+        begin = bond.GetBeginAtom()
+        end = bond.GetEndAtom()
+        self.BOND.append([self._get_PDBInfo_atomname(begin),
+                          self._get_PDBInfo_atomname(end),
+                          order])
+
     def _get_atom_descriptors(self, atom: Chem.Atom) -> dict:
         return {'name': self._get_PDBInfo_atomname(atom),
                 'rtype': atom.GetProp('_rType'),
@@ -257,13 +313,6 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
     def _get_nondummy_neighbors(self, atom) -> List[str]:
         # returns list of names!
         return [self._get_PDBInfo_atomname(neighbor) for neighbor in atom.GetNeighbors() if neighbor.GetSymbol() != '*']
-
-    def _get_unseen_neighbors(self, atom: Chem.Atom, seen: List[Chem.Atom], nondummy: bool = True):
-        neighbors = atom.GetNeighbors()
-        if nondummy:
-            neighbors = [neighbor for neighbor in neighbors if neighbor.GetSymbol() != '*']
-        seenIdx = {a.GetIdx() for a in seen}
-        return [neighbor for neighbor in neighbors if neighbor.GetIdx() not in seenIdx]
 
     def _find_centroid(self):
         a = Chem.Get3DDistanceMatrix(self.mol)
@@ -275,7 +324,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
 
     def polish_mol(self):
         """
-        The mol may be inconsistent.
+        The mol may be inconsistent in its PDBResidueInfo
         :return:
         """
         name = self.NAME[:3]
@@ -284,4 +333,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
             info = atom.GetPDBResidueInfo()
             info.SetResidueName(name)
             info.SetResidueNumber(index)
-            info.SetIsHeteroAtom(True)
+            if self.is_aminoacid:
+                info.SetIsHeteroAtom(False)
+            else:
+                info.SetIsHeteroAtom(True)

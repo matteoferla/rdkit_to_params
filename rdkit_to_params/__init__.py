@@ -156,7 +156,7 @@ class Params(_ParamsIoMixin, _RDKitMixin, _PoserMixin):
             else:
                 raise ValueError(f'{name} is not a valid atom name (does not appear in the entries)')
 
-    def rename_atom(self, atom_or_atomname: Union[str, 'Chem.Atom'], newname: str, overwrite=True) -> str:
+    def rename_atom(self, atom_or_atomname: Union[str, 'Chem.Atom'], newname: str, overwrite=True) -> Union[str, None]:
         """
         rename an atom by atomname or Chem.Atom (the former just calls ``rename_atom_by_name`` as is just for legacy)
 
@@ -172,7 +172,7 @@ class Params(_ParamsIoMixin, _RDKitMixin, _PoserMixin):
                 atom = self.get_atom_by_name(newname)
                 if isinstance(atom_or_atomname, str):
                     raise AssertionError(f'New name {newname} already exists')
-                elif isinstance(atom_or_atomname, Chem.Mol) and atom_or_atomname.GetIdx() != atom.GetIdx():
+                elif isinstance(atom_or_atomname, Chem.Atom) and atom_or_atomname.GetIdx() != atom.GetIdx():
                     raise AssertionError(f'New name {newname} already exists')
                 else:
                     pass # already changed.
@@ -191,6 +191,8 @@ class Params(_ParamsIoMixin, _RDKitMixin, _PoserMixin):
                 return self.rename_atom_by_name(oldname, newname)  # alters entry & rdkit
             else:
                 return self._set_PDBInfo_atomname(atom, newname, overwrite=overwrite) # alters rdkit
+        else:
+            raise TypeError(f'{type(atom_or_atomname)} is not a string or atom')
 
 
     def rename_atom_by_name(self, oldname: str, newname: str) -> str:

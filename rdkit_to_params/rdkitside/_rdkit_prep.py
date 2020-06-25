@@ -26,7 +26,7 @@ from collections import defaultdict, deque, namedtuple
 from rdkit import Chem
 from rdkit.Chem import AllChem, rdFMCS
 from warnings import warn
-import re
+import re, string
 from typing import Optional
 
 from ._rdkit_rename import _RDKitRenameMixin
@@ -74,7 +74,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         """
         mol = Chem.MolFromSmiles(smiles)
         mol.SetProp('_Name', name)
-        mol = AllChem.AddHs(mol)
+        mol = Chem.AddHs(mol)
         # cannot embed more than one dummy
         changed = []
         for atom in mol.GetAtoms():
@@ -199,6 +199,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
                   ]
         for group in groups:
             template = Chem.MolFromSmarts(group['SMARTS'])
+            template = Chem.AddHs(template, explicitOnly=True)
             types = group['types']
             for match in self.mol.GetSubstructMatches(template):
                 for i, n in enumerate(types):
@@ -398,23 +399,20 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
             else:
                 raise ValueError(f'No idea what this {atom.GetSymbol()} {atom.GetHybridization()} is')
 
-    def _fix_atom_names(self):
-        elemental = defaultdict(int)
-        seen = []
-        # Amino acid overwrite.
+    def _aminoacid_override(self, elemental):
         aa = Chem.MolFromSmiles('*NCC(~O)*')
         if self.mol.HasSubstructMatch(aa):
             warn('Ligand detected to be polymer!')
-            aa_map = dict([('LOWER', None),
-                     (' N  ', 'Nbb'),
-                     (' CA ', 'CAbb'),
-                     (' C  ', 'CObb'),
-                     (' O  ', 'OCbb'),
-                     ('UPPER', None)
-                     ])
             self.TYPE.append('POLYMER')
+            aa_map = dict([('LOWER', None),
+                           (' N  ', 'Nbb'),
+                           (' CA ', 'CAbb'),
+                           (' C  ', 'CObb'),
+                           (' O  ', 'OCbb'),
+                           ('UPPER', None)
+                           ])
             self.rename_by_substructure(aa, list(aa_map.keys()))
-            # fix amine and H for secondary
+            # fix amine and H for secondary (proline)
             amine = self.get_atom_by_name(' N  ')
             hs = [n for n in amine.GetNeighbors() if n.GetSymbol() == 'H']
             if len(hs):
@@ -422,10 +420,49 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
                 aa_map[' H  '] = 'HNbb'
             else:
                 aa_map[' N  '] = 'Npro'
+            ca = self.get_atom_by_name(' CA ')
+            for neigh in ca.GetNeighbors():
+                if neigh.GetSymbol() == 'H':
+                    self.rename_atom(neigh, ' HA ')
+            if self.greekification:
+                self._greekify()
             # add rtypes
             self.retype_by_name(aa_map)
             # change conn
-            elemental['CONN'] = 2 # when LOWER and UPPER exist the CONN is CONN3.
+            elemental['CONN'] = 2  # when LOWER and UPPER exist the CONN is CONN3.
+
+    def _greekify(self):
+        greek = list('ABGDEZHTIKLMNXOPRS')
+        greekdex = defaultdict(list)
+        ca = self.get_atom_by_name('CA')
+        for atom in self.mol.GetAtoms():
+            is_backbone = (atom.GetPDBResidueInfo() is not None and
+                    atom.GetPDBResidueInfo().GetName().strip() in ('LOWER', 'UPPER', 'N', 'CA', 'C', 'H', 'HA', 'O', 'OXT'))
+            if atom.GetSymbol() != 'H' and not is_backbone:
+                n = len(Chem.GetShortestPath(self.mol, ca.GetIdx(), atom.GetIdx())) - 1
+                greekdex[n].append(atom)
+        for k in greekdex:
+            if len(greek) <= k:
+                pass # finished the greek!
+            elif len(greekdex[k]) == 0:
+                pass # impossible tho
+            elif len(greekdex[k]) == 1:
+                name = f'{greekdex[k][0].GetSymbol(): >2}{greek[k]} '
+                self.rename_atom(greekdex[k][0], name)
+            elif len(greekdex[k]) < 36:
+                l = list(range(1,10)) + list(string.ascii_uppercase)
+                for i, atom in enumerate(greekdex[k]):
+                    name = f'{atom.GetSymbol(): >2}{greek[k]}{l[i]}'
+                    self.rename_atom(greekdex[k][0], name)
+            else:
+                pass # what????
+
+
+    def _fix_atom_names(self):
+        elemental = defaultdict(int)
+        seen = []
+        # Amino acid overwrite.
+        self._aminoacid_override(elemental)
         for i in range(self.mol.GetNumAtoms()):
             atom = self.mol.GetAtomWithIdx(i)
             el = atom.GetSymbol().upper()
