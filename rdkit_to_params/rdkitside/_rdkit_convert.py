@@ -302,6 +302,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
     ## ============= Bond entries ======================================================================================
 
     def _parse_bonds(self):
+        self.log.debug(f'Filling BOND')
         for bond in self.mol.GetBonds():
             self._parse_bond(bond)
         for ring_set in self.mol.GetRingInfo().AtomRings():
@@ -310,7 +311,6 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
                                   'second': self._get_PDBInfo_atomname(self.mol.GetAtomWithIdx(ring_set[-1]))})
 
     def _parse_bond(self, bond: Chem.Bond) -> None:
-        self.log.debug(f'Filling BOND')
         if any([atom.GetSymbol() == '*' for atom in (bond.GetBeginAtom(), bond.GetEndAtom())]):
             return None  # CONNECT.
         if bond.GetBondTypeAsDouble() == 1.5:

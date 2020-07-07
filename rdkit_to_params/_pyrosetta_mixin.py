@@ -53,6 +53,7 @@ class _PoserMixin:
         params_paths.extend([paramsfile])
         resiset = pyrosetta.generate_nonstandard_residue_set(pose, params_paths)
         ## This is the most convoluted way of getting it. But I don't known any otherway.
+        ## actually its rosetta.core.conformation.ResidueFactory.create_residue( rts.name_map( 'ALA' ) )
         v = pyrosetta.rosetta.core.chemical.ResidueTypeFinder(resiset).get_all_possible_residue_types()
         ligtype = [vv for vv in v if vv.name3() == name][0]
         lig = pyrosetta.rosetta.core.conformation.ResidueFactory.create_residue(ligtype)
