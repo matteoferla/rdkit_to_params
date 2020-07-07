@@ -19,6 +19,8 @@ from rdkit.Chem import AllChem
 from typing import Optional, Dict, List
 from ._rdkit_convert import _RDKitCovertMixin
 
+import warnings
+
 class _RDKitInitMixin(_RDKitCovertMixin):
 
     @classmethod
@@ -79,6 +81,7 @@ class _RDKitInitMixin(_RDKitCovertMixin):
         :rtype: instance
         """
         cls.log.debug('`from_smiles_w_pdbfile` called...')
+        warnings.warn('PLEASE DISABLE CHI - has issues with this mode') # todo correct this issue!
         pdb = Chem.MolFromPDBFile(pdb_file, removeHs=False, proximityBonding=proximityBonding)
         dodgy = Chem.SplitMolByPDBResidues(pdb, whiteList=[name])[name]
         AllChem.SanitizeMol(dodgy)
