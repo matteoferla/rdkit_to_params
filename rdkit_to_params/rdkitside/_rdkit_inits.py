@@ -81,7 +81,6 @@ class _RDKitInitMixin(_RDKitCovertMixin):
         :rtype: instance
         """
         cls.log.debug('`from_smiles_w_pdbblock` called...')
-        warnings.warn('PLEASE DISABLE CHI - has issues with this mode')  # todo correct this issue!
         pdb = Chem.MolFromPDBBlock(pdb_block, removeHs=False, proximityBonding=proximityBonding)
         return cls._from_smiles_w_pdb(pdb, smiles, generic, name, proximityBonding)
 
@@ -102,7 +101,6 @@ class _RDKitInitMixin(_RDKitCovertMixin):
         :rtype: instance
         """
         cls.log.debug('`from_smiles_w_pdbfile` called...')
-        warnings.warn('PLEASE DISABLE CHI - has issues with this mode') # todo correct this issue!
         pdb = Chem.MolFromPDBFile(pdb_file, removeHs=False, proximityBonding=proximityBonding)
         return cls._from_smiles_w_pdb(pdb, smiles, generic, name, proximityBonding)
 
@@ -126,4 +124,7 @@ class _RDKitInitMixin(_RDKitCovertMixin):
         self.move_aside()
         self.rename_from_template(dodgy)
         self.convert_mol()
+        #####
+        warnings.warn('CHI DISABLED. - has issues with this mode')  # todo correct this issue!
+        self.CHI = [] # !!!!
         return self
