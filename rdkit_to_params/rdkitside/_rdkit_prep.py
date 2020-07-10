@@ -14,9 +14,9 @@ It does not rely on any ``Params`` entry stuff. So can be used by itself for tes
 
 __author__ = "Matteo Ferla. [Github](https://github.com/matteoferla)"
 __email__ = "matteo.ferla@gmail.com"
-__date__ = "25 June 2020 A.D."
+__date__ = "10 July 2020 A.D."
 __license__ = "MIT"
-__version__ = "1.0.4"
+__version__ = "1.0.5"
 __citation__ = "None."
 
 ########################################################################################################################
@@ -129,7 +129,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         self.log.debug(f'Writing PDB conformers to file {filename}')
         mol = self._prep_dump_pdb(filename, overwrite, stripped)
         w = Chem.PDBWriter(filename)
-        for cid in mol.GetNumConformers():
+        for cid in range(mol.GetNumConformers()):
             w.write(mol, confId=cid)
         n = w.NumMols()
         w.close()
