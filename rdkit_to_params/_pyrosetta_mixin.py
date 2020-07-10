@@ -30,14 +30,36 @@ class _PoserMixin:
         :param outfile: optionally save file.
         :return: pose
         """
-
-        self.log.debug(f'Testing params! {outfile}')
-        self.dump('_test.params')
-        pose = self.__class__.params_to_pose('_test.params', self.NAME)
-        os.remove('_test.params')
+        self.log.debug(f'Testing params {outfile}')
+        pose = self.to_pose(relax=True)
+        assert pose.total_residue() == 1, 'Residue failed.'
         if outfile:
             pose.dump_pdb(outfile)
         return pose
+
+    def to_pose(self, relax=False):
+        pose = pyrosetta.Pose()
+        # add paramsblock
+        rts = self.add_residuetype(pose)
+        # add new residue
+        lig = pyrosetta.rosetta.core.conformation.ResidueFactory.create_residue(rts.name_map('LIG'))
+        pose.append_residue_by_jump(lig, 1)
+        if relax:
+            cycles = 15
+            scorefxn = pyrosetta.get_fa_scorefxn()
+            relax = pyrosetta.rosetta.protocols.relax.FastRelax(scorefxn, cycles)
+            relax.apply(pose)
+        return pose
+
+    def add_residuetype(self, pose: pyrosetta.Pose) -> pyrosetta.rosetta.core.chemical.ResidueTypeSet:
+        rts = pose.conformation().modifiable_residue_type_set_for_conf(pyrosetta.rosetta.core.chemical.FULL_ATOM_t)
+        buffer = pyrosetta.rosetta.std.stringbuf(self.dumps())
+        stream = pyrosetta.rosetta.std.istream(buffer)
+        new = pyrosetta.rosetta.core.chemical.read_topology_file(stream, self.NAME,
+                                                                 rts)  # no idea what the second argument does
+        rts.add_base_residue_type(new)
+        return rts
+
 
     @staticmethod
     def params_to_pose(paramsfile:str, name:str) -> pyrosetta.Pose:
@@ -48,18 +70,10 @@ class _PoserMixin:
         :param name: 3-letter residue name.
         :return:
         """
-        pose = pyrosetta.rosetta.core.pose.Pose()
+        pose = pyrosetta.Pose()
         params_paths = pyrosetta.rosetta.utility.vector1_string()
         params_paths.extend([paramsfile])
         resiset = pyrosetta.generate_nonstandard_residue_set(pose, params_paths)
-        ## This is the most convoluted way of getting it. But I don't known any otherway.
-        ## actually its rosetta.core.conformation.ResidueFactory.create_residue( rts.name_map( 'ALA' ) )
-        v = pyrosetta.rosetta.core.chemical.ResidueTypeFinder(resiset).get_all_possible_residue_types()
-        ligtype = [vv for vv in v if vv.name3() == name][0]
-        lig = pyrosetta.rosetta.core.conformation.ResidueFactory.create_residue(ligtype)
+        lig = pyrosetta.rosetta.core.conformation.ResidueFactory.create_residue( rts.name_map( name ) )
         pose.append_residue_by_jump(lig, 1)
-        cycles = 15
-        scorefxn = pyrosetta.get_fa_scorefxn()
-        relax = pyrosetta.rosetta.protocols.relax.FastRelax(scorefxn, cycles)
-        relax.apply(pose)
         return pose
