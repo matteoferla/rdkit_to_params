@@ -66,6 +66,27 @@ class _RDKitInitMixin(_RDKitCovertMixin):
         return self
 
     @classmethod
+    def from_smiles_w_pdbblock(cls, pdb_block: str, smiles: str, generic: bool = False, name='LIG',
+                              proximityBonding: bool = True):
+        """
+        Assumes there is only one residue of the resn/name3
+
+        :param pdb_block:
+        :param generic: convert mol with generic or classic AtomTypes?
+        :type generic: bool
+        :param name: 3-letter name
+        :type name: str
+        :param proximityBonding: rdkit option for Chem.MolFromPDBFile. Did the author of the pdb **not** add CONECT?
+        :type proximityBonding: bool
+        :rtype: instance
+        """
+        cls.log.debug('`from_smiles_w_pdbblock` called...')
+        warnings.warn('PLEASE DISABLE CHI - has issues with this mode')  # todo correct this issue!
+        pdb = Chem.MolFromPDBBlock(pdb_block, removeHs=False, proximityBonding=proximityBonding)
+        return cls._from_smiles_w_pdb(pdb, smiles, generic, name, proximityBonding)
+
+
+    @classmethod
     def from_smiles_w_pdbfile(cls, pdb_file: str, smiles: str, generic: bool = False, name='LIG',
                               proximityBonding: bool = True):
         """
@@ -83,6 +104,10 @@ class _RDKitInitMixin(_RDKitCovertMixin):
         cls.log.debug('`from_smiles_w_pdbfile` called...')
         warnings.warn('PLEASE DISABLE CHI - has issues with this mode') # todo correct this issue!
         pdb = Chem.MolFromPDBFile(pdb_file, removeHs=False, proximityBonding=proximityBonding)
+        return cls._from_smiles_w_pdb(pdb, smiles, generic, name, proximityBonding)
+
+    @classmethod
+    def _from_smiles_w_pdb(cls, pdb: Chem.Mol, smiles, generic, name, proximityBonding):
         dodgy = Chem.SplitMolByPDBResidues(pdb, whiteList=[name])[name]
         AllChem.SanitizeMol(dodgy)
         good = Chem.MolFromSmiles(smiles)
