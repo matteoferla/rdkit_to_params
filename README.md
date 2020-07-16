@@ -11,6 +11,8 @@ To install the latest version (probably the same) from GitHub
 
     git clone https://github.com/matteoferla/rdkit_to_params.git
     pip install .
+    
+(To install rdkit, `conda install -c conda-forge rdkit` or `apt-get`).
 
 ## Legal thingamabob
 The author, Matteo Ferla, is not affiliated with either Rosetta or RDKit and the presence of the latter's
