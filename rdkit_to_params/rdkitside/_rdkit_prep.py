@@ -526,6 +526,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
                 atom.SetAtomicNum(6)
                 atom.SetHybridization(Chem.HybridizationType.SP3)
                 changed.append(atom.GetIdx())
+        Chem.SanitizeMol(self.mol)
         AllChem.ComputeGasteigerCharges(self.mol, throwOnParamFailure=False)
         for i, atom in enumerate(self.mol.GetAtoms()):
             if i in changed:
@@ -579,6 +580,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         self.log.debug('Adding hydrogens')
         self.mol = AllChem.AddHs(self.mol)
         changed = []
+        Chem.SanitizeMol(self.mol)
         for atom in self.mol.GetAtoms():
             if atom.GetSymbol() == '*':
                 atom.SetAtomicNum(6)

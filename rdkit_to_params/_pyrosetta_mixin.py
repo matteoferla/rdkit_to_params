@@ -42,7 +42,7 @@ class _PoserMixin:
         # add paramsblock
         rts = self.add_residuetype(pose)
         # add new residue
-        lig = pyrosetta.rosetta.core.conformation.ResidueFactory.create_residue(rts.name_map('LIG'))
+        lig = pyrosetta.rosetta.core.conformation.ResidueFactory.create_residue(rts.name_map(self.NAME))
         pose.append_residue_by_jump(lig, 1)
         if relax:
             cycles = 15

@@ -115,6 +115,7 @@ class _RDKitInitMixin(_RDKitCovertMixin):
             if atom.GetSymbol() == '*':
                 atom.SetAtomicNum(9)
                 dummies.append(atom.GetIdx())
+        Chem.SanitizeMol(good)
         good = AllChem.AddHs(good)
         AllChem.EmbedMolecule(good)
         AllChem.ComputeGasteigerCharges(good)
