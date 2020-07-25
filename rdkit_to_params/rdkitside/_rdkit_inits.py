@@ -81,7 +81,8 @@ class _RDKitInitMixin(_RDKitCovertMixin):
         :rtype: instance
         """
         cls.log.debug('`from_smiles_w_pdbblock` called...')
-        pdb = Chem.MolFromPDBBlock(pdb_block, removeHs=False, proximityBonding=proximityBonding)
+        pdb = Chem.MolFromPDBBlock(pdb_block, removeHs=True, proximityBonding=proximityBonding)
+        # removeHs=True is no longer an option because it causes issues with the template step.
         return cls._from_smiles_w_pdb(pdb, smiles, generic, name)
 
 
@@ -101,7 +102,8 @@ class _RDKitInitMixin(_RDKitCovertMixin):
         :rtype: instance
         """
         cls.log.debug('`from_smiles_w_pdbfile` called...')
-        pdb = Chem.MolFromPDBFile(pdb_file, removeHs=False, proximityBonding=proximityBonding)
+        pdb = Chem.MolFromPDBFile(pdb_file, removeHs=True, proximityBonding=proximityBonding)
+        # removeHs=True is no longer an option because it causes issues with the template step.
         return cls._from_smiles_w_pdb(pdb, smiles, generic, name)
 
     @classmethod
