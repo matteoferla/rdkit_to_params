@@ -14,6 +14,10 @@ To install the latest version (probably the same) from GitHub
     
 (To install rdkit, `conda install -c conda-forge rdkit` or `apt-get`).
 
+## Website
+
+For a web app using this see [https://direvo.mutanalyst.com/params](https://direvo.mutanalyst.com/params).
+
 ## Legal thingamabob
 The author, Matteo Ferla, is not affiliated with either Rosetta or RDKit and the presence of the latter's
 name in the package's title is completely coincidental.
