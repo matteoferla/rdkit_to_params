@@ -30,7 +30,7 @@ class _PoserMixin:
         :param outfile: optionally save file.
         :return: pose
         """
-        self.log.debug(f'Testing params {outfile}')
+        self.log.debug(f'Testing params {"(writing out as "+outfile+")" if outfile is not None else "(no saving)"}')
         pose = self.to_pose(relax=True)
         assert pose.total_residue() == 1, 'Residue failed.'
         if outfile:
