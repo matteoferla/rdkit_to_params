@@ -570,7 +570,33 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         :return:
         """
         for i in range(self.mol.GetNumAtoms()):
-            self._set_PDBInfo_atomname(self.mol.GetAtomWithIdx(i), f'XX{i: <2}', overwrite=True)
+            atom = self.mol.GetAtomWithIdx(i)
+            atomname = self._get_PDBInfo_atomname(atom, throw=False)
+            if atomname:
+                atom.SetProp('_OriginalName', atomname)
+            if atom.GetSymbol() != '*':
+                self._set_PDBInfo_atomname(atom, f'XX{i: <2}', overwrite=True)
+
+    def unmove_aside(self):
+        """
+        Removes the ugly XX!
+
+        :return:
+        """
+        atomnames = []
+        for atom in self.mol.GetAtoms():
+            atomname = self._get_PDBInfo_atomname(atom, throw=False)
+            atomnames.append(atomname)
+        # find bad ones!
+        for atom in self.mol.GetAtoms():
+            atomname = self._get_PDBInfo_atomname(atom, throw=False)
+            if 'XX' in atomname:
+                original = atom.GetProp('_OriginalName')
+                if original not in atomnames:
+                    self._set_PDBInfo_atomname(atom, original, overwrite=True)
+                else:
+                    pass
+
 
     def add_Hs(self):
         """
