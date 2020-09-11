@@ -577,7 +577,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
             if atom.GetSymbol() != '*':
                 self._set_PDBInfo_atomname(atom, f'XX{i: <2}', overwrite=True)
 
-    def unmove_aside(self):
+    def move_back(self):
         """
         Removes the ugly XX!
 
@@ -595,7 +595,13 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
                 if original not in atomnames:
                     self._set_PDBInfo_atomname(atom, original, overwrite=True)
                 else:
-                    pass
+                    for i in range(1, 100):
+                        candidate = f'{atom.GetSymbol: >2}{i: <2}'
+                        if candidate not in atomnames:
+                            self._set_PDBInfo_atomname(atom, candidate, overwrite=True)
+                            break
+                    else:
+                        self.log.warning(f'Could not find a decent atomname for {atom.GetIdx()}')
 
 
     def add_Hs(self):
