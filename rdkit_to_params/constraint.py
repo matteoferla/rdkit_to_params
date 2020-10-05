@@ -86,39 +86,42 @@ class Constraints:
         # assign names
         self.assign_names(self.cov_template, self.names[:self.cov_template.GetNumAtoms()])
         self.assign_names(self.target_template, self.names[self.cov_template.GetNumAtoms():])
-        self.cov_con_name = self.get_conn(self.cov_template).GetProp('_AtomName')
-        self.target_con_name = self.get_conn(self.target_template).GetProp('_AtomName')
         # combine and embed
         self.combo = self.join_by_dummy(self.cov_template, self.target_template)
-        conf = self._get_conformer(self.combo)
-        # get key atoms
-        cov_con = self.get_atom(self.combo, self.cov_con_name)
-        cov_fore = cov_con.GetNeighbors()[0]
-        cov_fore_name = cov_fore.GetProp('_AtomName')
-        target_con = self.get_atom(self.combo, self.target_con_name)
-        target_fore = target_con.GetNeighbors()[0]
-        target_fore_name = target_fore.GetProp('_AtomName')
+        self._conformer = None
+        # get conn of covalent peptide residue (target)
+        self.target_con_name = self.get_conn(self.target_template).GetProp('_AtomName')
+        self.target_con = self.get_atom(self.combo, self.target_con_name) # from combo not target_template
+        # get conn of covalent ligand
+        self.cov_con_name = self.get_conn(self.cov_template).GetProp('_AtomName')
+        self.cov_con = self.get_atom(self.combo, self.cov_con_name) # from combo not cov_template
+        # get second atom of covalent peptide residue (target)
+        get_neigh = lambda this, other: [neigh for neigh in this.GetNeighbors() if neigh.GetIdx() != other.GetIdx()][0]
+        self.target_fore = get_neigh(self.target_con, self.cov_con)
+        self.target_fore_name = self.target_fore.GetProp('_AtomName')
+        # get second atom of covalent ligand
+        self.cov_fore = get_neigh( self.cov_con, self.target_con)
+        self.cov_fore_name = self.cov_fore.GetProp('_AtomName')
         # do maths
         ## Note: constraint is in Radian not Degree...
-        dist = Chem.rdMolTransforms.GetBondLength(conf, cov_con.GetIdx(), target_con.GetIdx())
-        angle_target = Chem.rdMolTransforms.GetAngleRad(conf, target_fore.GetIdx(), target_con.GetIdx(),
-                                                        cov_con.GetIdx())
-        angle_covalent = Chem.rdMolTransforms.GetAngleRad(conf, target_con.GetIdx(), cov_con.GetIdx(),
-                                                          cov_fore.GetIdx())
-        dihedral = Chem.rdMolTransforms.GetDihedralRad(conf, target_fore.GetIdx(), target_con.GetIdx(),
-                                                       cov_con.GetIdx(),
-                                                       cov_fore.GetIdx())
-        self.atom_pair_constraint = f'AtomPair {self.target_con_name} {target_res} {self.cov_con_name} {ligand_res} '+\
-                                    f'HARMONIC {dist:.2f} 0.2\n'
-        self.angle_constraint = f'Angle {target_fore_name} {target_res} {self.target_con_name} {target_res} '+\
-                                f'{self.cov_con_name} {ligand_res} HARMONIC {angle_target:.2f} 0.35\n' + \
-                                f'Angle {self.target_con_name} {target_res} {self.cov_con_name} {ligand_res} '+\
-                                f' {cov_fore_name} {ligand_res} HARMONIC {angle_covalent:.2f} 0.35\n'
-        self.dihedral_constraint = f'Dihedral {target_fore_name} {target_res} {self.target_con_name} {target_res} '+\
-                                f'{self.cov_con_name} {ligand_res} {cov_fore_name} {ligand_res} '+\
-                                f'CIRCULARHARMONIC {dihedral:.2f} 0.35\n'
+        self.atom_pair_constraint = f'AtomPair {self.target_con_name} {self.target_res} ' + \
+                                    f'{self.cov_con_name} {self.ligand_res} ' + \
+                                    f'HARMONIC {self.distance:.2f} 0.2\n'
+        self.angle_constraint = f'Angle {self.target_fore_name} {target_res} ' + \
+                                f'{self.target_con_name} {target_res} ' + \
+                                f'{self.cov_con_name} {ligand_res} ' + \
+                                f'HARMONIC {self.angle_target:.2f} 0.35\n' + \
+                                f'Angle {self.target_con_name} {target_res} ' + \
+                                f'{self.cov_con_name} {ligand_res} ' + \
+                                f' {self.cov_fore_name} {ligand_res} HARMONIC {self.angle_covalent:.2f} 0.35\n'
+        self.dihedral_constraint = f'Dihedral {self.target_fore_name} {target_res} ' + \
+                                   f'{self.target_con_name} {self.target_res} ' + \
+                                   f'{self.cov_con_name} {ligand_res} ' + \
+                                   f'{self.cov_fore_name} {self.ligand_res} ' + \
+                                   f'CIRCULARHARMONIC {self.dihedral:.2f} 0.35\n'
         self.coordinate_constraint = ''
         self.custom_constraint = ''
+
 
     # =================== dependent methods ============================================================================
 
@@ -127,6 +130,40 @@ class Constraints:
         AllChem.EmbedMolecule(mol)
         AllChem.MMFFOptimizeMolecule(mol)
         return mol.GetConformer()
+
+    @property #cached
+    def conformer(self):
+        if self._conformer is None:
+            self._conformer = self._get_conformer(self.combo)
+        return self._conformer
+
+    @property
+    def distance(self):
+        return Chem.rdMolTransforms.GetBondLength(self.conformer,
+                                                  self.cov_con.GetIdx(),
+                                                  self.target_con.GetIdx())
+
+    @property
+    def angle_target(self):
+        return Chem.rdMolTransforms.GetAngleRad(self.conformer,
+                                                self.target_fore.GetIdx(),
+                                                self.target_con.GetIdx(),
+                                                self.cov_con.GetIdx())
+
+    @property
+    def angle_covalent(self):
+        return Chem.rdMolTransforms.GetAngleRad(self.conformer,
+                                                self.target_con.GetIdx(),
+                                                self.cov_con.GetIdx(),
+                                                self.cov_fore.GetIdx())
+
+    @property
+    def dihedral(self):
+        return Chem.rdMolTransforms.GetDihedralRad(self.conformer,
+                                                   self.target_fore.GetIdx(),
+                                                   self.target_con.GetIdx(),
+                                                   self.cov_con.GetIdx(),
+                                                   self.cov_fore.GetIdx())
 
     def __str__(self):
         # make
@@ -166,6 +203,22 @@ class Constraints:
         :return:
         """
         self = cls.__new__(cls)
+        self.smiles = ''
+        self.names = []
+        self.ligand_res = 'LIG'
+        self.target_res = 'CYS'
+        self.cov_template = None
+        self.target_template = None
+        self.combo = None
+        self._conformer = None
+        self.target_con_name = ''
+        self.target_con = None
+        self.cov_con_name = ''
+        self.cov_con = None
+        self.target_fore = None
+        self.target_fore_name = ''
+        self.cov_fore = None
+        self.cov_fore_name = ''
         self.atom_pair_constraint = ''
         self.angle_constraint = ''
         self.dihedral_constraint = ''
