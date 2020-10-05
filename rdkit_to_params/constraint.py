@@ -89,34 +89,34 @@ class Constraints:
         # combine and embed
         self.combo = self.join_by_dummy(self.cov_template, self.target_template)
         self._conformer = None
-        # get conn of covalent peptide residue (target)
+        # get conn names of covalent peptide residue (target) and covalent ligand
         self.target_con_name = self.get_conn(self.target_template).GetProp('_AtomName')
-        self.target_con = self.get_atom(self.combo, self.target_con_name) # from combo not target_template
-        # get conn of covalent ligand
         self.cov_con_name = self.get_conn(self.cov_template).GetProp('_AtomName')
+        # get atom instances of self.combo
+        self.target_con = self.get_atom(self.combo, self.target_con_name) # from combo not target_template
         self.cov_con = self.get_atom(self.combo, self.cov_con_name) # from combo not cov_template
-        # get second atom of covalent peptide residue (target)
-        get_neigh = lambda this, other: [neigh for neigh in this.GetNeighbors() if neigh.GetIdx() != other.GetIdx()][0]
+        # get second atoms
+        get_neigh = lambda this, other: [neigh for neigh in this.GetNeighbors() if neigh.GetProp('_AtomName') != other.GetProp('_AtomName')][0]
         self.target_fore = get_neigh(self.target_con, self.cov_con)
+        self.cov_fore = get_neigh(self.cov_con, self.target_con)
         self.target_fore_name = self.target_fore.GetProp('_AtomName')
-        # get second atom of covalent ligand
-        self.cov_fore = get_neigh( self.cov_con, self.target_con)
         self.cov_fore_name = self.cov_fore.GetProp('_AtomName')
         # do maths
         ## Note: constraint is in Radian not Degree...
         self.atom_pair_constraint = f'AtomPair {self.target_con_name} {self.target_res} ' + \
                                     f'{self.cov_con_name} {self.ligand_res} ' + \
                                     f'HARMONIC {self.distance:.2f} 0.2\n'
-        self.angle_constraint = f'Angle {self.target_fore_name} {target_res} ' + \
-                                f'{self.target_con_name} {target_res} ' + \
-                                f'{self.cov_con_name} {ligand_res} ' + \
-                                f'HARMONIC {self.angle_target:.2f} 0.35\n' + \
-                                f'Angle {self.target_con_name} {target_res} ' + \
-                                f'{self.cov_con_name} {ligand_res} ' + \
-                                f' {self.cov_fore_name} {ligand_res} HARMONIC {self.angle_covalent:.2f} 0.35\n'
-        self.dihedral_constraint = f'Dihedral {self.target_fore_name} {target_res} ' + \
+        self.angle_constraint = f'Angle {self.target_fore_name} {self.target_res} ' + \
+                                f'{self.target_con_name} {self.target_res} ' + \
+                                f'{self.cov_con_name} {self.ligand_res} ' + \
+                                f'HARMONIC {self.angle_target:.2f} 0.35\n'
+        self.angle_constraint += f'Angle {self.target_con_name} {self.target_res} ' + \
+                                 f'{self.cov_con_name} {self.ligand_res} ' + \
+                                 f' {self.cov_fore_name} {self.ligand_res} ' + \
+                                 f'HARMONIC {self.angle_covalent:.2f} 0.35\n'
+        self.dihedral_constraint = f'Dihedral {self.target_fore_name} {self.target_res} ' + \
                                    f'{self.target_con_name} {self.target_res} ' + \
-                                   f'{self.cov_con_name} {ligand_res} ' + \
+                                   f'{self.cov_con_name} {self.ligand_res} ' + \
                                    f'{self.cov_fore_name} {self.ligand_res} ' + \
                                    f'CIRCULARHARMONIC {self.dihedral:.2f} 0.35\n'
         self.coordinate_constraint = ''
