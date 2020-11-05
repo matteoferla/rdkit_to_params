@@ -74,6 +74,6 @@ class _PoserMixin:
         params_paths = pyrosetta.rosetta.utility.vector1_string()
         params_paths.extend([paramsfile])
         resiset = pyrosetta.generate_nonstandard_residue_set(pose, params_paths)
-        lig = pyrosetta.rosetta.core.conformation.ResidueFactory.create_residue( rts.name_map( name ) )
+        lig = pyrosetta.rosetta.core.conformation.ResidueFactory.create_residue( resiset.name_map( name ) )
         pose.append_residue_by_jump(lig, 1)
         return pose
