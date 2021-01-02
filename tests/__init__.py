@@ -7,11 +7,11 @@ from rdkit import Chem
 
 class MyTestCase(unittest.TestCase):
     def test_load(self):
-        p = Params.load('example/official_PHE.params')
+        p = Params.load('../example/official_PHE.params')
         self.assertEqual(p.NAME, 'PHE')
 
     def test_round(self):
-        p = Params.load('example/official_PHE.params')
+        p = Params.load('../example/official_PHE.params')
         p.IO_STRING[0].name3 = 'PHX'
         p.IO_STRING[0].name1 = 'Z'
         p.AA = 'UNK'  # If it's not one of the twenty (plus extras), UNK!
@@ -37,8 +37,6 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(p.mol.GetAtomWithIdx(0).GetPDBResidueInfo().GetName(), ' CZ ')
         self.assertEqual(p.ATOM[0].name, ' CZ ')
         p.test()
-
-
 
 if __name__ == '__main__':
     unittest.main()
