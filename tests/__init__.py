@@ -27,7 +27,7 @@ class MyTestCase(unittest.TestCase):
     def test_smiles(self):
         p = Params.from_smiles('*C(=O)C(Cc1ccccc1)[NH]*',  # recognised as amino acid.
                                name='PHX',  # optional.
-                               atomnames={3: 'CZ'}  # optional, rando atom name
+                               atomnames={4: 'CZ'}  # optional, rando atom name for CB
                                )
         self.assertTrue(p.is_aminoacid())
 

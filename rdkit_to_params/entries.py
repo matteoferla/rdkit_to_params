@@ -15,7 +15,7 @@ __citation__ = "None."
 ########################################################################################################################
 
 from dataclasses import dataclass
-import re
+import re, logging
 from warnings import warn
 
 from collections import abc
@@ -53,6 +53,8 @@ class Entries(abc.MutableSequence):
         if name in cls.choices:
             cc, singleton = cls.choices[name]
             return cls(entry_cls=cc, singleton=singleton)
+        else:
+            raise KeyError(f'Name {name} is not one of {", ".join(cls.choices.keys())}')
 
     def __getitem__(self, index):
         return self.data[index]
@@ -101,6 +103,7 @@ class GenericEntry:
     """
     This is meant to be inherited. ``header`` is the entry type. body is a string.
     """
+    log = logging.getLogger(__name__)
 
     def __init__(self, header: str, body: str):
         self.header = header.strip().upper()
@@ -155,6 +158,14 @@ class NBR_RADIUSEntry(GenericEntry):
 
 Entries.choices['NBR_RADIUS'] = (NBR_RADIUSEntry, True)
 
+#########################################################################################################
+
+class MAINCHAIN_ATOMS(GenericListEntry):
+    def __init__(self, *args: str):
+        super().__init__('MAINCHAIN_ATOMS', *args)
+
+
+Entries.choices['MAINCHAIN_ATOMS'] = (MAINCHAIN_ATOMS, False)
 
 #########################################################################################################
 
@@ -511,6 +522,15 @@ class PROPERTIESEntry(GenericListEntry):
 
 Entries.choices['PROPERTIES'] = (PROPERTIESEntry, False)
 
+#########################################################################################################
+
+class VARIANTEntry(GenericListEntry):
+    # do multiple variant entries get the same line??
+    def __init__(self, *args: str):
+        super().__init__('VARIANT', *args)
+
+
+Entries.choices['VARIANT'] = (VARIANTEntry, False)
 
 #########################################################################################################
 

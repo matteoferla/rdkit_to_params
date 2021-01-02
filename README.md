@@ -209,13 +209,24 @@ To extract and correct a ligand, consider the following
     template = AllChem.DeleteSubstructs(params.mol, Chem.MolFromSmiles('*'))
     AllChem.AssignBondOrdersFromTemplate(template, ligand)
 
-## Greek
+## Amino acids
+
+A `*C(=O)C([*:3])[NH]*` molecule, where R3 is whatever sidechain is automatically converted into an amino acid.
+Omitting the hydrogen on the amine is fine (implicit), so `*C(=O)C([*:3])N*` is also automatically accepted.
+Likewise, a secondary amine like in proline, `*C(=O)C1CCCN1*`, is automatically determined to be an amino acid.
+Omitting the double bond of the carboxyl will result in a hydroxyl backbones amino acid, which will behave like `C=[OH+]`
+for properties, but without the partial charge.
+The criterion for an amino acid is if the substracture `*NCC(~O)*` is matched (see `_aminoacid_override`).
+
+However, `C(=O)C([*:3])[NH]` will be parsed as `[CH](=O)C([*:3])[NH]`, i.e. with a radical amine and an aldehyde.
+
+### Greek
 In the amino acid case, the class attribute `greekification` changes the atomnames to CB, CD2 etc.
 It is by default `True`. It is called during `fix_mol`, a step in `load_mol`/`load_smiles`,
 so should be safe for rename methods.
 
 
-### Optionals
+## Optionals
 Installing RDKit with conda is easy (`conda install rdkit`).
 With apt-get likewise (`sudo apt-get install python3-rdkit  librdkit1 rdkit-data`).
 With brew idem (`brew install rdkit --with-python3`).
@@ -223,6 +234,19 @@ But there is always a system where one needs to compile it from source, which is
 For example, I have never tried installing it on a Windows.
 
 Pyrosetta is optional because it has a non-standard installation.
+
+## Terminal caps
+
+To make a cap, there is a quick way:
+
+    p = Params.from_smiles('*NCC', name='CAP', atomnames={1: ' N  ', 2: ' CA '})
+    p.make_C_terminal_cap(mainchain_atoms=['N', 'CA'])
+    
+    p = Params.from_smiles('*C(=O)C', name='CAP', atomnames={1: ' C  ', 2: ' O  ', 3: ' CA '})
+    p.make_N_terminal_cap(mainchain_atoms=['C', 'CA'])
+
+Do note, `.test()` does not work on a terminal cap and will segfault.
+    
 
 ## Caveat: I do not know many things!
 
@@ -239,6 +263,13 @@ I made several guesses with the classic atom types and I am sure many things are
 even when undeclared, so is likely redudant.
 * `ADD_RING` is not implemented in the `from_mol` conversion as I think it's an old command.
 * Does a cis-trans tautomer bond (say `C(=O)-C=O`) gets a `CHI` entry? I am assuming no, but not sure.
+
+### Notes
+
+There are some other things to pay attention to:
+
+* Atom names are 4-letters. It is always safer to add the spaces yourself if assigning them.
+* CHI struggles with rings
 
 ## To Do
 I have not coded yet, because I forgot:

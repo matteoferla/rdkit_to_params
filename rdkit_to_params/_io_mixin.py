@@ -74,9 +74,10 @@ class _ParamsIoMixin(_ParamsInitMixin):
         assert self.NBR_RADIUS and self.NBR_RADIUS[0], 'Undeclared NBR_RADIUS entry'
         lines = [f'NAME {self.NAME}', str(self.comments)]
         for entries in (self.IO_STRING, self.TYPE, self.AA, self.ROTAMER_AA, self.ATOM, self.ATOM_ALIAS, self.BOND,
-                        self.CUT_BOND, self.ADD_RING, self.PROPERTIES, self.METAL_BINDING_ATOMS,
+                        self.CUT_BOND, self.ADD_RING, self.PROPERTIES, self.VARIANT, self.METAL_BINDING_ATOMS,
                         self.FIRST_SIDECHAIN_ATOM, self.RAMA_PREPRO_FILENAME, self.ACT_COORD_ATOMS, self.CHI,
-                        self.CONNECT, self.NBR_ATOM, self.NBR_RADIUS, self.ICOOR_INTERNAL, self.PDB_ROTAMERS):
+                        self.CONNECT, self.NBR_ATOM, self.NBR_RADIUS, self.MAINCHAIN_ATOMS,
+                        self.ICOOR_INTERNAL, self.PDB_ROTAMERS):
             if entries:
                 lines.append(str(entries))
         return '\n'.join(lines)

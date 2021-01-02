@@ -13,6 +13,7 @@ __citation__ = "None."
 
 ########################################################################################################################
 
+# remember it's `python setup.py sdist` and `python -m twine upload dist/rdkit_to_params-1.0.5.tar.gz`
 
 import setuptools
 import os

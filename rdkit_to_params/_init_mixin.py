@@ -20,7 +20,8 @@ class _ParamsInitMixin:
 
     # This is solely for my sanity/notebook and does not and should not be used.
     ordering = ['NAME', 'IO_STRING', 'TYPE', 'AA', 'ROTAMER_AA', '#' 'ATOM', 'ATOM_ALIAS', 'BOND', 'CUT_BOND',
-                'CHI', 'CONNECT', 'ADD_RING', 'PROPERTIES', 'METAL_BINDING_ATOMS', 'FIRST_SIDECHAIN_ATOM',
+                'CHI', 'CONNECT', 'ADD_RING', 'PROPERTIES', 'VARIANT', 'METAL_BINDING_ATOMS', 'FIRST_SIDECHAIN_ATOM',
+                'MAINCHAIN_ATOMS',
                 'RAMA_PREPRO_FILENAME', 'ACT_COORD_ATOMS',
                 'NBR_ATOM', 'NBR_RADIUS', 'ICOOR_INTERNAL', 'PDB_ROTAMERS']
 
@@ -41,7 +42,9 @@ class _ParamsInitMixin:
         self.ICOOR_INTERNAL = Entries.from_name('ICOOR_INTERNAL')
         self.ADD_RING = Entries.from_name('ADD_RING')
         self.PROPERTIES = Entries.from_name('PROPERTIES')
+        self.VARIANT = Entries.from_name('VARIANT')
         self.FIRST_SIDECHAIN_ATOM = Entries.from_name('FIRST_SIDECHAIN_ATOM')
+        self.MAINCHAIN_ATOMS = Entries.from_name('MAINCHAIN_ATOMS')
         self.RAMA_PREPRO_FILENAME = Entries.from_name('RAMA_PREPRO_FILENAME')
         self.METAL_BINDING_ATOMS = Entries.from_name('METAL_BINDING_ATOMS')
         self.ACT_COORD_ATOMS = Entries.from_name('ACT_COORD_ATOMS')
@@ -50,6 +53,9 @@ class _ParamsInitMixin:
         self.mol = None
         self.generic = False
         self._rtype = []
+        # defaults
+        self.AA.append('UNK')
+        self.TYPE.append('LIGAND')
 
     @property
     def fields(self):

@@ -17,7 +17,7 @@ __citation__ = "None."
 
 from warnings import warn
 import os, re, logging
-from typing import Union
+from typing import Union, Optional, List
 
 #################### base classes ######################################################################################
 
@@ -276,7 +276,81 @@ class Params(_ParamsIoMixin, _RDKitMixin, _PoserMixin):
                     if oldname.strip() in entry.body:
                         entry.body = re.sub('(?<!\w)' + oldname.strip() + '(?!\w)', newname, entry.body)
             # find in the Generic list entries
-            for attr in ('METAL_BINDING_ATOMS', 'ACT_COORD_ATOMS'):
+            for attr in ('METAL_BINDING_ATOMS', 'ACT_COORD_ATOMS', 'MAINCHAIN_ATOMS'):
                 for entry in getattr(self, attr):
                     entry.values = [v if v.strip() != oldname.strip() else newname for v in entry.values]
+
+    # ==== extras for cap
+
+    def _prep_for_terminal(self,  mainchain_atoms: Optional[List[str]]=None, connection_idx: int=1):
+        assert connection_idx > 0, 'Fortran counting the connection_idx'
+        assert len(self.CONNECT) >= connection_idx, 'No attachment atom... without a connection it\'s a ligand'
+        self.TYPE[0] = 'POLYMER'
+        self.AA.append('UNK')
+        self.PROPERTIES.append('TERMINUS')
+        # deal with mainchain
+        if mainchain_atoms is None:
+            mainchain_atoms = []
+        self.MAINCHAIN_ATOMS.append(mainchain_atoms)
+        # correct rtype.
+        expected = {'C': 'CObb', 'CA':'CAbb', 'N': 'Nbb', 'H': 'HNbb'}
+        for atom_name in mainchain_atoms:
+            if atom_name.strip() in expected:
+                #rdkit.Mol
+                if self.mol:
+                    atom = self.get_atom_by_name(atom_name)
+                    atom.SetProp('_rType', expected[atom_name.strip()])
+                # entries
+                for atom_entry in self.ATOM:
+                    if atom_entry.name.strip() == atom_name.strip():
+                        atom_entry.rtype = expected[atom_name.strip()]
+                        break
+                else:
+                    raise ValueError(f'{atom_name} does not appear in the ATOM entries.')
+
+    def _change_conn_for_terminal(self, connection_idx, new_name):
+        for conn in self.CONNECT:
+            if conn.index == connection_idx:
+                self.rename_atom(conn.connect_name, new_name)
+                self.FIRST_SIDECHAIN_ATOM.append(conn.atom_name)
+                conn.connect_type=f'{new_name}_CONNECT'
+                conn.connect_name=new_name
+                break
+        else:
+            raise ValueError('Why cannot find connect? CONNECT definitions are wrong.')
+
+    def make_C_terminal_cap(self, mainchain_atoms=None, connection_idx=1):
+        """
+        Make current covalent compound into a C-terminal cap, aka. goes on the C-terminal end of the peptide.
+        That is the compound has a N-terminus (UPPER)
+
+        :param mainchain_atoms: mainchain atoms.
+        :param connection_idx: Fortran indiced
+        :return:
+        """
+        self._prep_for_terminal(mainchain_atoms, connection_idx)
+        self.VARIANT.append(['LOWER_TERMINUS_VARIANT'])
+        self._change_conn_for_terminal(connection_idx, 'UPPER')
+        self.CONNECT.append(dict(atom_name='',
+                                 index=len(self.CONNECT)+1,
+                                 connect_type='LOWER_CONNECT NONE',
+                                 connect_name='LOWER')
+                           )
+
+    def make_N_terminal_cap(self, mainchain_atoms=None, connection_idx=1):
+        """
+                Make current covalent compound into a N-terminal cap, aka. goes on the N-terminal end of the peptide.
+                That is the compound has a C-terminus (LOWER)
+
+                :param connection_idx: Fortran indiced
+                :return:
+                """
+        self._prep_for_terminal(mainchain_atoms, connection_idx)
+        self.VARIANT.append(['UPPER_TERMINUS_VARIANT'])
+        self._change_conn_for_terminal(connection_idx, 'LOWER')
+        self.CONNECT.append(CONNECTEntry(atom_name='',
+                                         index=len(self.CONNECT) + 1,
+                                         connect_type='UPPER_CONNECT NONE',
+                                         connect_name='UPPER')
+                            )
 

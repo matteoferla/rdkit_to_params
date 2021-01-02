@@ -28,6 +28,7 @@ from rdkit.Chem import AllChem, rdFMCS
 from warnings import warn
 import re, string
 from typing import Optional
+from rdkit_to_params.entries import CONNECTEntry
 
 from ._rdkit_rename import _RDKitRenameMixin
 
@@ -459,7 +460,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
                     name = f'{atom.GetSymbol(): >2}{greek[k]}{l[i]}'
                     self.rename_atom(greekdex[k][0], name)
             else:
-                pass # what????
+                pass # no renaming. This is insane corner case. A 36 HA AA is madness.
 
 
     def _fix_atom_names(self):
@@ -625,3 +626,5 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
             if i in changed:
                 atom.SetAtomicNum(0)
         self.fix_mol()
+
+
