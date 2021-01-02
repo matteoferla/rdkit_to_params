@@ -268,22 +268,32 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
 
         ordered_indices = [a.GetIdx() for a in self.ordered_atoms]
         get_place = lambda atom: ordered_indices.index(atom.GetIdx())
-
+        # mark ring atoms.
+        for ring_set in self.mol.GetRingInfo().AtomRings():
+            for i in ring_set:
+                self.mol.GetAtomWithIdx(i).SetBoolProp('_isRing', True)
         for atom in self.ordered_atoms:
-            if atom.GetSymbol() == 'H':
+            if atom.HasProp('_isRing'):
+                continue
+            elif atom.GetSymbol() == 'H':
                 continue  # PROTON_CHI 3 SAMPLES 2 0 180 EXTRA 1 20 thing...
             elif atom.GetSymbol() == '*':
                 continue
+            # should there be a `is_single` case?
             for neighbor in self._get_unseen_neighbors(atom, []):
-                if get_place(atom) > get_place(neighbor):
+                if neighbor.HasProp('_isRing'):
                     continue
-                if is_cut(atom, neighbor):
+                elif get_place(atom) > get_place(neighbor):
+                    continue
+                elif is_cut(atom, neighbor): # redundant as _isRing in effect.
                     continue  # dont cross a cut!
                 elif is_single(atom, neighbor):
                     for grandneighbor in self._get_unseen_neighbors(neighbor, [atom]):
-                        if is_cut(neighbor, grandneighbor):
+                        if grandneighbor.HasProp('_isRing'):
                             continue
-                        if is_single(grandneighbor, neighbor):
+                        elif is_cut(neighbor, grandneighbor):
+                            continue
+                        elif is_single(grandneighbor, neighbor):
                             ggneighbors = self._get_unseen_neighbors(grandneighbor, [atom, neighbor])
                             if ggneighbors:  # 3-4 bond does not need to be single, nor does it matter which is the 4th atom
                                 self.CHI.append(dict(index=len(self.CHI) + 1,

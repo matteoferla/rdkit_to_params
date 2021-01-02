@@ -554,7 +554,7 @@ That is to say that `.ATOM[0]` will give the first atom as expected, but this ha
 Atomnames…
 
 
-* `p.get_correct_atomname` will return the 4 letter name of the atom with nice spacing.
+* `p.get_correct_atomname` will return the 4 letter name of the atom with nice spacing as present in the entries
 
 
 * `p.rename_atom` will change one atomname to a new one across all entries.
