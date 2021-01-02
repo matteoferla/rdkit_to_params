@@ -245,9 +245,15 @@ To make a cap, there is a quick way:
     p = Params.from_smiles('*C(=O)C', name='CAP', atomnames={1: ' C  ', 2: ' O  ', 3: ' CA '})
     p.make_N_terminal_cap(mainchain_atoms=['C', 'CA'])
 
-Do note, `.test()` does not work on a terminal cap and will segfault.
-    
+These methods also accept `connection_idx`, which is the Fortran-style index of the connection that will become a LOWER/UPPER.
+i.e. if the cap is further connected but not as a polymer, say `*NCC*`.
 
+Do note:
+
+* `.test()` does not work on a terminal cap and will segfault
+* `mainchain_atoms` will change Rosetta atom-types only if the name matches
+* The code accepts only cases with 3 or more atoms (so a `*=O` cap is a no go and requires virtual atoms added manually)
+    
 ## Caveat: I do not know many things!
 
 ### Chemical
@@ -273,6 +279,7 @@ There are some other things to pay attention to:
 
 ## To Do
 I have not coded yet, because I forgot:
+
 * ~~an auto-assignment of `NBR_ATOM` and `NBR_RADIUS` for `from_mol`.~~
 * add rotamer line in `from_mol`
 * change option to override starting atom.
@@ -282,6 +289,7 @@ I have not coded yet, because I forgot:
 
 The `from_mol` class method recognises `*[NH]CC(~O)*` and assigns it as a backbone properly.
 However, `Chem.MolFromSmiles('*[NH]CC(~O)*')` cannot be embedded, so is a bit of a horrible one for users to use.
-Cystathionine and similar amino acids are the problem as I cannot simply make an amino acid backbone be recognised,
+Throughout the code, dummy atoms (*/R) are changed to carbons or chlorines and then changed back.
+Cystathionine and similar twinned amino acids are the problem as I cannot simply make an amino acid backbone be recognised,
 however if protonated as is the case `'`[NH1]C[CH0](=O)`.
 Maybe the `CC(=O)NCC(=O)NC` option may be a better choice after all.
