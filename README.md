@@ -275,7 +275,7 @@ even when undeclared, so is likely redudant.
 There are some other things to pay attention to:
 
 * Atom names are 4-letters. It is always safer to add the spaces yourself if assigning them.
-* CHI struggles with rings
+* CHI struggles with rings, so currently `c1ccccc1CCC` has only one CHI (C7, C8, C9, H10), even if (C6, C7, C8, C9) probably counts?
 
 ## To Do
 I have not coded yet, because I forgot:
