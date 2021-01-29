@@ -17,6 +17,10 @@ To install the latest version (probably the same) from GitHub
 ## Website
 
 For a web app using this see [https://direvo.mutanalyst.com/params](https://direvo.mutanalyst.com/params).
+For the code running the website, see:
+
+* [templates](https://github.com/matteoferla/DirEvo_tools/tree/master/direvo/templates/params)
+* [views](https://github.com/matteoferla/DirEvo_tools/blob/master/direvo/views/params.py)
 
 ## Legal thingamabob
 The author, Matteo Ferla, is not affiliated with either Rosetta or RDKit and the presence of the latter's
@@ -61,7 +65,7 @@ Let's do a roundtrip changing an atomname:
 ## From mol object
 ### Requirements
 For the sake of sanity, `EmbedMolecule`, `Chem.AddHs(mol)` or any other operation is assumed to have been done beforehand.
-And that the user is going to do `Chem.MolToPDBFile(mol)` or `Chem.MolToPDBBlock(mol)` or use the bound methods of `Params`,
+And that the user is going to do `Chem.MolToPDBFile(params.mol)` or `Chem.MolToPDBBlock(params.mol)` or use the bound methods of `Params`,
 `dump_pdb` and `dump_pdb_conf` (see below).
 
 The molecule should preferably be **not** Kekulised.

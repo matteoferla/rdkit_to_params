@@ -1,47 +1,56 @@
 ########################################################################################################################
-__doc__ = \
-    """
-    Pip install file. All the files have this block here, so in PyCharm I can change them en-mass.
-    """
-
-__author__ = "Matteo Ferla. [Github](https://github.com/matteoferla)"
+__doc__ = 'README.md'
+__author__ = "Matteo Ferla"
+__url__ = "https://github.com/matteoferla/rdkit_to_params"
 __email__ = "matteo.ferla@gmail.com"
-__date__ = "5 November 2020 A.D."
+__date__ = "29 January 2021 A.D."
 __license__ = "MIT"
 __version__ = "1.1.4"
-__citation__ = "None."
+__citation__ = "Manuscript in preparation. See Fragmenstein"
 
-########################################################################################################################
-
+# ---------- imports  --------------------------------------------------------------------------------------------------
 # remember it's `python setup.py sdist` and `python -m twine upload dist/rdkit_to_params-1.0.5.tar.gz`
 
-import setuptools
+from setuptools import setup
+from warnings import warn
+from importlib import util
 import os
 
 this_directory = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(this_directory, 'README.md'), encoding='utf-8') as f:
-    long_description = f.read()
+    __doc__ = f.read()
+descr = 'Create or modify Rosetta params files (topology files) from scratch, RDKit mols or another params file.'
 
-print('rdkit and pyrosetta are optional... but are the main reason this was written.')
-print('The former is conda, the latter is downloaded from RosettaCommons.')
+# ---------- Non pip modules  ------------------------------------------------------------------------------------------
 
-setuptools.setup(
-                name='rdkit_to_params',
-                version=__version__,
-                python_requires='>3.6',
-                packages=setuptools.find_packages(),
-                url='https://github.com/matteoferla/rdkit_to_params',
-                license='MIT',
-                author=__author__,
-                author_email=__email__,
-                description='Create or modify Rosetta params files (topology files) from scratch, RDKit mols or another params file.',
-                long_description=long_description,
-                long_description_content_type='text/markdown',
-                test_suite='tests',
-                install_requires=[
-                ],
-                extras_require = {
-                        'rdkit_feature':  ["rdkit"],
-                        'testing_feature': ["pyrosetta"]
-                    }
+if not util.find_spec('rdkit'):
+    warn('Albeit optional, a lot of this code relies on rdkit which cannot be pip installed.' +
+               'To install try either ' +
+               'conda install -c conda-forge rdkit or ' +
+               'sudo apt-get/brew install python3-rdkit or visit rdkit documentation.')
+
+if not util.find_spec('pyrosetta'):
+    warn('The minimisation part of this code uses pyrosetta, which has to be downloaded from ' +
+         'the Rosetta software site due to licencing. Without it only the classes Monster and Rectifier will work')
+
+# ---------- setuptools.setup ------------------------------------------------------------------------------------------
+
+setup(
+    name='rdkit_to_params',
+    version=__version__,
+    python_requires='>3.6',
+    packages=['rdkit_to_params'],
+    url=__url__,
+    license=__license__,
+    author=__author__,
+    author_email=__email__,
+    description=descr,
+    long_description=__doc__,
+    long_description_content_type='text/markdown',
+    test_suite='tests',
+    install_requires=[],  # none pip
+    extras_require={},  # none pip
+    entry_points={
+            'console_scripts': ['smiles-to-params=rdkit_to_params.cli:smiles'],
+        }
 )
