@@ -5,13 +5,13 @@ __url__ = "https://github.com/matteoferla/rdkit_to_params"
 __email__ = "matteo.ferla@gmail.com"
 __date__ = "29 January 2021 A.D."
 __license__ = "MIT"
-__version__ = "1.1.4"
+__version__ = "1.1.5"
 __citation__ = "Manuscript in preparation. See Fragmenstein"
 
 # ---------- imports  --------------------------------------------------------------------------------------------------
 # remember it's `python setup.py sdist` and `python -m twine upload dist/rdkit_to_params-1.0.5.tar.gz`
 
-from setuptools import setup
+from setuptools import setup, find_packages
 from warnings import warn
 from importlib import util
 import os
@@ -39,7 +39,7 @@ setup(
     name='rdkit_to_params',
     version=__version__,
     python_requires='>3.6',
-    packages=['rdkit_to_params'],
+    packages=find_packages(),
     url=__url__,
     license=__license__,
     author=__author__,
