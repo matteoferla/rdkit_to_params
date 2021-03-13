@@ -59,6 +59,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         self.TYPE.append('LIGAND')
         if name is not None:
             self.NAME = name
+            self.mol.SetProp('_Name', name)
         self.fix_mol()
         # conversion elsewhere
         return self
@@ -75,6 +76,8 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         """
         cls.log.debug('`load_smiles` called...')
         mol = Chem.MolFromSmiles(smiles)
+        if mol is None:
+            raise ValueError('The SMILES string could not be converted')
         mol.SetProp('_Name', name)
         mol = Chem.AddHs(mol)
         # cannot embed more than one dummy
@@ -234,11 +237,11 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
                 elif atom.GetIsAromatic():  # could also be NtrR...
                     atom.SetProp('_rType', 'Ntrp')
                 elif atom.GetHybridization() == Chem.HybridizationType.SP3 and len(Hs) < 3:
-                    atom.SetProp('_rType', 'Nbb')
+                    atom.SetProp('_rType', 'Npro')  # Nbb is a SP2
                 elif atom.GetHybridization() == Chem.HybridizationType.SP3:
                     atom.SetProp('_rType', 'Nlys')
                 elif atom.GetHybridization() == Chem.HybridizationType.SP2:
-                    atom.SetProp('_rType', 'Npro')  # or Narg if the orbitals are funky...
+                    atom.SetProp('_rType', 'NH2O')  # or Narg if the orbitals are funky...
                 else:
                     raise ValueError(f'No idea what this nitrogen {atom.GetHybridization()} is')
             elif symbol == 'O':
