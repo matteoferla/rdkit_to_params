@@ -21,11 +21,12 @@ class _ParamsInitMixin:
     # This is solely for my sanity/notebook and does not and should not be used.
     ordering = ['NAME', 'IO_STRING', 'TYPE', 'AA', 'ROTAMER_AA', '#' 'ATOM', 'ATOM_ALIAS', 'BOND', 'CUT_BOND',
                 'CHI', 'CONNECT', 'ADD_RING', 'PROPERTIES', 'VARIANT', 'METAL_BINDING_ATOMS', 'FIRST_SIDECHAIN_ATOM',
-                'MAINCHAIN_ATOMS',
+                'MAINCHAIN_ATOMS', 'BACKBONE_AA',
                 'RAMA_PREPRO_FILENAME', 'ACT_COORD_ATOMS',
                 'NBR_ATOM', 'NBR_RADIUS', 'ICOOR_INTERNAL', 'PDB_ROTAMERS']
 
     def __init__(self):
+        # keep statically declared to stop pycharm complaining
         self.AA = Entries.from_name('AA')  # for ligands
         self.TYPE = Entries.from_name('TYPE') #POLYMER or LIGAND
         self.ROTAMER_AA = Entries.from_name('ROTAMER_AA')
@@ -44,6 +45,7 @@ class _ParamsInitMixin:
         self.PROPERTIES = Entries.from_name('PROPERTIES')
         self.VARIANT = Entries.from_name('VARIANT')
         self.FIRST_SIDECHAIN_ATOM = Entries.from_name('FIRST_SIDECHAIN_ATOM')
+        self.BACKBONE_AA = Entries.from_name('BACKBONE_AA')
         self.MAINCHAIN_ATOMS = Entries.from_name('MAINCHAIN_ATOMS')
         self.RAMA_PREPRO_FILENAME = Entries.from_name('RAMA_PREPRO_FILENAME')
         self.METAL_BINDING_ATOMS = Entries.from_name('METAL_BINDING_ATOMS')

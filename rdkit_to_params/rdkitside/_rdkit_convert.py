@@ -364,7 +364,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
             info.SetResidueNumber(resi)
             info.SetChainId(chain)
             #info.SetSegmentNumber(segi) commented out because it is an int not string
-            if self.is_aminoacid:
+            if self.is_aminoacid():
                 info.SetIsHeteroAtom(False)
             else:
                 info.SetIsHeteroAtom(True)

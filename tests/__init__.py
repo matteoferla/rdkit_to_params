@@ -5,7 +5,7 @@ pyrosetta.init(extra_options='-mute all')  # required for test
 from rdkit_to_params import Params
 from rdkit import Chem
 
-class MyTestCase(unittest.TestCase):
+class ParamTestCases(unittest.TestCase):
     def test_load(self):
         p = Params.load('../example/official_PHE.params')
         self.assertEqual(p.NAME, 'PHE')

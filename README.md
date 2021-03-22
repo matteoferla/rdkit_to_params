@@ -30,7 +30,7 @@ And yes, I am copying my legal mumbojumbo from South Park.
 ## Rationale
 This is a fresh rewrite of ``mol_to_params.py``. For three reasons:
 
-* I cannot share my 2to3 port and modded module-version of ``mol_to_params.py`` due to licence.
+* I cannot share my 2to3 port and modd  ed module-version of ``mol_to_params.py`` due to licence.
 * I want to modify `params` files and more as opposed to use a standalone script.
 * RDKit does not save ``mol2`` files, yet knows about atom names and Gasteiger-Massilli charges and more...
 
@@ -223,6 +223,29 @@ for properties, but without the partial charge.
 The criterion for an amino acid is if the substracture `*NCC(~O)*` is matched (see `_aminoacid_override`).
 
 However, `C(=O)C([*:3])[NH]` will be parsed as `[CH](=O)C([*:3])[NH]`, i.e. with a radical amine and an aldehyde.
+
+Here is an example of making a sequence with a custom residue (without writing to file):
+```python
+import nglview as nv
+from rdkit_to_params import Params
+
+# make params
+p = Params.from_smiles('CCCCC(N*)C(*)=O', name='NLE')
+p.PROPERTIES.append('ALIPHATIC')
+p.PROPERTIES.append('HYDROPHOBIC')
+# p.test() would test it in isolation.
+
+# add to pose
+pose = pyrosetta.Pose()
+rst = p.add_residuetype(pose)
+pyrosetta.rosetta.core.pose.make_pose_from_sequence(pose, 'AX[NLE]A', rst)
+
+# relax and show
+scorefxn = pyrosetta.get_fa_scorefxn()
+relax = pyrosetta.rosetta.protocols.relax.FastRelax(scorefxn, 15)
+relax.apply(pose)
+nv.show_rosetta(pose)
+```
 
 ### Greek
 In the amino acid case, the class attribute `greekification` changes the atomnames to CB, CD2 etc.

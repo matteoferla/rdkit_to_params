@@ -438,6 +438,13 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
             self.retype_by_name(aa_map)
             # change conn
             elemental['CONN'] = 2  # when LOWER and UPPER exist the CONN is CONN3.
+            # add properties
+            self.PROPERTIES.append('PROTEIN')
+            self.PROPERTIES.append('ALPHA_AA')
+            self.PROPERTIES.append('L_AA')
+            # HYDROPHOBIC ALIPHATIC
+            self.FIRST_SIDECHAIN_ATOM.append('CB')
+            self.BACKBONE_AA.append('ALA')
 
     def _greekify(self):
         greek = list('ABGDEZHTIKLMNXOPRS')

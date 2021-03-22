@@ -19,9 +19,25 @@ import re, logging
 from warnings import warn
 
 from collections import abc
+from enum import Enum
 
 
-########################################################################################################################
+# ======================================================================================================================
+
+class Singletony(Enum):
+    """
+    Is the entry
+
+    1. a singleton (e.g. ``NAME``) which can have only one value
+    0. a regular multientry affair (e.g. ``ATOM``)
+    2. a singleton (e.g. ``PROPERTY``) which can accept multiple values
+    """
+    multiton = 0  # non-singleton
+    singleton = 1
+    list_singleton = 2
+
+
+# ----------------------------------------------------------------------------------------------------------------------
 
 class Entries(abc.MutableSequence):
     """
@@ -35,9 +51,9 @@ class Entries(abc.MutableSequence):
     ``Entries.from_name('BOND')``
     """
 
-    choices = {} # this gets filled after each class is declared.
+    choices = {}  # this gets filled after each class is declared.
 
-    def __init__(self, entry_cls, singleton: bool = True):
+    def __init__(self, entry_cls, singleton: Singletony = Singletony.singleton):
         """
         The entries class is a fancy constrained list. The data is actually stored in ``.data``.
 
@@ -45,7 +61,9 @@ class Entries(abc.MutableSequence):
         :param singleton: is only one entry allowed?
         """
         self.entry_cls = entry_cls
-        self.singleton = singleton
+        self.singleton = Singletony(singleton)
+        if self.singleton != Singletony.multiton and isinstance(self.entry_cls, GenericListEntry):
+            raise TypeError(f'{type(self.entry_cls)} is incompatible with {self.singleton}')
         self.data = []
 
     @classmethod
@@ -72,9 +90,13 @@ class Entries(abc.MutableSequence):
             raise ValueError(f'No idea what to do with {value}')
 
     def __setitem__(self, index, value):
-        if self.singleton:
-            index = 0
-        self.data[index] = self._assign_value(value)
+        if self.singleton == Singletony.multiton:
+            self.data[index] = self._assign_value(value)
+        elif self.singleton == Singletony.singleton or len(self.data) == 0:
+            self.data = [self._assign_value(value)]
+        else:  # assumes it's a GenericListEntry and has a value.
+            neo = self._assign_value(value)
+            self.data[0].values.extend(neo.values)
 
     def __delitem__(self, index):
         if self.singleton:
@@ -82,10 +104,10 @@ class Entries(abc.MutableSequence):
         del self.data[index]
 
     def insert(self, index, value):
-        if self.singleton:
-            self.data = [self._assign_value(value)]
-        else:
+        if self.singleton == Singletony.multiton:  # non-singleton
             self.data.insert(index, self._assign_value(value))
+        else:
+            self[0] = value
 
     def __len__(self):
         return len(self.data)
@@ -128,7 +150,7 @@ class GenericListEntry:
 
     def __init__(self, header: str, *args: str):
         self.header = header.strip().upper()
-        self.values = args
+        self.values = list(args)
 
     def __str__(self) -> str:
         v = ' '.join(self.values)
@@ -146,7 +168,7 @@ class NBR_ATOMEntry(GenericEntry):
         super().__init__(header='NBR_ATOM', body=body)
 
 
-Entries.choices['NBR_ATOM'] = (NBR_ATOMEntry, True)
+Entries.choices['NBR_ATOM'] = (NBR_ATOMEntry, Singletony.singleton)
 
 
 #########################################################################################################
@@ -156,7 +178,8 @@ class NBR_RADIUSEntry(GenericEntry):
         super().__init__(header='NBR_RADIUS', body=body)
 
 
-Entries.choices['NBR_RADIUS'] = (NBR_RADIUSEntry, True)
+Entries.choices['NBR_RADIUS'] = (NBR_RADIUSEntry, Singletony.singleton)
+
 
 #########################################################################################################
 
@@ -165,7 +188,8 @@ class MAINCHAIN_ATOMS(GenericListEntry):
         super().__init__('MAINCHAIN_ATOMS', *args)
 
 
-Entries.choices['MAINCHAIN_ATOMS'] = (MAINCHAIN_ATOMS, False)
+Entries.choices['MAINCHAIN_ATOMS'] = (MAINCHAIN_ATOMS, Singletony.list_singleton)
+
 
 #########################################################################################################
 
@@ -174,8 +198,8 @@ class CommentEntry(GenericEntry):
         super().__init__(header='#', body=body)
 
 
-Entries.choices['#'] = (CommentEntry, False)
-Entries.choices['comment'] = (CommentEntry, False)
+Entries.choices['#'] = (CommentEntry, Singletony.multiton)
+Entries.choices['comment'] = (CommentEntry, Singletony.multiton)
 
 
 #########################################################################################################
@@ -186,7 +210,7 @@ class ATOM_ALIASEntry(GenericEntry):
         super().__init__(header='ATOM_ALIAS', body=body)
 
 
-Entries.choices['ATOM_ALIAS'] = (ATOM_ALIASEntry, False)
+Entries.choices['ATOM_ALIAS'] = (ATOM_ALIASEntry, Singletony.multiton)
 
 
 #########################################################################################################
@@ -215,7 +239,7 @@ class IO_STRINGEntry:
         return cls(name3, name1)
 
 
-Entries.choices['IO_STRING'] = (IO_STRINGEntry, True)
+Entries.choices['IO_STRING'] = (IO_STRINGEntry, Singletony.singleton)
 
 
 #########################################################################################################
@@ -247,7 +271,8 @@ class CONNECTEntry:
         elif not self.connect_name:
             self.connect_name = self.connect_type.replace('_CONNECT', '')
         else:
-            raise ValueError(f'I missed this case ({self.connect_name}, {self.connect_type}) in this badly written method')
+            raise ValueError(
+                f'I missed this case ({self.connect_name}, {self.connect_type}) in this badly written method')
 
     def __str__(self) -> str:
         return f'{self.connect_type} {self.atom_name}'
@@ -257,7 +282,7 @@ class CONNECTEntry:
         return cls(*text.split())
 
 
-Entries.choices['CONNECT'] = (CONNECTEntry, False)
+Entries.choices['CONNECT'] = (CONNECTEntry, Singletony.multiton)
 
 
 #########################################################################################################
@@ -286,7 +311,7 @@ class CHIEntry:
         return cls(**data)
 
 
-Entries.choices['CHI'] = (CHIEntry, False)
+Entries.choices['CHI'] = (CHIEntry, Singletony.multiton)
 
 
 #########################################################################################################
@@ -333,7 +358,7 @@ class ICOOR_INTERNALEntry:
         return cls(*data)
 
 
-Entries.choices['ICOOR_INTERNAL'] = (ICOOR_INTERNALEntry, False)
+Entries.choices['ICOOR_INTERNAL'] = (ICOOR_INTERNALEntry, Singletony.multiton)
 
 
 #########################################################################################################
@@ -382,7 +407,7 @@ class BONDEntry:
         return cls(**data)
 
 
-Entries.choices['BOND'] = (BONDEntry, False)
+Entries.choices['BOND'] = (BONDEntry, Singletony.multiton)
 
 
 #########################################################################################################
@@ -411,7 +436,6 @@ class ATOMEntry:
     def __hash__(self):
         return hash(self.name)
 
-
     @classmethod
     def from_str(cls, text: str):
         rex = re.match('(.{4}) (.{4}) (.{4}) +([-\d\.]+)', text)
@@ -422,7 +446,7 @@ class ATOMEntry:
         return cls(**data)
 
 
-Entries.choices['ATOM'] = (ATOMEntry, False)
+Entries.choices['ATOM'] = (ATOMEntry, Singletony.multiton)
 
 
 #########################################################################################################
@@ -449,7 +473,8 @@ class CUT_BONDEntry:
         data = dict(zip(('first', 'second'), rex.groups()))
         return cls(**data)
 
-Entries.choices['CUT_BOND'] = (CUT_BONDEntry, False)
+
+Entries.choices['CUT_BOND'] = (CUT_BONDEntry, Singletony.multiton)
 
 
 #########################################################################################################
@@ -458,11 +483,12 @@ class PDB_ROTAMERSEntry(GenericEntry):
     """
     This does zero checks for fine existance.
     """
+
     def __init__(self, body: str):
         super().__init__(header='PDB_ROTAMERS', body=body)
 
 
-Entries.choices['PDB_ROTAMERS'] = (PDB_ROTAMERSEntry, True)
+Entries.choices['PDB_ROTAMERS'] = (PDB_ROTAMERSEntry, Singletony.singleton)
 
 
 #########################################################################################################
@@ -472,7 +498,7 @@ class ROTAMER_AAEntry(GenericEntry):
         super().__init__(header='ROTAMER_AA', body=body)
 
 
-Entries.choices['ROTAMER_AA'] = (ROTAMER_AAEntry, True)
+Entries.choices['ROTAMER_AA'] = (ROTAMER_AAEntry, Singletony.singleton)
 
 
 #########################################################################################################
@@ -484,7 +510,7 @@ class AAEntry(GenericEntry):
         super().__init__(header='AA', body=body)
 
 
-Entries.choices['AA'] = (AAEntry, True)
+Entries.choices['AA'] = (AAEntry, Singletony.singleton)
 
 
 #########################################################################################################
@@ -493,12 +519,13 @@ class TYPEEntry(GenericEntry):
     """
     LIGAND or POLYMER. No exceptions.
     """
+
     def __init__(self, body: str = 'LIGAND'):
         assert body in ('POLYMER', 'LIGAND'), f'residue TYPE {body} is neither POLYMER or LIGAND'
         super().__init__(header='TYPE', body=body)
 
 
-Entries.choices['TYPE'] = (TYPEEntry, True)
+Entries.choices['TYPE'] = (TYPEEntry, Singletony.singleton)
 
 
 #########################################################################################################
@@ -510,17 +537,19 @@ class ADD_RINGEntry(GenericEntry):
         super().__init__(header='ADD_RING', body=body)
 
 
-Entries.choices['ADD_RING'] = (ADD_RINGEntry, False)
+Entries.choices['ADD_RING'] = (ADD_RINGEntry, Singletony.multiton)
 
 
 #########################################################################################################
 
 class PROPERTIESEntry(GenericListEntry):
+    # https://graylab.jhu.edu/PyRosetta.documentation/pyrosetta.rosetta.core.chemical.html#pyrosetta.rosetta.core.chemical.ResidueProperty
     def __init__(self, *args: str):
         super().__init__('PROPERTIES', *args)
 
 
-Entries.choices['PROPERTIES'] = (PROPERTIESEntry, False)
+Entries.choices['PROPERTIES'] = (PROPERTIESEntry, Singletony.list_singleton)
+
 
 #########################################################################################################
 
@@ -530,36 +559,46 @@ class VARIANTEntry(GenericListEntry):
         super().__init__('VARIANT', *args)
 
 
-Entries.choices['VARIANT'] = (VARIANTEntry, False)
+Entries.choices['VARIANT'] = (VARIANTEntry, Singletony.list_singleton)
+
 
 #########################################################################################################
 
 class FIRST_SIDECHAIN_ATOMEntry(GenericEntry):
-    def __init__(self, body:str):
+    def __init__(self, body: str):
         super().__init__(header='FIRST_SIDECHAIN_ATOM', body=body)
 
 
-Entries.choices['FIRST_SIDECHAIN_ATOM'] = (FIRST_SIDECHAIN_ATOMEntry, True)
+Entries.choices['FIRST_SIDECHAIN_ATOM'] = (FIRST_SIDECHAIN_ATOMEntry, Singletony.singleton)
+
+
+class BACKBONE_AAEntry(GenericEntry):
+    def __init__(self, body: str):
+        assert len(body) == 3, f'{body} is not 3 char long'
+        super().__init__(header='BACKBONE_AA', body=body.upper())
+
+
+Entries.choices['BACKBONE_AA'] = (BACKBONE_AAEntry, Singletony.singleton)
 
 
 #########################################################################################################
 
 class RAMA_PREPRO_FILENAMEEntry(GenericEntry):
-    def __init__(self, body:str):
+    def __init__(self, body: str):
         super().__init__(header='RAMA_PREPRO_FILENAME', body=body)
 
 
-Entries.choices['RAMA_PREPRO_FILENAME'] = (RAMA_PREPRO_FILENAMEEntry, True)
+Entries.choices['RAMA_PREPRO_FILENAME'] = (RAMA_PREPRO_FILENAMEEntry, Singletony.singleton)
 
 
 #########################################################################################################
 
 class METAL_BINDING_ATOMSEntry(GenericListEntry):
-    def __init__(self, *args:str):
+    def __init__(self, *args: str):
         super().__init__('METAL_BINDING_ATOMS', *args)
 
 
-Entries.choices['METAL_BINDING_ATOMS'] = (METAL_BINDING_ATOMSEntry, True)
+Entries.choices['METAL_BINDING_ATOMS'] = (METAL_BINDING_ATOMSEntry, Singletony.singleton)
 
 
 #########################################################################################################
@@ -569,7 +608,6 @@ class ACT_COORD_ATOMSEntry(GenericListEntry):
         super().__init__('ACT_COORD_ATOMS', *args)
 
 
-Entries.choices['ACT_COORD_ATOMS'] = (ACT_COORD_ATOMSEntry, True)
-
+Entries.choices['ACT_COORD_ATOMS'] = (ACT_COORD_ATOMSEntry, Singletony.singleton)
 
 #########################################################################################################
