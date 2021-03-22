@@ -7,13 +7,7 @@ __doc__ = \
     There are probably loads of mistakes here ---or more correctly
     in ``_RDKitPrepMixin()._add_rtypes`` or ``_RDKitPrepMixin()._add_genrtypes``.
     """
-
-__author__ = "Matteo Ferla. [Github](https://github.com/matteoferla)"
-__email__ = "matteo.ferla@gmail.com"
-__date__ = "5 November 2020 A.D."
-__license__ = "MIT"
-__version__ = "1.1.3"
-__citation__ = "None."
+from ..version import *
 
 ########################################################################################################################
 

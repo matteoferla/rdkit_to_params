@@ -7,13 +7,7 @@ This contains ``make_constraint`` which is creates a constraint file.
 It is completely independent and different in style because it was different.
 It is not integral to the conversion, it's just a utility.
     """
-
-__author__ = "Matteo Ferla. [Github](https://github.com/matteoferla)"
-__email__ = "matteo.ferla@gmail.com"
-__date__ = "5 November 2020 A.D."
-__license__ = "MIT"
-__version__ = "1.1.3"
-__citation__ = "None."
+from .version import *
 
 ########################################################################################################################
 
