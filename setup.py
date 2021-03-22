@@ -5,7 +5,7 @@ __url__ = "https://github.com/matteoferla/rdkit_to_params"
 __email__ = "matteo.ferla@gmail.com"
 __date__ = "29 January 2021 A.D."
 __license__ = "MIT"
-__version__ = "1.1.5b"
+__version__ = "1.1.6"
 __citation__ = "Manuscript in preparation. See Fragmenstein"
 
 # ---------- imports  --------------------------------------------------------------------------------------------------
