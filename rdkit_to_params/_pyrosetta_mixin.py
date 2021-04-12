@@ -50,8 +50,9 @@ class _PoserMixin:
         rts = pose.conformation().modifiable_residue_type_set_for_conf(pyrosetta.rosetta.core.chemical.FULL_ATOM_t)
         buffer = pyrosetta.rosetta.std.stringbuf(self.dumps())
         stream = pyrosetta.rosetta.std.istream(buffer)
-        new = pyrosetta.rosetta.core.chemical.read_topology_file(stream, self.NAME,
-                                                                 rts)  # no idea what the second argument does
+        new = pyrosetta.rosetta.core.chemical.read_topology_file(stream,
+                                                                 self.NAME,
+                                                                 rts)
         rts.add_base_residue_type(new)
         return rts
 
