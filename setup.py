@@ -18,8 +18,8 @@ import os
 
 this_directory = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(this_directory, 'README.md'), encoding='utf-8') as f:
-    __doc__ = f.read()
-descr = 'Create or modify Rosetta params files (topology files) from scratch, RDKit mols or another params file.'
+    long_description = f.read()
+description = 'Create or modify Rosetta params files (topology files) from scratch, RDKit mols or another params file.'
 
 # ---------- Non pip modules  ------------------------------------------------------------------------------------------
 
@@ -44,8 +44,8 @@ setup(
     license=__license__,
     author=__author__,
     author_email=__email__,
-    description=descr,
-    long_description=__doc__,
+    description=description,
+    long_description=long_description,
     long_description_content_type='text/markdown',
     test_suite='tests',
     install_requires=[],  # none pip
