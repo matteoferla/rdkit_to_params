@@ -44,6 +44,7 @@ class _RDKitRenameMixin:
 
     def _set_PDBInfo_atomname(self, atom, name, overwrite=False):
         info = atom.GetPDBResidueInfo()
+        # if has none, it is None
         if info is None:
             isHeteroAtom = not self.is_aminoacid()
             atom.SetMonomerInfo(Chem.AtomPDBResidueInfo(atomName=self.pad_name(name),

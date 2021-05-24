@@ -13,7 +13,7 @@ from ..version import *
 
 from ._rdkit_prep import _RDKitPrepMixin
 
-from typing import List, Dict, Union, Optional
+from typing import *
 from collections import defaultdict, deque, namedtuple
 from rdkit import Chem
 from rdkit.Chem import AllChem
@@ -55,15 +55,20 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         self.CUT_BOND.data = []
         self.CHI.data = []
         self.BOND.data = []
-        # ICOOR
-        self._parse_icoors()  # fills self.ordered_atoms
-        # ATOM & CONNECT
-        self._parse_atoms()
-        # CHI
-        self._parse_rotatables()
+        self.CHARGE.data = []
+        # correct for ions
+        if self.mol.GetNumAtoms() >= 3:
+            # ICOOR
+            self._parse_icoors()  # fills self.ordered_atoms
+            # ATOM & CONNECT
+            self._parse_atoms()
+            # CHI
+            self._parse_rotatables()
+        else:
+            self._parse_w_virtuals()  # adds virt atom to the mol
+            self._parse_atoms()
         # BOND
         self._parse_bonds()
-
         # NBR
         self._find_centroid()
 
@@ -93,8 +98,8 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
             while self._undescribed:
                 self._prevent_overcycling()
                 atom = self._undescribed[0]
-                if atom.GetSymbol() == '*':
-                    self.log.debug(f'Dummy not allowed in first three lines...')
+                if atom.GetSymbol() == '*' or atom.GetProp('_rType') == 'VIRT':
+                    self.log.debug(f'Dummy or Virtual not allowed in first three lines...')
                     self._undescribed.rotate(-1)
                     self._rotation_count += 1
                     continue  # This cannot be in the first three lines, whereas the R group is first in a canonical SMILES.
@@ -152,7 +157,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
             self._add_icoor(atoms)
             self._rotation_count -= 1
 
-    def _add_icoor(self, atoms):
+    def _add_icoor(self, atoms: List[Chem.Atom]) -> None:
         # due to madness the same atom objects differ.
         self._undescribed.remove([this for this in self._undescribed if atoms[0].GetIdx() == this.GetIdx()][0])
         self.ordered_atoms.append(atoms[0])
@@ -205,7 +210,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
             dist = Chem.rdMolTransforms.GetBondLength(conf, ai, bi)
             angle = 180 - Chem.rdMolTransforms.GetAngleDeg(conf, ai, bi, ci)
             tor = Chem.rdMolTransforms.GetDihedralDeg(conf, ai, bi, ci, di)
-        except ValueError:
+        except Exception:
             pass
         if str(tor) == 'nan':  # quicker than isnan.
             tor = 0
@@ -216,11 +221,12 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
     ## ============= Atom entries ======================================================================================
 
     def _parse_atoms(self):
-        self.log.debug(f'Filling ATOM')
+        self.log.debug(f'Filling ATOM records...')
         for atom in self.ordered_atoms:
             self._parse_atom(atom)
 
     def _parse_atom(self, atom: Chem.Atom) -> None:
+        self.log.debug(f'Parsing {atom.GetSymbol()} at position {atom.GetIdx()}')
         if atom.GetSymbol() == '*':
             neighbor = atom.GetNeighbors()[0]
             n_name = self._get_PDBInfo_atomname(neighbor)
@@ -317,10 +323,13 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
     def _parse_bond(self, bond: Chem.Bond) -> None:
         if any([atom.GetSymbol() == '*' for atom in (bond.GetBeginAtom(), bond.GetEndAtom())]):
             return None  # CONNECT.
-        if bond.GetBondTypeAsDouble() == 1.5:
+        order = bond.GetBondTypeAsDouble()
+        if order == 0:
+            order = 1 # it's a virtual atom, but actually a vanadium
+        if order == 1.5:
             order = 4
         else:
-            order = int(bond.GetBondTypeAsDouble())
+            order = int(order)
         begin = bond.GetBeginAtom()
         end = bond.GetEndAtom()
         self.BOND.append([self._get_PDBInfo_atomname(begin),
@@ -362,3 +371,58 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
                 info.SetIsHeteroAtom(False)
             else:
                 info.SetIsHeteroAtom(True)
+
+    # ============ VIRT ================================================================================================
+    def _parse_w_virtuals(self):
+        """
+        Add 1 or 2 vanadium (virtual) atoms, 0.1A away
+        :return:
+        """
+        target_atom_count = 3  # this is fixed due to icoor. But the code works for more if add_icoor part is corrected.
+        nonvirtuals = self.mol.GetNumAtoms()
+        virtuals = target_atom_count - nonvirtuals
+        if virtuals <= 0:
+            raise ValueError('Human called this when there are 3+ atoms.')
+        elif virtuals == target_atom_count:
+            raise ValueError('There are no atoms')
+        # 1 or more virtuals
+        anchor = sorted(self.mol.GetAtoms(), key=lambda atom: atom.GetAtomicNum(), reverse=True)[0]
+        anchor_idx = anchor.GetIdx()  # either 0 or 1
+        mol = Chem.RWMol(self.mol)
+        for i in range(virtuals):
+            virtual = Chem.Atom('V')
+            virtual.SetDoubleProp('_GasteigerCharge', 0.0)
+            virtual.SetProp('_rType', 'VIRT')
+            mol.AddAtom(virtual)
+            virtual_idx = mol.GetNumAtoms() - 1
+            virtual = mol.GetAtomWithIdx(virtual_idx)  # the PDBResidue info does not get set?
+            mol.AddBond(anchor_idx, virtual_idx, Chem.BondType.ZERO)
+            virtual.SetMonomerInfo(Chem.AtomPDBResidueInfo(atomName=f'V{i+1}',
+                                                        serialNumber=virtual_idx,
+                                                        residueName=self.NAME,
+                                                        isHeteroAtom=not self.is_aminoacid())
+                                   )
+        # get the coords off the original (without vanadium "virtual" atoms)
+        coordMap = {i: mol.GetConformer().GetAtomPosition(i) for i in range(self.mol.GetNumAtoms())}
+        AllChem.EmbedMolecule(mol, coordMap=coordMap)
+        for i in range(virtuals):
+            AllChem.SetBondLength(mol.GetConformer(), anchor_idx, i+nonvirtuals, 0.1)
+        self.mol = mol.GetMol()
+        self._undescribed = deque(self.mol.GetAtoms())
+        self.ordered_atoms = []
+        atoms = mol.GetAtoms()
+        self._add_icoor([atoms[0],
+                         atoms[0],
+                         atoms[1],
+                         atoms[2]])
+        self._add_icoor([atoms[1],
+                         atoms[0],
+                         atoms[1],
+                         atoms[2]])
+        self._add_icoor([atoms[2],
+                         atoms[1],
+                         atoms[0],
+                         atoms[2]])
+        self.ordered_atoms = self.mol.GetAtoms()
+        # no idea why but the atoms in ordered_atoms get altered and this segfaults
+        # calling any getter results in a segfault
