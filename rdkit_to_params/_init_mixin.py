@@ -13,7 +13,7 @@ from .entries import Entries
 class _ParamsInitMixin:
 
     # This is solely for my sanity/notebook and does not and should not be used.
-    ordering = ['NAME', 'IO_STRING', 'TYPE', 'AA', 'ROTAMER_AA', '#' 'ATOM', 'ATOM_ALIAS', 'BOND', 'CUT_BOND',
+    ordering = ['NAME', 'IO_STRING', 'TYPE', 'AA', 'ROTAMER_AA', '#' 'ATOM', 'ATOM_ALIAS', 'BOND', 'CHARGE', 'CUT_BOND',
                 'CHI', 'CONNECT', 'ADD_RING', 'PROPERTIES', 'VARIANT', 'METAL_BINDING_ATOMS', 'FIRST_SIDECHAIN_ATOM',
                 'MAINCHAIN_ATOMS', 'BACKBONE_AA',
                 'RAMA_PREPRO_FILENAME', 'ACT_COORD_ATOMS',
@@ -30,6 +30,7 @@ class _ParamsInitMixin:
         self.ATOM_ALIAS = Entries.from_name('ATOM_ALIAS')
         self.BOND = Entries.from_name('BOND')
         self.CUT_BOND = Entries.from_name('CUT_BOND')
+        self.CHARGE = Entries.from_name('CHARGE')
         self.CONNECT = Entries.from_name('CONNECT')
         self.CHI = Entries.from_name('CHI')
         self.NBR_ATOM = Entries.from_name('NBR_ATOM')

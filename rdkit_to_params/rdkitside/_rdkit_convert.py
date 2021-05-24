@@ -242,8 +242,11 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
             else:
                 self.CONNECT.append([n_name, len(self.CONNECT) + 1, 'CONNECT'])
         else:
-            d = self._get_atom_descriptors(atom)
+            d = self._get_atom_descriptors(atom)  # dict of 'name', 'rtype': 'mtype', 'partial'
             self.ATOM.append(d)
+            formal = atom.GetFormalCharge()
+            if formal != 0:
+                self.CHARGE.append([d['name'], formal])
 
     ## ============= Chi entries =======================================================================================
 

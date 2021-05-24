@@ -249,9 +249,9 @@ class Params(_ParamsIoMixin, _RDKitMixin, _PoserMixin):
                     atom.name = newname
                     break
             # find in entries of the kind with ``first``, ``second``, ``third``, ``fourth`` attributes, which are atom names 4 char
-            for attr in ('BOND', 'CHI', 'CUT_BOND'):  # ICOOR_INTERNAL ATOM_ALIAS
+            for attr in ('BOND', 'CHARGE', 'CHI', 'CUT_BOND', 'CHARGE'):  # ICOOR_INTERNAL ATOM_ALIAS
                 for entry in getattr(self, attr):
-                    for key in 'first', 'second', 'third', 'fourth':
+                    for key in 'first', 'second', 'third', 'fourth', 'atom':
                         if hasattr(entry, key) and getattr(entry, key) == oldname:
                             setattr(entry, key, newname)
                             break

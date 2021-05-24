@@ -221,6 +221,8 @@ class IO_STRINGEntry:
     name1: str = 'Z'
 
     def __post_init__(self):
+        if len(self.name3) == 2:
+            self.name3 += ' '
         assert len(self.name3) == 3, f'{self.name3} is not 3 char long'
         assert len(self.name1) == 1, f'{self.name1} is not 1 char long'
 
@@ -469,6 +471,31 @@ class CUT_BONDEntry:
 
 
 Entries.choices['CUT_BOND'] = (CUT_BONDEntry, Singletony.multiton)
+
+
+#########################################################################################################
+
+@dataclass
+class CHARGEEntry:
+    """
+    No idea if anything respects this.
+    """
+    atom: str
+    charge: int
+
+    def __str__(self) -> str:
+        return f'CHARGE {self.atom} FORMAL {self.charge}'
+
+    @classmethod
+    def from_str(cls, text: str):
+        rex = re.match('(\w+) FORMAL ([-\d])', text)
+        if rex is None:
+            raise ValueError(f'CHARGE entry "{text}" is not formatted correctly')
+        data = dict(zip(('atom', 'charge'), rex.groups()))
+        return cls(**data)
+
+
+Entries.choices['CHARGE'] = (CHARGEEntry, Singletony.multiton)
 
 
 #########################################################################################################
