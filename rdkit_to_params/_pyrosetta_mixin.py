@@ -40,11 +40,24 @@ class _PoserMixin:
         lig = pyrosetta.rosetta.core.conformation.ResidueFactory.create_residue(rts.name_map(self.NAME))
         pose.append_residue_by_jump(lig, 1)
         if relax:
-            cycles = 15
-            scorefxn = pyrosetta.get_fa_scorefxn()
-            relax = pyrosetta.rosetta.protocols.relax.FastRelax(scorefxn, cycles)
-            relax.apply(pose)
+            self._relax(pose)
         return pose
+
+    def to_polymeric_pose(self, relax=False, sequence:Optional[str]=None):
+        if sequence is None:
+            sequence = f'AX[{self.name}]A'
+        pose = pyrosetta.Pose()
+        rts = self.add_residuetype(pose)
+        pyrosetta.rosetta.core.pose.make_pose_from_sequence(pose, sequence, rts)
+        if relax:
+            self._relax(pose)
+        return pose
+
+    def _relax(self, pose, scorefxn: Optional[pyrosetta.ScoreFunction]=None, cycles: Optional[int] = 15):
+        if scorefxn is None:
+            scorefxn = pyrosetta.get_fa_scorefxn()
+        relax = pyrosetta.rosetta.protocols.relax.FastRelax(scorefxn, cycles)
+        relax.apply(pose)
 
     def add_residuetype(self, pose: pyrosetta.Pose) -> pyrosetta.rosetta.core.chemical.ResidueTypeSet:
         rts = pose.conformation().modifiable_residue_type_set_for_conf(pyrosetta.rosetta.core.chemical.FULL_ATOM_t)
