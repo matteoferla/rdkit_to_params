@@ -5,8 +5,8 @@ __url__ = "https://github.com/matteoferla/rdkit_to_params"
 __email__ = "matteo.ferla@gmail.com"
 __date__ = "29 January 2021 A.D."
 __license__ = "MIT"
-__version__ = "1.1.7"
-__citation__ = "Manuscript in preparation. See Fragmenstein"
+__version__ = "1.1.8"
+__citation__ = "https://advances.sciencemag.org/content/7/16/eabf8711 (Fragmenstein)"
 
 # ---------- imports  --------------------------------------------------------------------------------------------------
 # remember it's `python setup.py sdist` and `python -m twine upload dist/rdkit_to_params-1.0.5.tar.gz`
