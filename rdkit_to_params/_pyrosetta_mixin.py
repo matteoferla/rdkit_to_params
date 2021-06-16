@@ -45,7 +45,7 @@ class _PoserMixin:
 
     def to_polymeric_pose(self, relax=False, sequence:Optional[str]=None):
         if sequence is None:
-            sequence = f'AX[{self.name}]A'
+            sequence = f'AX[{self.NAME}]A'
         pose = pyrosetta.Pose()
         rts = self.add_residuetype(pose)
         pyrosetta.rosetta.core.pose.make_pose_from_sequence(pose, sequence, rts)
