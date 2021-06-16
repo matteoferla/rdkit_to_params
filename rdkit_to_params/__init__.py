@@ -277,6 +277,14 @@ class Params(_ParamsIoMixin, _RDKitMixin, _PoserMixin):
     # ==== extras for cap
 
     def _prep_for_terminal(self,  mainchain_atoms: Optional[List[str]]=None, connection_idx: int=1):
+        """
+        p = Params.from_smiles('*C(=O)[C@@]1NC(=O)CC1', name='CAP', atomnames=[None, 'C', 'O', 'CA', 'N'])
+        p.make_N_terminal_cap(mainchain_atoms=['C', 'O', 'CA', 'N'])
+        import nglview as nv
+        view = nv.show_rosetta(p.to_polymeric_pose(sequence='X[CAP]AA'))
+        view.add_hyperball('*')
+        view
+        """
         assert connection_idx > 0, 'Fortran counting the connection_idx'
         assert len(self.CONNECT) >= connection_idx, 'No attachment atom... without a connection it\'s a ligand'
         self.TYPE[0] = 'POLYMER'
@@ -303,6 +311,14 @@ class Params(_ParamsIoMixin, _RDKitMixin, _PoserMixin):
                     raise ValueError(f'{atom_name} does not appear in the ATOM entries.')
 
     def _change_conn_for_terminal(self, connection_idx, new_name):
+        """
+        LOWER_CONNECT attaches to N
+        UPPER_CONNECT attaches to C
+
+        :param connection_idx:
+        :param new_name:
+        :return:
+        """
         for conn in self.CONNECT:
             if conn.index == connection_idx:
                 self.rename_atom(conn.connect_name, new_name)
@@ -323,28 +339,30 @@ class Params(_ParamsIoMixin, _RDKitMixin, _PoserMixin):
         :return:
         """
         self._prep_for_terminal(mainchain_atoms, connection_idx)
-        self.VARIANT.append(['LOWER_TERMINUS_VARIANT'])
-        self._change_conn_for_terminal(connection_idx, 'UPPER')
+        # self.VARIANT.append(['LOWER_TERMINUS_VARIANT'])
+        self._change_conn_for_terminal(connection_idx, 'LOWER')
         self.CONNECT.append(dict(atom_name='',
                                  index=len(self.CONNECT)+1,
-                                 connect_type='LOWER_CONNECT NONE',
-                                 connect_name='LOWER')
+                                 connect_type='UPPER_CONNECT NONE',
+                                 connect_name='UPPER')
                            )
 
     def make_N_terminal_cap(self, mainchain_atoms=None, connection_idx=1):
         """
                 Make current covalent compound into a N-terminal cap, aka. goes on the N-terminal end of the peptide.
                 That is the compound has a C-terminus (LOWER)
+                LOWER_CONNECT attaches to N so should be None.
+
 
                 :param connection_idx: Fortran indiced
                 :return:
                 """
         self._prep_for_terminal(mainchain_atoms, connection_idx)
-        self.VARIANT.append(['UPPER_TERMINUS_VARIANT'])
-        self._change_conn_for_terminal(connection_idx, 'LOWER')
-        self.CONNECT.append(CONNECTEntry(atom_name='',
+        # self.VARIANT.append(['UPPER_TERMINUS_VARIANT'])
+        self._change_conn_for_terminal(connection_idx, 'UPPER')
+        self.CONNECT.append(dict(atom_name='',
                                          index=len(self.CONNECT) + 1,
-                                         connect_type='UPPER_CONNECT NONE',
-                                         connect_name='UPPER')
+                                         connect_type='LOWER_CONNECT NONE',
+                                         connect_name='LOWER')
                             )
 
