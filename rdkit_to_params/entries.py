@@ -345,7 +345,7 @@ class ICOOR_INTERNALEntry:
 
     @classmethod
     def from_str(cls, text: str):
-        rex = re.match(' (.{5}) (.{11}) (.{11}) (.{11}) (.{5}) (.{5}) (.{3,5})', text)
+        rex = re.match(' (.{5}) (.{11}) (.{11}) (.{11}) (.{5}) (.{5}) (.{1,5})', text)
         if rex is None:
             raise ValueError(f'ICOOR_INTERNAL Entry "{text}" is not formatted correctly')
         data = list(rex.groups())
