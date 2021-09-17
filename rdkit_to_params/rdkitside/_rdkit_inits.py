@@ -11,8 +11,9 @@ from ..version import *
 
 from rdkit import Chem
 from rdkit.Chem import AllChem
-from typing import Optional, Dict, List
+from typing import *
 from ._rdkit_convert import _RDKitCovertMixin
+from rdkit.Chem.EnumerateStereoisomers import EnumerateStereoisomers
 
 import warnings
 
@@ -128,3 +129,29 @@ class _RDKitInitMixin(_RDKitCovertMixin):
         warnings.warn('CHI DISABLED. - has issues with this mode')  # todo correct this issue!
         self.CHI.data = [] # !!!!
         return self
+
+    @staticmethod
+    def split_stereoisomers(mol: Chem.Mol) -> Dict[str, List[Chem.Mol]]:
+        """
+        Utility to split stereoisomers of amino acids into L/D
+
+        :param mol:
+        :return: dict of keys 'levo', 'dextro', 'neither', 'both'
+        """
+        # prep
+        levo = Chem.MolFromSmiles('C[C@@H](C(=O))N')
+        dextro = Chem.MolFromSmiles('C[C@H](C(=O))N')
+        splits = {'levo': [], 'dextro': [], 'neither': [], 'both': []}
+        for isomer in EnumerateStereoisomers(mol):
+            is_levo = isomer.HasSubstructMatch(levo, useChirality=True)
+            is_dextro = isomer.HasSubstructMatch(dextro, useChirality=True)
+            if is_levo and is_dextro:  # two groups.
+                box = 'both'
+            elif is_levo:  # L
+                box = 'levo'
+            elif is_dextro:  # D
+                box = 'dextro'
+            else:  # gly or not amino acid
+                box = 'neither'
+            splits[box].append(isomer)
+        return splits

@@ -30,7 +30,7 @@ except ImportError:
 
 #################### rdkit #############################################################################################
 try:
-    from .rdkitside import _RDKitMixin
+    from .rdkitside import _RDKitMixin, neutralise
     from .constraint import Constraints
     from rdkit import Chem
 except ImportError:

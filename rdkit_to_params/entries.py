@@ -345,12 +345,18 @@ class ICOOR_INTERNALEntry:
 
     @classmethod
     def from_str(cls, text: str):
+        # position based.
         rex = re.match(' (.{5}) (.{11}) (.{11}) (.{11}) (.{5}) (.{5}) (.{1,5})', text)
-        if rex is None:
+        # space based... bad.
+        rex2 = re.search('(\w+)\s+([-\d\.]+)\s+([-\d\.]+)\s+([-\d\.]+)\s+(\w+)\s+(\w+)\s+(\w+)', text)
+        if rex:
+            data = list(rex.groups())
+        elif rex2:
+            data = list(rex2.groups())
+        else:
             raise ValueError(f'ICOOR_INTERNAL Entry "{text}" is not formatted correctly')
-        data = list(rex.groups())
         for i in range(1, 4):
-            data[i] = float(data[i])
+            data[i] = float(data[i].strip())
         return cls(*data)
 
 
