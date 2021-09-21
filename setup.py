@@ -5,7 +5,7 @@ __url__ = "https://github.com/matteoferla/rdkit_to_params"
 __email__ = "matteo.ferla@gmail.com"
 __date__ = "29 January 2021 A.D."
 __license__ = "MIT"
-__version__ = "1.1.8"
+__version__ = "1.1.9"
 __citation__ = "https://advances.sciencemag.org/content/7/16/eabf8711 (Fragmenstein)"
 
 # ---------- imports  --------------------------------------------------------------------------------------------------
@@ -27,7 +27,9 @@ if not util.find_spec('rdkit'):
     warn('Albeit optional, a lot of this code relies on rdkit which cannot be pip installed.' +
                'To install try either ' +
                'conda install -c conda-forge rdkit or ' +
-               'sudo apt-get/brew install python3-rdkit or visit rdkit documentation.')
+               'sudo apt-get/brew install python3-rdkit or visit rdkit documentation.' +
+         'or use the new pip install rdkit-pypi'
+         )
 
 if not util.find_spec('pyrosetta'):
     warn('The minimisation part of this code uses pyrosetta, which has to be downloaded from ' +

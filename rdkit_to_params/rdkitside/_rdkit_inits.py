@@ -126,7 +126,7 @@ class _RDKitInitMixin(_RDKitCovertMixin):
         self.move_back()
         self.convert_mol()
         #####
-        warnings.warn('CHI DISABLED. - has issues with this mode')  # todo correct this issue!
+        #warnings.warn('CHI DISABLED. - has issues with this mode')  # todo correct this issue!
         self.CHI.data = [] # !!!!
         return self
 

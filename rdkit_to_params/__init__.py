@@ -116,6 +116,13 @@ class Params(_ParamsIoMixin, _RDKitMixin, _PoserMixin):
         else:
             self.IO_STRING[0].name3 = name
 
+    @property
+    def nbr(self):
+        if self.NBR_RADIUS:
+            return float(self.NBR_RADIUS[0].body)
+        else:
+            return float('nan')
+
     def is_aminoacid(self):
         if len(self.TYPE) == 0:
             self.TYPE.append('LIGAND')
