@@ -41,5 +41,6 @@ def neutralise(mol: Chem) -> Chem:
         atom.SetFormalCharge(-1)
         protons_removed += 1
     AllChem.ComputeGasteigerCharges(mol)
-    return dict(protons_added=protons_added,
-                protons_removed=protons_removed)
+    # return dict(protons_added=protons_added,
+    #             protons_removed=protons_removed)
+    return mol
