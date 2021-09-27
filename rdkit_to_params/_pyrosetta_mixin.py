@@ -59,7 +59,16 @@ class _PoserMixin:
         relax = pyrosetta.rosetta.protocols.relax.FastRelax(scorefxn, cycles)
         relax.apply(pose)
 
-    def add_residuetype(self, pose: pyrosetta.Pose) -> pyrosetta.rosetta.core.chemical.ResidueTypeSet:
+    def add_residuetype(self, pose: pyrosetta.Pose, reset:bool=False) \
+                                            -> pyrosetta.rosetta.core.chemical.ResidueTypeSet:
+        """
+        Adds the params to a copy of a residue type set of a pose.
+        If reset is True it will also save it as the default RTS —it keeps other custom residue types.
+
+        :param pose:
+        :param reset:
+        :return:
+        """
         rts = pose.conformation().modifiable_residue_type_set_for_conf(pyrosetta.rosetta.core.chemical.FULL_ATOM_t)
         buffer = pyrosetta.rosetta.std.stringbuf(self.dumps())
         stream = pyrosetta.rosetta.std.istream(buffer)
@@ -67,6 +76,8 @@ class _PoserMixin:
                                                                  self.NAME,
                                                                  rts)
         rts.add_base_residue_type(new)
+        if reset:
+            pose.conformation().reset_residue_type_set_for_conf(rts)
         return rts
 
 
