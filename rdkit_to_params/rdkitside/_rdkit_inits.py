@@ -36,6 +36,11 @@ class _RDKitInitMixin(_RDKitCovertMixin):
         """
         cls.log.debug('`from_mol` called...')
         self = cls.load_mol(mol, generic, name)  # stores and calls .fix_mol() method in prep file.
+        if atomnames is None:
+            pass
+        else:
+            self.rename(atomnames)
+            self.polish_mol()
         self.convert_mol()
         return self
 

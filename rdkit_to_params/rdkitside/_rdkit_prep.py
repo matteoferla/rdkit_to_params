@@ -430,7 +430,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
                 if neigh.GetSymbol() == 'H':
                     self.rename_atom(neigh, ' HA ')
             if self.greekification:
-                self._greekify()
+                self.greekify()
             # add rtypes
             self.retype_by_name(aa_map)
             # change conn
@@ -443,8 +443,20 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
             self.FIRST_SIDECHAIN_ATOM.append('CB')
             self.BACKBONE_AA.append('ALA')
 
-    def _greekify(self):
-        greek = list('ABGDEZHTIKLMNXOPRS')
+    def greekify(self, ascii=True):
+        """
+        Converts the atom names into relative names, i.e. using the Greek alphabet.
+
+        Its name is terrible, but ``hellenify`` or ``translitterate`` are too confusing.
+
+        If ascii is True, these will be Greek-like letters else
+        they will be actual Greek Unicode letters if it is not -- A really terrible idea.
+        """
+        if ascii:
+            greek = list('ABGDEZHTIKLMNXOPRS')
+        else:
+            greek = list('ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ')
+
         greekdex = defaultdict(list)
         ca = self.get_atom_by_name('CA')
         for atom in self.mol.GetAtoms():
@@ -462,13 +474,12 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
                 name = f'{greekdex[k][0].GetSymbol(): >2}{greek[k]} '
                 self.rename_atom(greekdex[k][0], name)
             elif len(greekdex[k]) < 36:
-                l = list(range(1,10)) + list(string.ascii_uppercase)
+                l = list(string.digits+string.ascii_uppercase)[1:]
                 for i, atom in enumerate(greekdex[k]):
                     name = f'{atom.GetSymbol(): >2}{greek[k]}{l[i]}'
-                    self.rename_atom(greekdex[k][0], name)
+                    self.rename_atom(greekdex[k][i], name)
             else:
-                pass # no renaming. This is insane corner case. A 36 HA AA is madness.
-
+                pass  # no renaming. This is insane corner case. A 36 HA AA is madness.
 
     def _fix_atom_names(self):
         elemental = defaultdict(int)
