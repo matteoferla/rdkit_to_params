@@ -451,6 +451,9 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
 
         If ascii is True, these will be Greek-like letters else
         they will be actual Greek Unicode letters if it is not -- A really terrible idea.
+        (In PyMOL, it will not read. In Rosetta, Unicodes cause strange errors,
+        e.g. "Can't add atom named ` CΒ` to ResidueType  as it already has one with that name." even if it isn't)
+        Also, no PBD file has CA with upper case alpha). It is mainly as an experiment to see what happens TBH
         """
         if ascii:
             greek = list('ABGDEZHTIKLMNXOPRS')
