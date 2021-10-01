@@ -59,7 +59,7 @@ class DummyMasker:
     def __init__(self, mol: Chem.Mol):
         self.mol = mol
         self.is_masked = False
-        self.dummies = mol.GetAtomsMatchingQuery(Chem.rdqueries.AtomNumEqualsQueryAtom(0))
+        self.dummies = list(  mol.GetAtomsMatchingQuery(Chem.rdqueries.AtomNumEqualsQueryAtom(0))  )
 
     def mask(self):
         for dummy in self.dummies:
@@ -73,6 +73,7 @@ class DummyMasker:
 
     def __enter__(self):
         self.mask()
+        return self
 
     def __exit__(self, exc_type: Exception, exc_value: str, exc_traceback: 'bultins.traceback'):
         self.unmask()
