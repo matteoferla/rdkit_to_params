@@ -611,7 +611,6 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
                     else:
                         self.log.warning(f'Could not find a decent atomname for {atom.GetIdx()}')
 
-
     def add_Hs(self):
         """
         Add Hs before convert_mol step!
@@ -621,7 +620,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         self.mol = AllChem.AddHs(self.mol)
         changed = []
         Chem.SanitizeMol(self.mol)
-        for atom in self.mol.GetAtoms():
+        for atom in self.mol.GetAtoms():  # TODO switch to DummyMasker
             if atom.GetSymbol() == '*':
                 atom.SetAtomicNum(6)
                 atom.SetHybridization(Chem.HybridizationType.SP3)

@@ -44,3 +44,35 @@ def neutralise(mol: Chem) -> Chem:
     # return dict(protons_added=protons_added,
     #             protons_removed=protons_removed)
     return mol
+
+class DummyMasker:
+    """
+    A context manager that allows operations on a mol containing dummy atoms (R/*) that
+    otherwise would raise an RDKit error.
+    It simply masks and unmasks the dummy atoms.
+
+    >>> mol = Chem.MolFromSmiles('*CCC(C)C')
+    >>> with DummyMasker(mol):
+    >>>     AllChem.EmbedMolecule(mol)
+    """
+
+    def __init__(self, mol: Chem.Mol):
+        self.mol = mol
+        self.is_masked = False
+        self.dummies = mol.GetAtomsMatchingQuery(Chem.rdqueries.AtomNumEqualsQueryAtom(0))
+
+    def mask(self):
+        for dummy in self.dummies:
+            dummy.SetAtomicNum(6)
+        self.is_masked = True
+
+    def unmask(self):
+        for dummy in self.dummies:
+            dummy.SetAtomicNum(0)
+        self.is_masked = False
+
+    def __enter__(self):
+        self.mask()
+
+    def __exit__(self, exc_type: Exception, exc_value: str, exc_traceback: 'bultins.traceback'):
+        self.unmask()

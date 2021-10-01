@@ -106,7 +106,7 @@ class _RDKitInitMixin(_RDKitCovertMixin):
     def _from_smiles_w_pdb(cls, pdb: Chem.Mol, smiles, generic, name):
         dodgy = Chem.SplitMolByPDBResidues(pdb, whiteList=[name])[name]
         AllChem.SanitizeMol(dodgy)
-        good = Chem.MolFromSmiles(smiles)
+        good = Chem.MolFromSmiles(smiles) # TODO switch to DummyMasker
         good.SetProp('_Name', name)
         dummies = []
         for atom in good.GetAtoms():

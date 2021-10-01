@@ -12,6 +12,7 @@ from ..version import *
 ########################################################################################################################
 
 from ._rdkit_prep import _RDKitPrepMixin
+from .utilities import DummyMasker
 
 from typing import *
 from collections import defaultdict, deque, namedtuple
@@ -34,6 +35,10 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
 
         :return:
         """
+        if not self.mol.GetConformers():
+            self.log.warn('The molecule passed has no conformers... Adding.')
+            with DummyMasker(self.mol):
+                AllChem.EmbedMolecule(self.mol)
         # NAME
         if self.mol.HasProp("_Name"):
             title = self.mol.GetProp("_Name").strip()
