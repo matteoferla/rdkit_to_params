@@ -52,9 +52,11 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         self.mol = mol
         self.generic = generic
         self.TYPE.append('LIGAND')
-        if name is not None:
-            self.NAME = name
-            self.mol.SetProp('_Name', name)
+        if name is None:
+            self.log.warning('Residue `name` not specified defaulting to "LIG"')
+            name = 'LIG'
+        self.NAME = name
+        self.mol.SetProp('_Name', name)
         self.fix_mol()
         # conversion elsewhere
         return self
