@@ -1,4 +1,4 @@
-__all__ = ['neutralise']
+__all__ = ['neutralise', 'DummyMasker']
 
 from rdkit import Chem
 from rdkit.Chem import AllChem

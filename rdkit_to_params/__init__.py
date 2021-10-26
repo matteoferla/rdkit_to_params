@@ -30,7 +30,7 @@ except ImportError:
 
 #################### rdkit #############################################################################################
 try:
-    from .rdkitside import _RDKitMixin, neutralise
+    from .rdkitside import _RDKitMixin, neutralise, DummyMasker
     from .constraint import Constraints
     from rdkit import Chem
 except ImportError:
@@ -39,8 +39,14 @@ except ImportError:
     class Chem:
         Atom = None
 
+    class DummyMasker:
+        raise ImportError('RDkit is required for DummyMasker')
+
     class _RDKitMixin:
         pass
+
+    def neutralise(*args, **kargs):
+        raise ImportError('RDkit is required for neutralise')
 
 
 #################### main class ########################################################################################
