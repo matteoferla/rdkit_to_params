@@ -167,6 +167,9 @@ class Constraints:
                        self.custom_constraint]
         return ''.join(constraints)
 
+    def _repr_html_(self):
+        return str(self)
+
     def dumps(self):
         return str(self)
 
