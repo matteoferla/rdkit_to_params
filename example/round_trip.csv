@@ -1,0 +1,2052 @@
+,error,path,name,type,comments,error_original,good_original,SMILES,is_name3_too_long,formatting_error
+PTR.params,ERROR: unrecognized aa type PTR,ptm-caa/PTR.params,PTR,TYPE POLYMER," rosetta residue topology file
+ residue type
+ APL CB to sidechain heavyatom distance -- max observed at residue 74 in ubiquitin",ERROR: unrecognized aa type PTR,False,,False,
+SEP.params,ERROR: unrecognized aa type SEP,ptm-caa/SEP.params,SEP,TYPE POLYMER," rosetta residue topology file
+ residue type
+ APL O to CB distance; max observed in ubiquitin",ERROR: unrecognized aa type SEP,False,,False,
+TPO.params,ERROR: unrecognized aa type TPO,ptm-caa/TPO.params,TPO,TYPE POLYMER," rosetta residue topology file
+ residue type
+ APL O to CB distance; max observed in ubiquitin",ERROR: unrecognized aa type TPO,False,,False,
+B3D.params,,beta-peptide/B3D.params,B3D,TYPE POLYMER," rosetta residue topology file
+ residue type
+ APL O to CB distance -- max O-CB observed in ubiquitin
+ NCAA_ROTLIB_NUM_ROTAMER_BINS 2 3 3",,True,N[C@H](CCO)CC(O)O,False,
+B3H.params,,beta-peptide/B3H.params,B3H,TYPE POLYMER," rosetta residue topology file
+ residue type
+ APL CB to sidechain heavy atom disance -- max observed on residue 74 of ubiquitin",,True,N[C@H](CCO)CC1CNCN1,False,
+B3P.params,,beta-peptide/B3P.params,B3P,TYPE POLYMER," rosetta residue topology file
+ residue type
+ APL Declare that the NV atom should shadow the N atom to the cart-bonded term.
+ APL O to CB distance; max observed in ubiquitin",,True,OCC[C@@H]1CCCN1,False,
+B3F.params,,beta-peptide/B3F.params,B3F,TYPE POLYMER," rosetta residue topology file
+ residue type
+ APL CB to side chain heavyatom distance -- max as observed on residue 74 of ubiquitin
+ NCAA_ROTLIB_NUM_ROTAMER_BINS 2 3 2",,True,N[C@H](CCO)CC1CCCCC1,False,
+B3R.params,segfault,beta-peptide/B3R.params,B3R,TYPE POLYMER," rosetta residue topology file
+ residue type
+ APL CB to sidechain heavyatom distance -- max observed at residue 74 in ubiquitin",,True,,False,
+B3V.params,,beta-peptide/B3V.params,B3V,TYPE POLYMER," rosetta residue topology file
+ residue type",,True,CC(C)[C@H](N)CCO,False,
+B3N.params,,beta-peptide/B3N.params,B3N,TYPE POLYMER," rosetta residue topology file
+ residue type
+ APL O to CB distance; max observed in ubiquitin",,True,N[C@@H](O)C[C@H](N)CCO,False,
+B3X.params,segfault,beta-peptide/B3X.params,B3X,TYPE POLYMER," rosetta residue topology file
+ residue type
+ APL CB to side chain heavyatom distance -- max as observed on residue 74 of ubiquitin",,True,,False,
+cisACHC.params,segfault,,,,,name,False,,False,
+B3T.params,,beta-peptide/B3T.params,B3T,TYPE POLYMER," rosetta residue topology file
+ residue type
+ APL O to CB distance; max observed in ubiquitin",,True,C[C@@H](O)[C@H](N)CCO,False,
+B3L.params,,beta-peptide/B3L.params,B3L,TYPE POLYMER," rosetta residue topology file
+ residue type
+ ATOM  N   Nbb  NH1  -0.47
+ ATOM  CA  CAbb CT1  0.07
+ ATOM  CM  CAbb CT2  -0.18
+ ATOM  C   CObb C    0.51
+ ATOM  O   OCbb O    -0.51
+ ATOM  CB  CH2  CT2  -0.18
+ ATOM  CG  CH1  CT1  -0.09
+ ATOM  CD1 CH3  CT3  -0.27
+ ATOM  CD2 CH3  CT3  -0.27
+ ATOM  H   HNbb H    0.31
+ ATOM  HA  Hapo HB   0.09
+ ATOM 1HB  Hapo HA   0.09
+ ATOM 2HB  Hapo HA   0.09
+ ATOM  HG  Hapo HA   0.09
+ ATOM 1HD1 Hapo HA   0.09
+ ATOM 2HD1 Hapo HA   0.09
+ ATOM 3HD1 Hapo HA   0.09
+ ATOM 1HD2 Hapo HA   0.09
+ ATOM 2HD2 Hapo HA   0.09
+ ATOM 3HD2 Hapo HA   0.09
+ ATOM 1HM  Hapo HB   0.09
+ ATOM 2HM  Hapo HB   0.09
+ APL O to CB distance; max observed in ubiquitin",,True,CC(C)C[C@H](N)CCO,False,
+B3Q.params,,beta-peptide/B3Q.params,B3Q,TYPE POLYMER," rosetta residue topology file
+ residue type
+ APL CB to sidechain heavyatom distance -- max observed at residue 74 in ubiquitin",,True,NC1CC[C@@H](CCO)NO1,False,
+B3E.params,,beta-peptide/B3E.params,B3E,TYPE POLYMER," rosetta residue topology file
+ residue type
+ APL CB to furthest side chain heavy atom distance -- max as observed from res 74 on ubiquitin",,True,OCC[C@@H]1CC[C@H](O)ON1,False,
+B3I.params,,beta-peptide/B3I.params,B3I,TYPE POLYMER," rosetta residue topology file
+ residue type
+ APL O to CB distance; max observed in ubiquitin",,True,CC[C@H](C)[C@H](N)CCO,False,
+cisACPC.params,segfault,,,,,name,False,,False,
+B3S.params,,beta-peptide/B3S.params,B3S,TYPE POLYMER," rosetta residue topology file
+ residue type
+ APL O to CB distance; max observed in ubiquitin",,True,N[C@@H](CO)CCO,False,
+B3K.params,segfault,beta-peptide/B3K.params,B3K,TYPE POLYMER," rosetta residue topology file
+ residue type
+ APL CB to side chain heavyatom distance --  max observed in residue 74 of ubiquitin",,True,,False,
+transACPC.params,segfault,,,,,name,False,,False,
+B3G.params,,beta-peptide/B3G.params,B3G,TYPE POLYMER," rosetta residue topology file
+ We are referring to this beta-amino acid as beta-3-glycine, in
+ analogy to the alpha-amino acids.  Confusingly, this is also
+ referred to in the literature as beta-Ala (or 3-amino propanoic
+ acid).
+ residue type
+ APL CA to O distance -- not yet measured; default to max CB to O distance",,True,NCCCO,False,
+B3C.params,,beta-peptide/B3C.params,B3C,TYPE POLYMER," rosetta residue topology file
+ residue type
+ APL O to CB distance -- max O-CB observed in ubiquitin",,True,N[C@@H](CS)CCO,False,
+B3O.params,,beta-peptide/B3O.params,B3O,TYPE POLYMER," rosetta residue topology file
+ residue type
+ APL CB to side chain heavyatom distance --  max observed in residue 74 of ubiquitin",,True,OCC[C@@H]1CCC[NH2+][NH2+]1,False,
+B3W.params,,beta-peptide/B3W.params,B3W,TYPE POLYMER," rosetta residue topology file
+ residue type
+ amw 4/15 changed to gaussian charges
+ ATOM  N   Nbb  NH1  -0.47
+ ATOM  CA  CAbb CT1  0.07
+ ATOM  CM  CAbb CT2  -0.18
+ ATOM  C   CObb C    0.51
+ ATOM  O   OCbb O    -0.51
+ ATOM  CB  CH2  CT2  -0.18
+ ATOM  CG  aroC CY   -0.03
+ ATOM  CD1 aroC CA   0.035
+ ATOM  CD2 aroC CPT  -0.02
+ ATOM  NE1 Ntrp NY   -0.61
+ ATOM  CE2 aroC CPT  0.13
+ ATOM  CE3 aroC CA   -0.115
+ ATOM  CZ2 aroC CA   -0.115
+ ATOM  CZ3 aroC CA   -0.115
+ ATOM  CH2 aroC CA   -0.115
+ ATOM  H   HNbb H    0.31
+ ATOM  HE1 Hpol H    0.38
+ ATOM  HD1 Haro HP   0.115
+ ATOM  HZ2 Haro HP   0.115
+ ATOM  HH2 Haro HP   0.115
+ ATOM  HZ3 Haro HP   0.115
+ ATOM  HE3 Haro HP   0.115
+ ATOM  HA  Hapo HB   0.09
+ ATOM 1HB  Hapo HA   0.09
+ ATOM 2HB  Hapo HA   0.09
+ ATOM 1HM  Hapo HB   0.09
+ ATOM 2HM  Hapo HB   0.09
+ APL CB to sidechain heavyatom distance -- max observed at residue 74 in ubiquitin",,True,N[C@H](CCO)CC1CNC2CCCCC12,False,
+B3M.params,,beta-peptide/B3M.params,B3M,TYPE POLYMER," rosetta residue topology file
+ residue type
+ APL CB to sidechain heavyatom distance -- max observed on residue 74 of ubiquitin",,True,OCC[C@@H]1CC[SH]2CN12,False,
+B3A.params,,beta-peptide/B3A.params,B3A,TYPE POLYMER," rosetta residue topology file
+ This is beta-3-homoalanine, also referred to in the literature as
+ 3-aminobutanoic acid (beta-Abu).
+ residue type
+ APL O to CB DISTANCE -- MAX O-CB OBSERVED IN UBQ",,True,C[C@H](N)CCO,False,
+B3Y.params,,beta-peptide/B3Y.params,B3Y,TYPE POLYMER," rosetta residue topology file
+ residue type
+ APL CB to sidechain heavyatom distance -- max observed at residue 74 in ubiquitin",,True,N[C@H](CCO)CC1CCC(O)CC1,False,
+08B.params,segfault,,,,,name,False,,False,
+08A.params,segfault,,,,,name,False,,False,
+MCY.params,segfault,,,,,name,False,,False,
+TFT.params,segfault,,,,,name,False,,False,
+TRAD_n.params,segfault,,,,,name,False,,False,
+TRCY_n.params,segfault,,,,,name,False,,False,
+TRGU_n.params,segfault,,,,,name,False,,False,
+TURA_n.params,segfault,,,,,name,False,,False,
+URA_s.params,segfault,,,,,name,False,,False,
+RAD_n.params,segfault,,,,,name,False,,False,
+RCY_n.params,segfault,,,,,name,False,,False,
+RGU_s.params,segfault,,,,,name,False,,False,
+RGU_n.params,segfault,,,,,name,False,,False,
+RCY_s.params,segfault,,,,,name,False,,False,
+RAD_s.params,segfault,,,,,name,False,,False,
+URA_n.params,segfault,,,,,name,False,,False,
+PPU.params,segfault,,,,,name,False,,False,
+I6A.params,segfault,,,,,name,False,,False,
+1MA.params,segfault,,,,,name,False,,False,
+A44.params,segfault,,,,,name,False,,False,
+INO.params,segfault,,,,,name,False,,False,
+CFM.params,segfault,,,,,name,False,,False,
+5IU.params,segfault,,,,,name,False,,False,
+1AP.params,segfault,,,,,name,False,,False,
+S2C.params,segfault,,,,,name,False,,False,
+OMU.params,segfault,,,,,name,False,,False,
+OMC.params,segfault,,,,,name,False,,False,
+1PU.params,segfault,,,,,name,False,,False,
+FA7.params,segfault,,,,,name,False,,False,
+BRU.params,segfault,,,,,name,False,,False,
+M1I.params,segfault,,,,,name,False,,False,
+CNM.params,segfault,,,,,name,False,,False,
+7MG.params,ATOM_ALIAS  H21 1H2,nucleic/rna_nonnatural/7MG.params,7MG,TYPE POLYMER," Need to correct this -- this residue is really supposed to have
+ a nonplanar ring
+ contact amw579@stanford.edu
+ residue type
+ PROTON_CHI 4 SAMPLES 1 -140 EXTRA 1
+ PROTON_CHI 4 SAMPLES 6 -140 -80 -20 40 100 160 EXTRA 1 15",,True,,False,
+6MG.params,segfault,,,,,name,False,,False,
+Q.params,segfault,,,,,name,False,,False,
+PUR.params,segfault,,,,,name,False,,False,
+NPU.params,segfault,,,,,name,False,,False,
+IGU.params,segfault,,,,,name,False,,False,
+MST.params,segfault,,,,,name,False,,False,
+K2C.params,segfault,,,,,name,False,,False,
+M2G.params,,nucleic/rna_nonnatural/M2G.params,M2G,TYPE POLYMER," Gaussian-corrected charges and positions
+ via HF/6-31G(d), SCF=Tight optimization
+ contact amw579@nyu.edu
+ residue type",,True,CN(C)C1NC(O)C2NCN([C@@H]3O[C@H](COP(O)O)[C@@H](O)[C@H]3O)C2N1,False,
+MTA.params,segfault,,,,,name,False,,False,
+OMG.params,segfault,,,,,name,False,,False,
+MOT.params,segfault,,,,,name,False,,False,
+1MG.params,segfault,,,,,name,False,,False,
+yW.params,segfault,,,,,name,False,,False,
+31U.params,segfault,,,,,name,False,,False,
+PSU.params,,nucleic/rna_nonnatural/PSU.params,PSU,TYPE POLYMER," Gaussian corrected charges and positions.
+ via HF/6-31G(d), SCF=Tight optimization
+ contact amw579@nyu.edu
+ residue type
+ ATOM  P   Phos H    1.632254
+ ATOM  OP2 OOC  H   -0.872767
+ ATOM  OP1 OOC  H   -0.777087
+ ATOM  O5' Oet2 H   -0.787763
+ ATOM  C5' CH2  H    0.019865
+ ATOM  C4' CH1  H    0.175569
+ ATOM  O4' Oet3 H   -0.702727
+ ATOM  C3' CH1  H    0.159936
+ ATOM  O3' Oet2 H   -0.759692
+ ATOM  C1' CH1  H    0.204083
+ ATOM  C2' CH2  H    0.097770
+ ATOM  O2' OH   H   -0.824212
+ ATOM  N1  Ntrp H   -0.882369
+ ATOM  C2  CObb H    1.030875
+ ATOM  O2  OCbb H   -0.656171
+ ATOM  N3  Ntrp H   -0.928441  what am I doing even
+ ATOM  C4  CObb H    0.843965
+ ATOM  O4  OCbb H   -0.634142
+ ATOM  C5  aroC H   -0.300369
+ ATOM  C6  aroC H    0.129864
+ ATOM  H5' Hapo H   0.153263
+ ATOM H5'' Hapo H   0.174148
+ ATOM  H4' Hapo H   0.168109
+ ATOM  H3' Hapo H   0.197051
+ ATOM  H2' Hapo H   0.178952
+ ATOM HO2' Hpol H   0.515879
+ ATOM  H1' Hapo H   0.193856
+ ATOM  H3  Hpol H   0.395142
+ ATOM  H1  Hpol H   0.462676
+ ATOM  H6  Haro H   0.395624
+  -0.882369 -- in URA, -0.34
+   1.030875 -- in URA,  0.51
+  -0.656171 -- in URA, -0.41
+  -0.928441 -- in URA, -0.46
+   0.843965 -- in URA,  0.5
+  -0.634142 -- in URA, -0.45
+  -0.300369 -- in URA, -0.15
+   0.129864 -- in URA,  0.17
+   0.395142 -- in URA, 0.36
+   0.462676 -- in URA, <=> H5, 0.17
+   0.395624 -- in URA, 0.17",,True,OC1NCC([C@@H]2O[C@H](COP(O)O)[C@@H](O)[C@H]2O)C(O)N1,False,
+RIA.params,segfault,,,,,name,False,,False,
+MHU.params,segfault,,,,,name,False,,False,
+52C.params,segfault,,,,,name,False,,False,
+2ST.params,segfault,,,,,name,False,,False,
+C43.params,segfault,,,,,name,False,,False,
+A2M.params,segfault,,,,,name,False,,False,
+CNS.params,segfault,,,,,name,False,,False,
+52U.params,segfault,,,,,name,False,,False,
+5BU.params,segfault,,,,,name,False,,False,
+MIA.params,segfault,,,,,name,False,,False,
+5JO.params,segfault,,,,,name,False,,False,
+G48.params,segfault,,,,,name,False,,False,
+M3G.params,segfault,,,,,name,False,,False,
+7DA.params,segfault,,,,,name,False,,False,
+OMI.params,segfault,,,,,name,False,,False,
+T6A.params,segfault,,,,,name,False,,False,
+SRG.params,segfault,,,,,name,False,,False,
+FMC.params,segfault,,,,,name,False,,False,
+NMT.params,segfault,,,,,name,False,,False,
+S4A.params,segfault,,,,,name,False,,False,
+M5U.params,segfault,,,,,name,False,,False,
+4OC.params,ATOM_ALIAS  H41 1H4,nucleic/rna_nonnatural/4OC.params,4OC,TYPE POLYMER," Gauss-corrected
+ via HF/6-31G(d), SCF=Tight optimization
+ contact amw579@nyu.edu
+ residue type
+ BOND VO4'  C1'
+ virt
+ PROTON_CHI 4 SAMPLES 1 -140 EXTRA 1
+ PROTON_CHI 4 SAMPLES 6 -140 -80 -20 40 100 160 EXTRA 1 15",,True,,False,
+3MC.params,segfault,,,,,name,False,,False,
+S4U.params,segfault,,,,,name,False,,False,
+MPU.params,segfault,,,,,name,False,,False,
+IHA.params,segfault,,,,,name,False,,False,
+8OG.params,segfault,,,,,name,False,,False,
+U36.params,segfault,,,,,name,False,,False,
+O2W.params,segfault,,,,,name,False,,False,
+5FC.params,segfault,,,,,name,False,,False,
+5FU.params,segfault,,,,,name,False,,False,
+UR3.params,,nucleic/rna_nonnatural/UR3.params,UR3,TYPE POLYMER," Gaussian corrected charges and positions
+ via HF/6-31G(d), SCF=Tight optimization
+ contact amw579@nyu.edu
+ residue type
+  better atom type!",,True,CN1C(O)CCN([C@@H]2O[C@H](COP(O)O)[C@@H](O)[C@H]2O)C1O,False,
+3TD.params,,nucleic/rna_nonnatural/3TD.params,3TD,TYPE POLYMER," AMW optimized
+ contact amw579@stanford.edu
+ residue type
+ This is a stretch -- really, it's two steps removed -- UR3 x PSU",,True,CN1C(O)CCN([C@@H]2O[C@H](COP(O)O)[C@@H](O)[C@H]2O)C1O,False,
+CNT.params,segfault,,,,,name,False,,False,
+4SU.params,segfault,,,,,name,False,,False,
+2AP.params,segfault,,,,,name,False,,False,
+F5C.params,segfault,,,,,name,False,,False,
+S4C.params,segfault,,,,,name,False,,False,
+2MU.params,,nucleic/rna_nonnatural/2MU.params,2MU,TYPE POLYMER," Replaced with QM charges and coordinates.
+ Not averaging charges over Hs. Since we don't do induced charge effects...
+ it makes sense to me to explicitly give the induced charges, then let sampling
+ find that conformation in H optimization.
+ Also did not re-adjust charges after removing the second methylphosphate from
+ optimization. The summed charges are very close to -1 anyway.
+ Didn't change coordinates of LOWER or associated Os.
+ via HF/6-31G(d), SCF=Tight optimization
+ contact amw579@nyu.edu
+ residue type
+ ATOM VO4' VIRT VIRT 0.00
+ BOND VO4'  C1'",,True,CO[C@@H]1[C@H](O)[C@@H](COP(O)O)O[C@H]1N1CCC(O)NC1O,False,
+FMA.params,segfault,,,,,name,False,,False,
+SSG.params,segfault,,,,,name,False,,False,
+FMU.params,segfault,,,,,name,False,,False,
+2MA.params,ATOM_ALIAS  H61 1H6,nucleic/rna_nonnatural/2MA.params,2MA,TYPE POLYMER," Now with Gaussian charges and corrected positions
+ via HF/6-31G(d), SCF=Tight optimization
+ contact amw579@nyu.edu
+ residue type
+ BOND VO4'  C1'
+ PROTON_CHI 4 SAMPLES 1 -140 EXTRA 1
+ PROTON_CHI 4 SAMPLES 6 -140 -80 -20 40 100 160 EXTRA 1 15",,True,,False,
+2FU.params,segfault,,,,,name,False,,False,
+2SU.params,segfault,,,,,name,False,,False,
+6MZ.params,ATOM_ALIAS  H62 2H6,nucleic/rna_nonnatural/6MZ.params,6MZ,TYPE POLYMER," AMW optimized
+ contact amw579@stanford.edu
+ residue type
+ BOND VO4'  C1'
+ AMW HOW TO SAMPLE
+ CHI 5 N1  C6  N6  C9
+ PROTON_CHI 5 SAMPLES 2 0 180",,True,,False,
+H2U.params,segfault,,,,,name,False,,False,
+MOU.params,segfault,,,,,name,False,,False,
+SRU.params,segfault,,,,,name,False,,False,
+5MU.params,segfault,,,,,name,False,,False,
+C5L.params,segfault,,,,,name,False,,False,
+C5T.params,segfault,,,,,name,False,,False,
+SRA.params,segfault,,,,,name,False,,False,
+S4G.params,segfault,,,,,name,False,,False,
+SSC.params,segfault,,,,,name,False,,False,
+2MG.params,ATOM_ALIAS  H21 1H2,nucleic/rna_nonnatural/2MG.params,2MG,TYPE POLYMER," Gaussian corrected charges and locations
+ via HF/6-31G(d), SCF=Tight optimization
+ contact amw579@nyu.edu
+ residue type
+ ATOM VO4' VIRT VIRT 0.00
+ BOND VO4'  C1'
+ PROTON_CHI 4 SAMPLES 1 -140 EXTRA 1
+ PROTON_CHI 4 SAMPLES 6 -140 -80 -20 40 100 160 EXTRA 1 15",,True,,False,
+SSU.params,segfault,,,,,name,False,,False,
+SSA.params,segfault,,,,,name,False,,False,
+FMG.params,segfault,,,,,name,False,,False,
+SRC.params,segfault,,,,,name,False,,False,
+5MC.params,ATOM_ALIAS  H41 1H4,nucleic/rna_nonnatural/5MC.params,5MC,TYPE POLYMER," Gaussian charges and positions
+ via HF/6-31G(d), SCF=Tight optimization
+ contact amw579@nyu.edu
+ residue type
+  Why isn't this CH1?
+ BOND VO4'  C1'
+ PROTON_CHI 4 SAMPLES 1 -140 EXTRA 1
+ PROTON_CHI 4 SAMPLES 6 -140 -80 -20 40 100 160 EXTRA 1 15",,True,,False,
+NST.params,segfault,,,,,name,False,,False,
+CMT.params,segfault,,,,,name,False,,False,
+OAU.params,segfault,,,,,name,False,,False,
+ICY.params,segfault,,,,,name,False,,False,
+APU.params,segfault,,,,,name,False,,False,
+G7M.params,ATOM_ALIAS  H21 1H2,nucleic/rna_nonnatural/G7M.params,G7M,TYPE POLYMER," Gaussian corrected charges and positions
+ via HF/6-31G(d), SCF=Tight optimization
+ contact amw579@stanford.edu
+ residue type
+ PROTON_CHI 4 SAMPLES 1 -140 EXTRA 1
+ PROTON_CHI 4 SAMPLES 6 -140 -80 -20 40 100 160 EXTRA 1 15",,True,,False,
+A4C.params,segfault,,,,,name,False,,False,
+M26.params,segfault,,,,,name,False,,False,
+THY.params,segfault,,,,,name,False,,False,
+GNP.params,,nucleic/dna/GNP.params,GNP,TYPE LIGAND,,,True,NC1NC(O)C2NCN([C@@H]3O[C@H](CO[PH](O)(O)O[PH](O)(O)N[PH](O)(O)O)[C@@H](O)[C@H]3O)C2N1,False,
+GDP.params,,nucleic/dna/GDP.params,GDP,TYPE LIGAND,,,True,N[C@H]1NC2C(NCN2[C@@H]2O[C@H](CO[PH](O)(O)O[PH](O)(O)O)[C@@H](O)[C@H]2O)[C@H](O)N1,False,
+GUA.params,segfault,,,,,name,False,,False,
+GTP.params,,nucleic/dna/GTP.params,GTP,TYPE LIGAND,,,True,N[C@H]1NC(O)C2NCN([C@@H]3O[C@H](CO[PH](O)(O)O[PH](O)(O)O[PH](O)(O)O)[C@@H](O)[C@H]3O)C2N1,False,
+ADE.params,segfault,,,,,name,False,,False,
+CYT.params,segfault,,,,,name,False,,False,
+RCY.params,segfault,,,,,name,False,,False,
+URA.params,segfault,,,,,name,False,,False,
+RGU.params,segfault,,,,,name,False,,False,
+TYR_D.params,segfault,,,,,name,False,,False,
+GLU_P1.params,segfault,,,,,name,False,,False,
+ASP_P1.params,segfault,,,,,name,False,,False,
+LYS_D.params,segfault,,,,,name,False,,False,
+ASP_P2.params,segfault,,,,,name,False,,False,
+GLU_P2.params,segfault,,,,,name,False,,False,
+HIS_P.params,segfault,,,,,name,False,,False,
+PWAT_V.params,segfault,,,,,name,False,,False,
+PWAT.params,segfault,,,,,name,False,,False,
+HOH_V.params,segfault,,,,,name,False,,False,
+TP5.params,segfault,,,,,name,False,,False,
+TP3.params,segfault,,,,,name,False,,False,
+HOH.params,,water/HOH.params,HOH,TYPE LIGAND," This used to be a direct copy of TP3.params but is now modified
+ for use with Frank and Ryan's solvation methods, giving the
+ water its own atom types for parameterization with the beta-nov16 ff
+ Did not want to use the TP3 residue type, since TP3 implies a particular
+ set of parameters and liquid behavior that is not matched here
+ This residue type can be converted to a virtual residue by the packer (effectively ""packing"" for water occupancy or lack of occupancy).
+ hack -- max distance from hbond anchor atom to farthest O position, since packing assumes that NBR_ATOM doesnt move during packing which is not true with repackable position waters...
+ need a better solution for this",,True,O,False,
+OU3_ASN.params,segfault,,,,,name,False,,False,
+OU3_TYR.params,segfault,,,,,name,False,,False,
+OU3_VAL.params,segfault,,,,,name,False,,False,
+OU3_GLN.params,segfault,,,,,name,False,,False,
+OU3_ILE.params,segfault,,,,,name,False,,False,
+OU3_PRO.params,segfault,,,,,name,False,,False,
+OU3_TRP.params,segfault,,,,,name,False,,False,
+OU3_LEU.params,segfault,,,,,name,False,,False,
+OU3_PHE.params,segfault,,,,,name,False,,False,
+OU3_THR.params,segfault,,,,,name,False,,False,
+OU3_ALA.params,segfault,,,,,name,False,,False,
+CL.params,ERROR: unrecognized atom_type_name 'Cl1p',anions/CL.params,CL ,TYPE LIGAND," I think right now that Mini has to have at least three atoms per residue,
+ hence the virtual atoms.",ERROR: unrecognized atom_type_name 'Cl1p',False,,False,
+2S-2-amino-7-sulfanylheptanoic-acid.params,segfault,,,,,name,False,,False,
+BPY.params,,metal_binding_ncaa/BPY.params,BPY,TYPE POLYMER," ATOM  FE  VIRT VIRT 1.98
+ BOND  FE    NE1
+ PROTON_CHI 1 SAMPLES 3 60 -60 180 EXTRA 1 20
+ PROTON_CHI 2 SAMPLES 3 60 -60 180 EXTRA 1 20
+ ICOOR_INTERNAL   FE   -170.177941   55.215847    2.170259   NE1   CD1   CZ
+ These lines stolen from ALA.params
+ I *believe* they will override any duplicate definitions above
+ PDB_ROTAMERS BPY.rotlib.pdb",,True,N[C@H](CO)CC1CCC(C2CCCCN2)NC1,False,
+6-mercapto-norleucine.params,segfault,,,,,name,False,,False,
+2.6_bisbromomethylpyridine.params,segfault,,,,,name,False,,False,
+2.7_bisbromomethylnaphthalene.params,segfault,,,,,name,False,,False,
+1.3.5_trisbromomethylbenzene_symm.params,segfault,,,,,name,False,,False,
+BoronateLDopa.params,segfault,,,,,name,False,,False,
+triazolemer_linker.params,segfault,,,,,name,False,,False,
+1.3_bisbromomethylbenzene.params,segfault,,,,,name,False,,False,
+1.4_bisbromomethylbenzene_symm.params,segfault,,,,,name,False,,False,
+trimesic_acid.params,,crosslinker/trimesic_acid.params,TMA,TYPE LIGAND," Trimesic acid, a non-canonical three-way crosslinking agent that
+ can link three amine-containing amino acid residues.
+ Params file originally created by Gauarv Bhardwaj, Ph.D.
+ Modified and added to database by Vikram K. Mulligan, Ph.D. (vmullig@uw.edu)
+ on 2 March 2017.
+ Where N2 would go.
+ Where N3 would go.
+ Where V3 would go.
+ Same as CONN2
+ Same as CONN3",,True,OCC1CC(CO)CC(CO)C1,False,
+2.6_bisbromomethylnaphthalene.params,segfault,,,,,name,False,,False,
+1.8_bisbromomethylnaphthalene.params,segfault,,,,,name,False,,False,
+1.3.5_trisbromomethylbenzene.params,segfault,,,,,name,False,,False,
+1.4_bisbromomethylbenzene.params,segfault,,,,,name,False,,False,
+trimesic_acid_symm.params,segfault,,,,,name,False,,False,
+1.2_bisbromomethylbenzene.params,segfault,,,,,name,False,,False,
+PAF.params,segfault,,,,,name,False,,False,
+QAF.params,segfault,,,,,name,False,,False,
+QRI.params,segfault,,,,,name,False,,False,
+KLD.params,segfault,,,,,name,False,,False,
+KLH.params,segfault,,,,,name,False,,False,
+QRE.params,segfault,,,,,name,False,,False,
+KA1.params,segfault,,,,,name,False,,False,
+TA3.params,segfault,,,,,name,False,,False,
+UA3.params,segfault,,,,,name,False,,False,
+MA5.params,segfault,,,,,name,False,,False,
+LA5.params,segfault,,,,,name,False,,False,
+OAH.params,segfault,,,,,name,False,,False,
+QAR.params,segfault,,,,,name,False,,False,
+PAR.params,segfault,,,,,name,False,,False,
+QRQ.params,segfault,,,,,name,False,,False,
+OAD.params,segfault,,,,,name,False,,False,
+LAG.params,segfault,,,,,name,False,,False,
+MAG.params,segfault,,,,,name,False,,False,
+UAA.params,segfault,,,,,name,False,,False,
+TAA.params,segfault,,,,,name,False,,False,
+OA6.params,segfault,,,,,name,False,,False,
+TAM.params,segfault,,,,,name,False,,False,
+UAM.params,segfault,,,,,name,False,,False,
+MAK.params,segfault,,,,,name,False,,False,
+LAK.params,segfault,,,,,name,False,,False,
+KAW.params,segfault,,,,,name,False,,False,
+SAQ.params,segfault,,,,,name,False,,False,
+RAQ.params,segfault,,,,,name,False,,False,
+MAS.params,segfault,,,,,name,False,,False,
+LAS.params,segfault,,,,,name,False,,False,
+KL6.params,segfault,,,,,name,False,,False,
+SAI.params,segfault,,,,,name,False,,False,
+RAI.params,segfault,,,,,name,False,,False,
+QA4.params,segfault,,,,,name,False,,False,
+PA4.params,segfault,,,,,name,False,,False,
+KAC.params,segfault,,,,,name,False,,False,
+RAE.params,segfault,,,,,name,False,,False,
+SAE.params,segfault,,,,,name,False,,False,
+UAY.params,segfault,,,,,name,False,,False,
+TAY.params,segfault,,,,,name,False,,False,
+SAS.params,segfault,,,,,name,False,,False,
+RAS.params,segfault,,,,,name,False,,False,
+OA4.params,segfault,,,,,name,False,,False,
+MAI.params,segfault,,,,,name,False,,False,
+LAI.params,segfault,,,,,name,False,,False,
+UAC.params,segfault,,,,,name,False,,False,
+TAC.params,segfault,,,,,name,False,,False,
+LAE.params,segfault,,,,,name,False,,False,
+MAE.params,segfault,,,,,name,False,,False,
+KAY.params,segfault,,,,,name,False,,False,
+RAG.params,segfault,,,,,name,False,,False,
+SAG.params,segfault,,,,,name,False,,False,
+KAA.params,segfault,,,,,name,False,,False,
+QR5.params,segfault,,,,,name,False,,False,
+KAM.params,segfault,,,,,name,False,,False,
+SAK.params,segfault,,,,,name,False,,False,
+RAK.params,segfault,,,,,name,False,,False,
+QA6.params,segfault,,,,,name,False,,False,
+PA6.params,segfault,,,,,name,False,,False,
+TAW.params,segfault,,,,,name,False,,False,
+UAW.params,segfault,,,,,name,False,,False,
+KL4.params,segfault,,,,,name,False,,False,
+MAQ.params,segfault,,,,,name,False,,False,
+LAQ.params,segfault,,,,,name,False,,False,
+QAH.params,segfault,,,,,name,False,,False,
+PAH.params,segfault,,,,,name,False,,False,
+QRG.params,segfault,,,,,name,False,,False,
+KA3.params,segfault,,,,,name,False,,False,
+SA5.params,segfault,,,,,name,False,,False,
+RA5.params,segfault,,,,,name,False,,False,
+OAR.params,segfault,,,,,name,False,,False,
+KLF.params,segfault,,,,,name,False,,False,
+QRK.params,segfault,,,,,name,False,,False,
+PAD.params,segfault,,,,,name,False,,False,
+QAD.params,segfault,,,,,name,False,,False,
+OAF.params,segfault,,,,,name,False,,False,
+QRS.params,segfault,,,,,name,False,,False,
+TA1.params,segfault,,,,,name,False,,False,
+UA1.params,segfault,,,,,name,False,,False,
+KLR.params,segfault,,,,,name,False,,False,
+QA2.params,segfault,,,,,name,False,,False,
+PA2.params,segfault,,,,,name,False,,False,
+KAI.params,segfault,,,,,name,False,,False,
+TAS.params,segfault,,,,,name,False,,False,
+UAS.params,segfault,,,,,name,False,,False,
+LAY.params,segfault,,,,,name,False,,False,
+MAY.params,segfault,,,,,name,False,,False,
+QR1.params,segfault,,,,,name,False,,False,
+RAC.params,segfault,,,,,name,False,,False,
+SAC.params,segfault,,,,,name,False,,False,
+KAE.params,segfault,,,,,name,False,,False,
+UAG.params,segfault,,,,,name,False,,False,
+TAG.params,segfault,,,,,name,False,,False,
+LAA.params,segfault,,,,,name,False,,False,
+MAA.params,segfault,,,,,name,False,,False,
+SAW.params,segfault,,,,,name,False,,False,
+RAW.params,segfault,,,,,name,False,,False,
+KAQ.params,segfault,,,,,name,False,,False,
+MAM.params,segfault,,,,,name,False,,False,
+LAM.params,segfault,,,,,name,False,,False,
+TAK.params,segfault,,,,,name,False,,False,
+UAK.params,segfault,,,,,name,False,,False,
+QAT.params,segfault,,,,,name,False,,False,
+PAT.params,segfault,,,,,name,False,,False,
+OAN.params,segfault,,,,,name,False,,False,
+MA3.params,segfault,,,,,name,False,,False,
+LA3.params,segfault,,,,,name,False,,False,
+TA5.params,segfault,,,,,name,False,,False,
+UA5.params,segfault,,,,,name,False,,False,
+KLV.params,segfault,,,,,name,False,,False,
+QRW.params,segfault,,,,,name,False,,False,
+SA1.params,segfault,,,,,name,False,,False,
+RA1.params,segfault,,,,,name,False,,False,
+QAL.params,segfault,,,,,name,False,,False,
+PAL.params,segfault,,,,,name,False,,False,
+QRC.params,segfault,,,,,name,False,,False,
+KLN.params,segfault,,,,,name,False,,False,
+OAV.params,segfault,,,,,name,False,,False,
+OAL.params,segfault,,,,,name,False,,False,
+KLT.params,segfault,,,,,name,False,,False,
+MA1.params,segfault,,,,,name,False,,False,
+LA1.params,segfault,,,,,name,False,,False,
+QAV.params,segfault,,,,,name,False,,False,
+PAV.params,segfault,,,,,name,False,,False,
+QRY.params,segfault,,,,,name,False,,False,
+KLL.params,segfault,,,,,name,False,,False,
+OAT.params,segfault,,,,,name,False,,False,
+SA3.params,segfault,,,,,name,False,,False,
+RA3.params,segfault,,,,,name,False,,False,
+KA5.params,segfault,,,,,name,False,,False,
+QRA.params,segfault,,,,,name,False,,False,
+QAN.params,segfault,,,,,name,False,,False,
+PAN.params,segfault,,,,,name,False,,False,
+QRM.params,segfault,,,,,name,False,,False,
+QR3.params,segfault,,,,,name,False,,False,
+KAG.params,segfault,,,,,name,False,,False,
+RAA.params,segfault,,,,,name,False,,False,
+SAA.params,segfault,,,,,name,False,,False,
+MAW.params,segfault,,,,,name,False,,False,
+LAW.params,segfault,,,,,name,False,,False,
+TAQ.params,segfault,,,,,name,False,,False,
+UAQ.params,segfault,,,,,name,False,,False,
+KL2.params,segfault,,,,,name,False,,False,
+RAM.params,segfault,,,,,name,False,,False,
+KAK.params,segfault,,,,,name,False,,False,
+TAI.params,segfault,,,,,name,False,,False,
+UAI.params,segfault,,,,,name,False,,False,
+OA2.params,segfault,,,,,name,False,,False,
+KAS.params,segfault,,,,,name,False,,False,
+RAY.params,segfault,,,,,name,False,,False,
+SAY.params,segfault,,,,,name,False,,False,
+LAC.params,segfault,,,,,name,False,,False,
+MAC.params,segfault,,,,,name,False,,False,
+UAE.params,segfault,,,,,name,False,,False,
+TAE.params,segfault,,,,,name,False,,False,
+PA5.params,segfault,,,,,name,False,,False,
+QA5.params,segfault,,,,,name,False,,False,
+RAH.params,segfault,,,,,name,False,,False,
+KAN.params,segfault,,,,,name,False,,False,
+LAR.params,segfault,,,,,name,False,,False,
+MAR.params,segfault,,,,,name,False,,False,
+UAT.params,segfault,,,,,name,False,,False,
+TAT.params,segfault,,,,,name,False,,False,
+QR6.params,segfault,,,,,name,False,,False,
+KAB.params,segfault,,,,,name,False,,False,
+SAD.params,segfault,,,,,name,False,,False,
+RAD.params,segfault,,,,,name,False,,False,
+MAF.params,segfault,,,,,name,False,,False,
+LAF.params,segfault,,,,,name,False,,False,
+KAV.params,segfault,,,,,name,False,,False,
+UAL.params,segfault,,,,,name,False,,False,
+TAL.params,segfault,,,,,name,False,,False,
+PAS.params,segfault,,,,,name,False,,False,
+QAS.params,segfault,,,,,name,False,,False,
+OAI.params,segfault,,,,,name,False,,False,
+UA2.params,segfault,,,,,name,False,,False,
+KLQ.params,segfault,,,,,name,False,,False,
+TA2.params,segfault,,,,,name,False,,False,
+LA4.params,segfault,,,,,name,False,,False,
+MA4.params,segfault,,,,,name,False,,False,
+OAE.params,segfault,,,,,name,False,,False,
+KLE.params,segfault,,,,,name,False,,False,
+QAG.params,segfault,,,,,name,False,,False,
+PAG.params,segfault,,,,,name,False,,False,
+QRH.params,segfault,,,,,name,False,,False,
+RA6.params,segfault,,,,,name,False,,False,
+SA6.params,segfault,,,,,name,False,,False,
+QRD.params,segfault,,,,,name,False,,False,
+PAK.params,segfault,,,,,name,False,,False,
+QAK.params,segfault,,,,,name,False,,False,
+KLI.params,segfault,,,,,name,False,,False,
+OAQ.params,segfault,,,,,name,False,,False,
+QRR.params,segfault,,,,,name,False,,False,
+OAG.params,segfault,,,,,name,False,,False,
+OAK.params,segfault,,,,,name,False,,False,
+LA6.params,segfault,,,,,name,False,,False,
+MA6.params,segfault,,,,,name,False,,False,
+KLS.params,segfault,,,,,name,False,,False,
+PAQ.params,segfault,,,,,name,False,,False,
+QAQ.params,segfault,,,,,name,False,,False,
+KLK.params,segfault,,,,,name,False,,False,
+OAS.params,segfault,,,,,name,False,,False,
+KA2.params,segfault,,,,,name,False,,False,
+RA4.params,segfault,,,,,name,False,,False,
+SA4.params,segfault,,,,,name,False,,False,
+PAI.params,segfault,,,,,name,False,,False,
+QAI.params,segfault,,,,,name,False,,False,
+QRF.params,segfault,,,,,name,False,,False,
+QAE.params,segfault,,,,,name,False,,False,
+PAE.params,segfault,,,,,name,False,,False,
+KLG.params,segfault,,,,,name,False,,False,
+QR4.params,segfault,,,,,name,False,,False,
+SAF.params,segfault,,,,,name,False,,False,
+RAF.params,segfault,,,,,name,False,,False,
+UAV.params,segfault,,,,,name,False,,False,
+KL5.params,segfault,,,,,name,False,,False,
+TAV.params,segfault,,,,,name,False,,False,
+KAL.params,segfault,,,,,name,False,,False,
+LAH.params,segfault,,,,,name,False,,False,
+MAH.params,segfault,,,,,name,False,,False,
+UAN.params,segfault,,,,,name,False,,False,
+TAN.params,segfault,,,,,name,False,,False,
+OA5.params,segfault,,,,,name,False,,False,
+RAR.params,segfault,,,,,name,False,,False,
+SAR.params,segfault,,,,,name,False,,False,
+KAT.params,segfault,,,,,name,False,,False,
+MAD.params,segfault,,,,,name,False,,False,
+LAD.params,segfault,,,,,name,False,,False,
+QRN.params,segfault,,,,,name,False,,False,
+QAA.params,segfault,,,,,name,False,,False,
+PAA.params,segfault,,,,,name,False,,False,
+KLC.params,segfault,,,,,name,False,,False,
+OAW.params,segfault,,,,,name,False,,False,
+PAM.params,segfault,,,,,name,False,,False,
+QAM.params,segfault,,,,,name,False,,False,
+KA6.params,segfault,,,,,name,False,,False,
+LA2.params,segfault,,,,,name,False,,False,
+MA2.params,segfault,,,,,name,False,,False,
+UA4.params,segfault,,,,,name,False,,False,
+KLW.params,segfault,,,,,name,False,,False,
+TA4.params,segfault,,,,,name,False,,False,
+QAY.params,segfault,,,,,name,False,,False,
+PAY.params,segfault,,,,,name,False,,False,
+QRV.params,segfault,,,,,name,False,,False,
+OAC.params,segfault,,,,,name,False,,False,
+TAF.params,segfault,,,,,name,False,,False,
+UAF.params,segfault,,,,,name,False,,False,
+OA1.params,segfault,,,,,name,False,,False,
+LAL.params,segfault,,,,,name,False,,False,
+MAL.params,segfault,,,,,name,False,,False,
+RAV.params,segfault,,,,,name,False,,False,
+SAV.params,segfault,,,,,name,False,,False,
+UAR.params,segfault,,,,,name,False,,False,
+KL1.params,segfault,,,,,name,False,,False,
+TAR.params,segfault,,,,,name,False,,False,
+LAT.params,segfault,,,,,name,False,,False,
+MAT.params,segfault,,,,,name,False,,False,
+KAH.params,segfault,,,,,name,False,,False,
+RAN.params,segfault,,,,,name,False,,False,
+SAN.params,segfault,,,,,name,False,,False,
+PA3.params,segfault,,,,,name,False,,False,
+QA3.params,segfault,,,,,name,False,,False,
+KAD.params,segfault,,,,,name,False,,False,
+KAR.params,segfault,,,,,name,False,,False,
+RAT.params,segfault,,,,,name,False,,False,
+SAT.params,segfault,,,,,name,False,,False,
+OA3.params,segfault,,,,,name,False,,False,
+UAH.params,segfault,,,,,name,False,,False,
+TAH.params,segfault,,,,,name,False,,False,
+LAN.params,segfault,,,,,name,False,,False,
+MAN.params,segfault,,,,,name,False,,False,
+TAD.params,segfault,,,,,name,False,,False,
+UAD.params,segfault,,,,,name,False,,False,
+KAF.params,segfault,,,,,name,False,,False,
+QR2.params,segfault,,,,,name,False,,False,
+RAL.params,segfault,,,,,name,False,,False,
+PA1.params,segfault,,,,,name,False,,False,
+QA1.params,segfault,,,,,name,False,,False,
+LAV.params,segfault,,,,,name,False,,False,
+MAV.params,segfault,,,,,name,False,,False,
+KL3.params,segfault,,,,,name,False,,False,
+RA2.params,segfault,,,,,name,False,,False,
+SA2.params,segfault,,,,,name,False,,False,
+KA4.params,segfault,,,,,name,False,,False,
+KLM.params,segfault,,,,,name,False,,False,
+OAY.params,segfault,,,,,name,False,,False,
+KLA.params,segfault,,,,,name,False,,False,
+QAC.params,segfault,,,,,name,False,,False,
+PAC.params,segfault,,,,,name,False,,False,
+QRL.params,segfault,,,,,name,False,,False,
+KLY.params,segfault,,,,,name,False,,False,
+OAA.params,segfault,,,,,name,False,,False,
+QRT.params,segfault,,,,,name,False,,False,
+PAW.params,segfault,,,,,name,False,,False,
+QAW.params,segfault,,,,,name,False,,False,
+UA6.params,segfault,,,,,name,False,,False,
+TA6.params,segfault,,,,,name,False,,False,
+OAM.params,segfault,,,,,name,False,,False,
+MG.params,ERROR: The residue MG  could not be generated.  Has a suitable params file been loaded? (Note that custom params files not in the Rosetta database can be loaded with the -extra_res or -extra_res_fa command-line flags.),metal_ions/MG.params,MG ,TYPE LIGAND," I think right now that Mini has to have at least three atoms per residue,
+ hence the virtual atoms.
+  x
+  y
+  z
+  x'
+  y'
+  z'",ERROR: The residue MG  could not be generated.  Has a suitable params file been loaded? (Note that custom params files not in the Rosetta database can be loaded with the -extra_res or -extra_res_fa command-line flags.),False,,False,
+NA.params,ERROR: The residue NA  could not be generated.  Has a suitable params file been loaded? (Note that custom params files not in the Rosetta database can be loaded with the -extra_res or -extra_res_fa command-line flags.),metal_ions/NA.params,NA ,TYPE LIGAND," I think right now that Mini has to have at least three atoms per residue,
+ hence the virtual atoms.",ERROR: The residue NA  could not be generated.  Has a suitable params file been loaded? (Note that custom params files not in the Rosetta database can be loaded with the -extra_res or -extra_res_fa command-line flags.),False,,False,
+K.params,ERROR: The residue K   could not be generated.  Has a suitable params file been loaded? (Note that custom params files not in the Rosetta database can be loaded with the -extra_res or -extra_res_fa command-line flags.),metal_ions/K.params,K  ,TYPE LIGAND," I think right now that Mini has to have at least three atoms per residue,
+ hence the virtual atoms.",ERROR: The residue K   could not be generated.  Has a suitable params file been loaded? (Note that custom params files not in the Rosetta database can be loaded with the -extra_res or -extra_res_fa command-line flags.),False,,False,
+FE2.params,,metal_ions/FE2.params,FE2,TYPE LIGAND," I think right now that Mini has to have at least three atoms per residue,
+ hence the virtual atoms.",,True,[Fe],False,
+CD.params,ERROR: The residue CD  could not be generated.  Has a suitable params file been loaded? (Note that custom params files not in the Rosetta database can be loaded with the -extra_res or -extra_res_fa command-line flags.),metal_ions/CD.params,CD ,TYPE LIGAND," Cadmium.  Added 14 June 2019 by Vikram K. Mulligan (vmulligan@flatironinstitute.org).
+ Copied from parameters for zinc.
+ tetrahedral geometry with 2.2 distance from center to vertex
+ chirality is defined so that viewing from V1 to CD, V2-V3-V4 are in clockwise direction.",ERROR: The residue CD  could not be generated.  Has a suitable params file been loaded? (Note that custom params files not in the Rosetta database can be loaded with the -extra_res or -extra_res_fa command-line flags.),False,,False,
+FE.params,ERROR: The residue FE  could not be generated.  Has a suitable params file been loaded? (Note that custom params files not in the Rosetta database can be loaded with the -extra_res or -extra_res_fa command-line flags.),metal_ions/FE.params,FE ,TYPE LIGAND," I think right now that Mini has to have at least three atoms per residue,
+ hence the virtual atoms.",ERROR: The residue FE  could not be generated.  Has a suitable params file been loaded? (Note that custom params files not in the Rosetta database can be loaded with the -extra_res or -extra_res_fa command-line flags.),False,,False,
+ZN.params,ERROR: The residue ZN  could not be generated.  Has a suitable params file been loaded? (Note that custom params files not in the Rosetta database can be loaded with the -extra_res or -extra_res_fa command-line flags.),metal_ions/ZN.params,ZN ,TYPE LIGAND," I think right now that Mini has to have at least three atoms per residue,
+ hence the virtual atoms.
+ tetrahedral geometry with 2.2 distance from center to vertex
+ chirality is defined so that viewing from V1 to ZN, V2-V3-V4 are in clockwise direction.",ERROR: The residue ZN  could not be generated.  Has a suitable params file been loaded? (Note that custom params files not in the Rosetta database can be loaded with the -extra_res or -extra_res_fa command-line flags.),False,,False,
+LN.params,ERROR: unrecognized atom_type_name 'Ln2p',metal_ions/LN.params,LN ,TYPE LIGAND," I think right now that Mini has to have at least three atoms per residue,
+ hence the virtual atoms.
+  x
+  y
+  z
+  x'
+  y'
+  z'",ERROR: unrecognized atom_type_name 'Ln2p',False,,False,
+CA.params,ERROR: The residue CA  could not be generated.  Has a suitable params file been loaded? (Note that custom params files not in the Rosetta database can be loaded with the -extra_res or -extra_res_fa command-line flags.),metal_ions/CA.params,CA ,TYPE LIGAND," I think right now that Mini has to have at least three atoms per residue,
+ hence the virtual atoms.
+ Calcium is *not* tetrahedral--in proteins, its coord varies from ~6-8 atoms, or 2 ions
+ This file was changed to match properties from the centroid params file
+ Ideal bond length is 2.4 angstroms",ERROR: The residue CA  could not be generated.  Has a suitable params file been loaded? (Note that custom params files not in the Rosetta database can be loaded with the -extra_res or -extra_res_fa command-line flags.),False,,False,
+CU.params,ERROR: The residue CU  could not be generated.  Has a suitable params file been loaded? (Note that custom params files not in the Rosetta database can be loaded with the -extra_res or -extra_res_fa command-line flags.),metal_ions/CU.params,CU ,TYPE LIGAND," I think right now that Mini has to have at least three atoms per residue,
+ hence the virtual atoms.
+ tetrahedral geometry with 2.2 distance from center to vertex
+ chirality is defined so that viewing from V1 to CU, V2-V3-V4 are in clockwise direction.",ERROR: The residue CU  could not be generated.  Has a suitable params file been loaded? (Note that custom params files not in the Rosetta database can be loaded with the -extra_res or -extra_res_fa command-line flags.),False,,False,
+CO.params,ERROR: The residue CO  could not be generated.  Has a suitable params file been loaded? (Note that custom params files not in the Rosetta database can be loaded with the -extra_res or -extra_res_fa command-line flags.),metal_ions/CO.params,CO ,TYPE LIGAND," I think right now that Mini has to have at least three atoms per residue,
+ hence the virtual atoms.
+ tetrahedral geometry with 2.2 distance from center to vertex
+ chirality is defined so that viewing from V1 to CO, V2-V3-V4 are in clockwise direction.",ERROR: The residue CO  could not be generated.  Has a suitable params file been loaded? (Note that custom params files not in the Rosetta database can be loaded with the -extra_res or -extra_res_fa command-line flags.),False,,False,
+MN.params,ERROR: The residue MN  could not be generated.  Has a suitable params file been loaded? (Note that custom params files not in the Rosetta database can be loaded with the -extra_res or -extra_res_fa command-line flags.),metal_ions/MN.params,MN ,TYPE LIGAND," I think right now that Mini has to have at least three atoms per residue,
+ hence the virtual atoms.
+ We don't have a Mn type right now, but Mg should be close enough.",ERROR: The residue MN  could not be generated.  Has a suitable params file been loaded? (Note that custom params files not in the Rosetta database can be loaded with the -extra_res or -extra_res_fa command-line flags.),False,,False,
+3L2L_GALA.params,segfault,,,,,name,False,,False,
+4L3D2L_GALA.params,segfault,,,,,name,False,,False,
+G4ALA.params,segfault,,,,,name,False,,False,
+4L2L_GALA.params,segfault,,,,,name,False,,False,
+4D3D2L_GALA.params,segfault,,,,,name,False,,False,
+G4LYS.params,segfault,,,,,name,False,,False,
+4L3L_GALA.params,segfault,,,,,name,False,,False,
+G2ALA.params,segfault,,,,,name,False,,False,
+G4PHE.params,segfault,,,,,name,False,,False,
+G4GLU.params,segfault,,,,,name,False,,False,
+G4LEU.params,segfault,,,,,name,False,,False,
+G3ALA.params,segfault,,,,,name,False,,False,
+4D3L2L_GALA.params,segfault,,,,,name,False,,False,
+4D3L_GALA.params,segfault,,,,,name,False,,False,
+4L3L2L_GALA.params,segfault,,,,,name,False,,False,
+3D2L_GALA.params,segfault,,,,,name,False,,False,
+G4ASP.params,segfault,,,,,name,False,,False,
+4D2L_GALA.params,segfault,,,,,name,False,,False,
+GABA.params,segfault,,,,,name,False,,False,
+G4VAL.params,segfault,,,,,name,False,,False,
+G4TYR.params,segfault,,,,,name,False,,False,
+BZA.params,segfault,,,,,name,False,,False,
+BZO.params,segfault,,,,,name,False,,False,
+ACE.params,segfault,,,,,name,False,,False,
+NME.params,segfault,,,,,name,False,,False,
+GPN.params,,pna/GPN.params,GPN,TYPE POLYMER," PROTEIN for termini; PEPTOID because of where the SC comes off... not sure.
+ Old:
+ ICOOR_INTERNAL  UPPER    1.300000   60.487741    1.342337   C     CD2   NG
+ ICOOR_INTERNAL    O   -126.716072   60.551385    1.205654   C     CD2   NG
+ Below: from ALA
+ ICOOR_INTERNAL  UPPER  149.999985   63.800007    1.328685   C     CA    N
+ ICOOR_INTERNAL    O   -180.000000   59.200005    1.231015   C     CA  UPPER",,True,NCCN(CCO)C(O)CN1CNC2C(O)NC(N)NC21,False,
+APN.params,,pna/APN.params,APN,TYPE POLYMER," PROTEIN for termini; PEPTOID because of where the SC comes off... not sure.
+ ICOOR_INTERNAL  UPPER    1.300000   60.487741    1.342337   C     CD2   NG
+ ICOOR_INTERNAL    O   -126.716072   60.551385    1.205654   C     CD2   NG
+ ICOOR_INTERNAL   1HA  -120.796669   71.362736    1.082254   CA    CB    NG
+ ICOOR_INTERNAL   2HA   117.569665   71.501926    1.081810   CA    CB   1HA",,True,NCCN(CCO)C(O)CN1CNC2C(N)NCNC21,False,
+TPN.params,,pna/TPN.params,TPN,TYPE POLYMER," PROTEIN for termini; PEPTOID because of where the SC comes off... not sure.
+ ICOOR_INTERNAL  UPPER    1.300000   60.487741    1.342337   C     CD2   NG
+ ICOOR_INTERNAL    O   -126.716072   60.551385    1.205654   C     CD2   NG",,True,CC1CN(C[C@@H](O)N(CCN)CCO)C(O)NC1O,False,
+UPN.params,,pna/UPN.params,UPN,TYPE POLYMER," PROTEIN for termini; PEPTOID because of where the SC comes off... not sure.
+ ICOOR_INTERNAL  UPPER    1.300000   60.487741    1.342337   C     CD2   NG
+ ICOOR_INTERNAL    O   -126.716072   60.551385    1.205654   C     CD2   NG",,True,NCCN(CCO)[C@H](O)CN1CCC(O)NC1O,False,
+CPN.params,,pna/CPN.params,CPN,TYPE POLYMER," PROTEIN for termini; PEPTOID because of where the SC comes off... not sure.
+ ICOOR_INTERNAL  UPPER    1.300000   60.487741    1.342337   C     CD2   NG
+ ICOOR_INTERNAL    O   -126.716072   60.551385    1.205654   C     CD2   NG",,True,NCCN(CCO)C(O)CN1CCC(N)NC1O,False,
+INV_VRT.params,segfault,,,,,name,False,,False,
+VRT1.params,segfault,,,,,name,False,,False,
+VRT.params,segfault,,,,,name,False,,False,
+GB_AA_PLACEHOLDER.params,segfault,,,,,name,False,,False,
+SUCK.params,segfault,,,,,name,False,,False,
+VRTBB.params,segfault,,,,,name,False,,False,
+sphingosine.params,segfault,,,,,name,False,,False,
+nBuOH.params,segfault,,,,,name,False,,False,
+choline.params,segfault,,,,,name,False,,False,
+linoleate.params,segfault,,,,,name,False,,False,
+palmitate.params,segfault,,,,,name,False,,False,
+oleate.params,segfault,,,,,name,False,,False,
+ONonOMe.params,segfault,,,,,name,False,,False,
+glycerol-3-phosphate.params,segfault,,,,,name,False,,False,
+CRO.params,segfault,,,,,name,False,,False,
+C.params,segfault,,,,,name,False,,False,
+2-iodophenol.params,segfault,,,,,name,False,,False,
+LYX.params,segfault,,,,,name,False,,False,
+DGLX.params,segfault,,,,,name,False,,False,
+GLX.params,segfault,,,,,name,False,,False,
+DLYX.params,segfault,,,,,name,False,,False,
+VLS.params,,sidechain_conjugation/VLS.params,VLS,TYPE POLYMER," CHI 5  CD   CE   NZ   CT
+ CHI 6  CE   NZ   CT   CI2
+ CHI 7  NZ   CT   CI2  CK",,True,CCC(O)NCCCC[C@H](N)CO,False,
+DASX.params,segfault,,,,,name,False,,False,
+ASX.params,segfault,,,,,name,False,,False,
+ALT.params,,sidechain_conjugation/ALT.params,ALT,TYPE POLYMER," azidolysine triazole, polymer part
+ TYPES SC_BRANCH_POINT
+ CHI 5  CD   CE   NZ   NT
+ ICOOR_INTERNAL  CONN4 -176.937537   75.989168    1.357280   NI1   NZ    CE",,True,NNNCCCC[C@H](N)CO,False,
+PET.params,segfault,,,,,name,False,,False,
+VDP.params,,sidechain_conjugation/VDP.params,VDP,TYPE POLYMER," ICOOR_INTERNAL    CD  -106.487167   53.797996    1.367111   NG    CB    CA
+ ICOOR_INTERNAL   1HG    34.430666   64.693346    1.000341   NG    CB    CD
+ ROTAMER_AA MET
+ BACKBONE_AA MET",,True,CC[C@H](O)NC[C@H](N)CO,False,
+VHA.params,,sidechain_conjugation/VHA.params,VHA,TYPE POLYMER, CHI 3  CB   CG   ND   CE,,True,CCC(O)NCC[C@H](N)CO,False,
+CYX.params,,sidechain_conjugation/CYX.params,CYX,TYPE POLYMER," rosetta residue topology file
+ icoor for connect-bond is from 1FXT, which contains a CYX - Glycine bond
+ Updated 11 April 2014 by Vikram K. Mulligan, Baker laboratory.
+ residue type
+ APL O to CB distance -- max O-CB observed in ubiquitin
+ Same as CONN3",,True,NC(CO)CS,False,
+VOR.params,,sidechain_conjugation/VOR.params,VOR,TYPE POLYMER," CHI 5  CD   NE   CZ   CT2
+ CHI 6  NE   CZ   CT2  CI",,True,CCC(O)NCCC[C@H](N)CO,False,
+VSR.params,,sidechain_conjugation/VSR.params,VSR,TYPE POLYMER, CHI 3  CB   OG   CD   CE2,,True,CCC(O)OC[C@H](N)CO,False,
+OSi.params,,mineral_surface/OSi.params,OSi,TYPE LIGAND," I think right now that Mini has to have at least three atoms per residue,
+ hence the virtual atoms.
+  Correct later",,True,O,False,
+CAL.params,ERROR: add_bond: atom Ca2p and/or V don't exist!,mineral_surface/CAL.params,CAL,TYPE LIGAND," created by liza lee (Graylab@JHU)
+ For hydroxyapatite surface
+ parameters are from Kosta Makrodimitris's Ca2p.params",,True,,False,
+OHH.params,,mineral_surface/OHH.params,OHH,TYPE LIGAND," created by liza lee (Graylab@JHU)
+ For oxygen of hydroxyl in hydroxyapatite surface",,True,O,False,
+CO3.params,,mineral_surface/CO3.params,CO3,TYPE LIGAND,,,True,OC(O)O,False,
+Si.params,ERROR: The residue Si  could not be generated.  Has a suitable params file been loaded? (Note that custom params files not in the Rosetta database can be loaded with the -extra_res or -extra_res_fa command-line flags.),mineral_surface/Si.params,Si ,TYPE LIGAND," I think right now that Mini has to have at least three atoms per residue,
+ hence the virtual atoms.
+  Correct later",ERROR: The residue Si  could not be generated.  Has a suitable params file been loaded? (Note that custom params files not in the Rosetta database can be loaded with the -extra_res or -extra_res_fa command-line flags.),False,,False,
+OC3.params,ERROR: add_bond: atom OC3 and/or V don't exist!,mineral_surface/OC3.params,OC3,TYPE LIGAND," I think right now that Mini has to have at least three atoms per residue,
+ hence the virtual atoms.",,True,,False,
+HHA.params,,mineral_surface/HHA.params,HHA,TYPE LIGAND," created by liza lee (Graylab@JHU)
+ For hydrogen of hydroxyl ion in hydroxyapatite surface
+ distance beyond which residue i and j would not be neighbors",,True,[HH],False,
+Oice.params,segfault,,,,,name,False,,False,
+HYD.params,,mineral_surface/HYD.params,HYD,TYPE LIGAND," created by liza lee (Graylab@JHU)
+ For hydroxyl ion in monoclinic hydroxyapatite surface",,True,O,False,
+OPH.params,,mineral_surface/OPH.params,OPH,TYPE LIGAND," created by liza lee (Graylab@JHU)
+ For oxygen of phosphate in hydroxyapatite",,True,O,False,
+PHA.params,,mineral_surface/PHA.params,PHA,TYPE LIGAND," created by liza lee (Graylab@JHU)
+ For phosphorous of phosphate in monoclinic hydroxypatite surface",,True,P,False,
+Hice.params,segfault,,,,,name,False,,False,
+PHO.params,,mineral_surface/PHO.params,PHO,TYPE LIGAND," created by liza lee (Graylab@JHU)
+ For phosphate ion in monoclinic hydroxyapatite surface",,True,O[PH](O)(O)O,False,
+104.params,,peptoids/104.params,104,TYPE POLYMER, Amine submonomer: 2-chloro benzyl amine,,True,OCCNC[C@H]1CCCCC1Cl,False,
+004.params,,peptoids/004.params,004,TYPE POLYMER, Amine submonomer: 2-methyl 3-hydroxy aniline,,True,CC1C(O)CCCC1NCCO,False,
+016.params,,peptoids/016.params,016,TYPE POLYMER, Amine submonomer: not loaded,,True,COC1CC(NCCO)CCN1,False,
+116.params,,peptoids/116.params,116,TYPE POLYMER, Amine submonomer: 4-fluoro benzyl amine,,True,OCCNCC1CCC(F)CC1F,False,
+008.params,,peptoids/008.params,008,TYPE POLYMER, Amine submonomer: ? won't load',,True,OCCNC1CCCC2OCCOC12,False,
+108.params,,peptoids/108.params,108,TYPE POLYMER, Amine submonomer: not loaded,,True,COC1CCC(CNCCO)CC1OC,False,
+020.params,,peptoids/020.params,020,TYPE POLYMER, Amine submonomer: 1-amino napthalene,,True,OCCNC1CCCC2CCCCC21,False,
+120.params,,peptoids/120.params,120,TYPE POLYMER," Amine submonomer: 2, 4-dichloro benzyl amine",,True,OCCNCC1CCC(Cl)CC1Cl,False,
+132.params,,peptoids/132.params,132,TYPE POLYMER, Amine submonomer: 1-hydroxy-cyclohexyl methyl amine,,True,OCCNCC1(O)CCCCC1,False,
+403.params,ERROR: Can't add atom named ` CA ` to ResidueType  as it already has one with that name.,peptoids/403.params,403,TYPE POLYMER," Amine submonomer: 2,4 dichloro homobenzyl amine",ERROR: Can't add atom named ` CA ` to ResidueType  as it already has one with that name.,False,,False,
+503.params,,peptoids/503.params,503,TYPE POLYMER, Amine submonomer: not loaded,,True,OCCNCC[C@@H]1CN[C@@H]2CCCCC12,False,
+411.params,,peptoids/411.params,411,TYPE POLYMER," Amine submonomer: 2,3 dihydro 1H-inden-2-amine",,True,OCCNC1CC2CCCCC2C1,False,
+315.params,,peptoids/315.params,315,TYPE POLYMER, Amine submonomer: diaminomethane,,True,[NH3+]CNCCO,False,
+307.params,,peptoids/307.params,307,TYPE POLYMER, Amine submonomer: 3-hydroxy propylamine,,True,OCCCNCCO,False,
+207.params,,peptoids/207.params,207,TYPE POLYMER, Amine submonomer: not loaded - identical to 204,,True,CCCCNCCO,False,
+413.params,"In chi #3, the base of the fourth atom ( CD1) is  CE1, rather than the third atom of the chi ( NG )",peptoids/413.params,413,TYPE POLYMER, Amine submonomer: 2-morpholine ethylamine,"In chi #3, the base of the fourth atom ( CD1) is  CE1, rather than the third atom of the chi ( NG )",False,,False,
+401.params,,peptoids/401.params,401,TYPE POLYMER, Amine submonomer: homobenzyl amine,,True,OCCNCCC1CCCCC1,False,
+501.params,,peptoids/501.params,501,TYPE POLYMER, Amine submonomer: not loaded,,True,OCCNCC1CCCO1,False,
+333.params,,peptoids/333.params,333,TYPE POLYMER," A peptoid with an ornithine-like sidechain.
+ Params file added by Vikram K. Mulligan, Flatiron Institute (vmulligan@flatironinstitute.org) on 26 Nov. 2018.
+ Geometry generated in Avogadro, and optimized first with MM (MMFF94s force field) and second with QM methods
+ using GAMESS (STO-6G approximation).  Partial charges were recomputed with the 6-311G approximation.  there
+ was no change in the values.
+ Note: I'll use the convention of 33x = lysine-like sidechain with x methylene groups.",,True,[NH3+]CCCNCCO,False,
+305.params,,peptoids/305.params,305,TYPE POLYMER, Amine submonomer: 2-methoxy ethylamine,,True,COCCNCCO,False,
+205.params,,peptoids/205.params,205,TYPE POLYMER, Amine submonomer: 3-methyl butyl 1-amine,,True,CC(C)CCNCCO,False,
+209.params,,peptoids/209.params,209,TYPE POLYMER, Amine submonomer: cyclopentyl methylamine,,True,CCC(CC)CNCCO,False,
+309.params,ERROR: Can't add atom named ` CA ` to ResidueType  as it already has one with that name.,peptoids/309.params,309,TYPE POLYMER, nonsense,ERROR: Can't add atom named ` CA ` to ResidueType  as it already has one with that name.,False,,False,
+317.params,,peptoids/317.params,317,TYPE POLYMER, Amine submonomer: diaminopropane,,True,[NH3+]CCCNCCO,False,
+014.params,,peptoids/014.params,014,TYPE POLYMER, Amine submonomer: not loaded,,True,OCCN[C@@]1(N(O)O)CCCCC1O,False,
+114.params,,peptoids/114.params,114,TYPE POLYMER," Amine submonomer: 2,5-difluoro benzyl amine",,True,OCCNCC1C(F)CCCC1F,False,
+118.params,,peptoids/118.params,118,TYPE POLYMER," Amine submonomer: 2,3 fluorobenzyl amine",,True,OCCNCC1CCCC(F)C1F,False,
+018.params,"In chi #1, the base of the fourth atom ( CB1) is  CG2, rather than the third atom of the chi ( CA1)",peptoids/018.params,018,TYPE POLYMER, Amine submonomer: 2-hydroxyl aniline,"In chi #1, the base of the fourth atom ( CB1) is  CG2, rather than the third atom of the chi ( CA1)",False,,False,
+106.params,,peptoids/106.params,106,TYPE POLYMER, Amine submonomer: not loaded,,True,OCCNCC1CCCC(Cl)C1,False,
+006.params,,peptoids/006.params,006,TYPE POLYMER," Amine submonomer: 3, 4-dimethyl-5 hydroxy aniline",,True,CC1CC(NCCO)CC(O)C1C,False,
+702.params,"In chi #2, the base of the fourth atom ( N  ) is  CA , rather than the third atom of the chi ( CA1)",peptoids/702.params,702,TYPE POLYMER, Amine submonomer: half of a click,"In chi #2, the base of the fourth atom ( N  ) is  CA , rather than the third atom of the chi ( CA1)",False,,False,
+130.params,,peptoids/130.params,130,TYPE POLYMER, Amine submonomer: diphenyl methyl amine,,True,OCCNC(C1CCCCC1)C1CCCCC1,False,
+122.params,,peptoids/122.params,122,TYPE POLYMER, Amine submonomer: not loaded,,True,OCCNCC1CCCCN1,False,
+313.params,,peptoids/313.params,313,TYPE POLYMER," Amine submonomer: carboxy methylamine (asp-ish)
+ This sidechain matches that of aspartate (ASP).",,True,OCCNCC(O)O,False,
+405.params,,peptoids/405.params,405,TYPE POLYMER, Amine submonomer: not loaded,,True,OCCNCCC1CCCC(O)C1,False,
+505.params,,peptoids/505.params,505,TYPE POLYMER, Amine submonomer: not loaded,,True,OCCNCC[C@@H]1CN[C@@H]2CC(Cl)CCC12,False,
+509.params,,peptoids/509.params,509,TYPE POLYMER, Amine submonomer: not loaded,,True,OCCNCCC1NC2CCCCC2N1,False,
+409.params,,peptoids/409.params,409,TYPE POLYMER, Amine submonomer: not loaded,,True,OCCNCCC1CCCC(N(O)O)N1,False,
+126.params,,peptoids/126.params,126,TYPE POLYMER, Amine submonomer: not loaded,,True,CC1CNC(CNCCO)CN1,False,
+102.params,,peptoids/102.params,102,TYPE POLYMER, Amine submonomer: 3-chloro benzyl amine,,True,OCCNCC1CCCC(Cl)C1,False,
+002.params,,peptoids/002.params,002,TYPE POLYMER, Amine submonomer: not loaded,,True,OCCNC1CCCC(OC2CCCCC2)C1,False,
+010.params,,peptoids/010.params,010,TYPE POLYMER, Amine submonomer: not loaded,,True,OCCNC1CCCC(O)C1O,False,
+110.params,,peptoids/110.params,110,TYPE POLYMER, Amine submonomer: not loaded,,True,COC1CC(CNCCO)CC(OC)C1,False,
+128.params,,peptoids/128.params,128,TYPE POLYMER, Amine submonomer: 2-methyl napthalene - amine,,True,OCCNCC1CCC2CCCCC2C1,False,
+704.params,,peptoids/704.params,704,TYPE POLYMER, Amine submonomer: half of a click,,True,NNCCCNCCO,False,
+124.params,,peptoids/124.params,124,TYPE POLYMER, Amine submonomer: not loaded,,True,OCCNCC1CCCNC1,False,
+012.params,,peptoids/012.params,012,TYPE POLYMER, Amine submonomer: not loaded,,True,OCCNC1CCCC(O)C1N(O)O,False,
+112.params,,peptoids/112.params,112,TYPE POLYMER, Amine submonomer: not loaded,,True,OCCNCC1CCC2OCOC2C1,False,
+303.params,,peptoids/303.params,303,TYPE POLYMER, Amine submonomer: ethanolamine,,True,OCCNCCO,False,
+203.params,,peptoids/203.params,203,TYPE POLYMER, Amine submonomer: propyl amine,,True,CCCNCCO,False,
+211.params,,peptoids/211.params,211,TYPE POLYMER," Amine submonomer: isopropyl amine
+ This sidechain is that of valine (VAL).",,True,CC(C)NCCO,False,
+407.params,,peptoids/407.params,407,TYPE POLYMER, Amine submonomer: not loaded,,True,COC1CCCC(CCNCCO)C1,False,
+507.params,,peptoids/507.params,507,TYPE POLYMER, Amine submonomer: not loaded,,True,OCCNCCC1NCCN1,False,
+314.params,,peptoids/314.params,314,TYPE POLYMER," Amine submonomer: carboxy ethylamine (glu-ish)
+ This sidechain matches that of glutamate (GLU).",,True,OCCNCCC(O)O,False,
+318.params,,peptoids/318.params,318,TYPE POLYMER, Amine submonomer: diaminobutane,,True,[NH3+]CCCCNCCO,False,
+206.params,segfault,,,,,name,False,,False,
+306.params,,peptoids/306.params,306,TYPE POLYMER, Amine submonomer: 3-methoxy propylamine,,True,COCCCNCCO,False,
+502.params,,peptoids/502.params,502,TYPE POLYMER, Amine submonomer: not loaded,,True,OCCNCCC1CCCO1,False,
+402.params,,peptoids/402.params,402,TYPE POLYMER, Amine submonomer: not loaded,,True,OCCNCCC1CCCC(Cl)C1,False,
+410.params,,peptoids/410.params,410,TYPE POLYMER, Amine submonomer: 2-fluoro homobenzyl amine,,True,OCCNCCC1CCCC[C@@H]1F,False,
+121.params,,peptoids/121.params,121,TYPE POLYMER, Amine submonomer: not loaded,,True,OCCNCC1CCCCC1Cl,False,
+021.params,"In chi #1, the base of the fourth atom ( CB1) is  CG1, rather than the third atom of the chi ( CA1)",peptoids/021.params,021,TYPE POLYMER, Amine submonomer: 2-methyl 4-hydroxy aniline,"In chi #1, the base of the fourth atom ( CB1) is  CG1, rather than the third atom of the chi ( CA1)",False,,False,
+701.params,,peptoids/701.params,701,TYPE POLYMER, Amine submonomer: half of a click,,True,CC(N)CNCCO,False,
+601.params,,peptoids/601.params,601,TYPE POLYMER," Amine submonomer: beta-methyl benzyl amine/ S phenylethyl-1-amine (Nspe )
+ This resembles a phenylalanine side-chain (coming off of the nitrogen, of course), but with an extra
+ methyl group on what would be the methylene (CB) atom.  This makes this peptoid chiral (only in the side-chain).",,True,C[C@H](NCCO)C1CCCCC1,False,
+005.params,,peptoids/005.params,005,TYPE POLYMER, Amine submonomer: 3-phenyl aniline,,True,OCCNC1CCCC(C2CCCCC2)C1,False,
+105.params,,peptoids/105.params,105,TYPE POLYMER, Amine submonomer: not loaded,,True,OCCNC[C@@H]1CCCCC1N(O)O,False,
+109.params,,peptoids/109.params,109,TYPE POLYMER, Amine submonomer: not loaded,,True,OCCNCC1CCC(N(O)O)CC1,False,
+009.params,,peptoids/009.params,009,TYPE POLYMER," Amine submonomer: 2, 3 dihydro 1H inden-4-amine",,True,OCCNC1CCCC2CCCC21,False,
+117.params,,peptoids/117.params,117,TYPE POLYMER, Amine submonomer: 3-fluorobenzyl amine,,True,OCCNCC1CCCC(F)C1,False,
+017.params,"In chi #1, the base of the fourth atom ( CB1) is  CG1, rather than the third atom of the chi ( CA1)",peptoids/017.params,017,TYPE POLYMER, Amine submonomer: 4-hydroxyl aniline (i.e. tyr),"In chi #1, the base of the fourth atom ( CB1) is  CG1, rather than the third atom of the chi ( CA1)",False,,False,
+131.params,,peptoids/131.params,131,TYPE POLYMER, Amine submonomer: not loaded,,True,OCCNCC1CCC2CCCC(O)C2N1,False,
+703.params,,peptoids/703.params,703,TYPE POLYMER, Amine submonomer: half of a click,,True,NNCCNCCO,False,
+123.params,,peptoids/123.params,123,TYPE POLYMER, Amine submonomer: not loaded,,True,OCCNCC1CCCC(Cl)C1,False,
+115.params,,peptoids/115.params,115,TYPE POLYMER, Amine submonomer: 2-fluoro benzyl amine,,True,OCCNCC1CCCCC1F,False,
+015.params,,peptoids/015.params,015,TYPE POLYMER, Amine submonomer: not loaded,,True,COC1CCCC(NCCO)C1,False,
+007.params,,peptoids/007.params,007,TYPE POLYMER," Amine submonomer: 2,3 dimethyl aniline",,True,CC1CCCC(NCCO)C1C,False,
+107.params,,peptoids/107.params,107,TYPE POLYMER, Amine submonomer: not loaded,,True,OCCNCC1CCCC(N(O)O)C1,False,
+019.params,"In chi #1, the base of the fourth atom ( CB1) is  CG1, rather than the third atom of the chi ( CA1)",peptoids/019.params,019,TYPE POLYMER," Amine submonomer: 2,3-dimethyl 4-hydroxy aniline","In chi #1, the base of the fourth atom ( CB1) is  CG1, rather than the third atom of the chi ( CA1)",False,,False,
+119.params,,peptoids/119.params,119,TYPE POLYMER, Amine submonomer: not used (symmetry to 117),,True,OCCNCC1CCCC(F)C1,False,
+204.params,,peptoids/204.params,204,TYPE POLYMER, Amine submonomer: butyl amine,,True,CCCCNCCO,False,
+304.params,,peptoids/304.params,304,TYPE POLYMER, Amine submonomer: not loaded 2-(dimethylamino) propylamine,,True,CN(C)CCCNCCO,False,
+316.params,,peptoids/316.params,316,TYPE POLYMER, Amine submonomer: ethylenediamine,,True,[NH3+]CCNCCO,False,
+308.params,ERROR: Can't add atom named ` CA ` to ResidueType  as it already has one with that name.,peptoids/308.params,308,TYPE POLYMER, nonsense,ERROR: Can't add atom named ` CA ` to ResidueType  as it already has one with that name.,False,,False,
+208.params,,peptoids/208.params,208,TYPE POLYMER," Amine submonomer: isobutyl amine
+ This sidechain is like that of leucine (LEU).",,True,CC(C)CNCCO,False,
+320.params,,peptoids/320.params,320,TYPE POLYMER," Amine submonomer: 3-(dimethylamino)-2,2-dimethyl propyl amine",,True,C[NH+](C)CC(C)(C)CNCCO,False,
+412.params,,peptoids/412.params,412,TYPE POLYMER, Amine submonomer: 3-fluoro homobenzyl amine,,True,OCCNCCC1CCCC(F)C1,False,
+332.params,,peptoids/332.params,332,TYPE POLYMER," A peptoid with a side-chain like DAB (2,4-diaminobutyric acid).
+ Params file added by Vikram K. Mulligan, Flatiron Institute (vmulligan@flatironinstitute.org)
+ on 26 November 2018.  The geometry was created in Avogadro, and optimized first with molecular
+ mechanics (MMFF94s force field), and then with QM methods (STO-6G approximation) using GAMESS.
+ Note: I'll use the convention of 33x = lysine-like sidechain with x methylene groups.",,True,[NH3+]CCNCCO,False,
+003.params,,peptoids/003.params,003,TYPE POLYMER, Amine submonomer: 3-tertbutyl aniline,,True,CC(C)(C)C1CCCC(NCCO)C1,False,
+103.params,,peptoids/103.params,103,TYPE POLYMER, Amine submonomer: 2-methyl benzyl amine,,True,CC1CCCCC1CNCCO,False,
+631.params,,peptoids/631.params,631,TYPE POLYMER," A peptoid with a side-chain like D-threonine or L-allo-threonine.  This is N-((S)-1-hydroxyethyl)glycine.
+ Params file added by Vikram K. Mulligan, Flatiron Institute (vmulligan@flatironinstitute.org) on 8 Nov. 2018.",,True,C[C@H](O)NCCO,False,
+111.params,,peptoids/111.params,111,TYPE POLYMER, Amine submonomer: 3-hydroxy benzyl amine,,True,OCCNCC1CCCC(O)C1,False,
+011.params,ERROR: Can't add atom named ` CA ` to ResidueType  as it already has one with that name.,peptoids/011.params,011,TYPE POLYMER, Amine submonomer: not loaded,ERROR: Can't add atom named ` CA ` to ResidueType  as it already has one with that name.,False,,False,
+623.params,,peptoids/623.params,623,TYPE POLYMER, Amine submonomer: S cyclohexylethyl-1-amine (Nsce),,True,C[C@@H](NCCO)C1CCCCC1,False,
+127.params,,peptoids/127.params,127,TYPE POLYMER, Amine submonomer: 1-methyl napthalene - amine,,True,OCCNCC1CCCC2CCCCC21,False,
+504.params,,peptoids/504.params,504,TYPE POLYMER, Amine submonomer: not loaded,,True,CC1CCC(CNCCO)O1,False,
+404.params,,peptoids/404.params,404,TYPE POLYMER, Amine submonomer: not loaded,,True,COC1CCC(CCNCCO)CC1OC,False,
+408.params,,peptoids/408.params,408,TYPE POLYMER, Amine submonomer: not loaded,,True,OCCNCCC1CCCCN1,False,
+508.params,,peptoids/508.params,508,TYPE POLYMER, Amine submonomer: not loaded,,True,OCCNCCCN1CCNC1,False,
+506.params,ERROR: Can't add atom named ` CA ` to ResidueType  as it already has one with that name.,peptoids/506.params,506,TYPE POLYMER, Amine submonomer: not loaded,ERROR: Can't add atom named ` CA ` to ResidueType  as it already has one with that name.,False,,False,
+406.params,,peptoids/406.params,406,TYPE POLYMER," Amine submonomer: 2,4 dichloro homobenzyl amine",,True,OCCNCCC1CCC(Cl)CC1Cl,False,
+202.params,,peptoids/202.params,202,TYPE POLYMER, Amine submonomer: ethyl amine,,True,CCNCCO,False,
+302.params,,peptoids/302.params,302,TYPE POLYMER, Amine submonomer:  not loaded 2-(dimethylamino) ethylamine,,True,CN(C)CCNCCO,False,
+210.params,,peptoids/210.params,210,TYPE POLYMER, Amine submonomer: cyclopropyl methyl amine,,True,OCCNCC1CC1,False,
+621.params,,peptoids/621.params,621,TYPE POLYMER, Amine submonomer: beta-methyl napthyl amine/ S 1-napthylethylamine (Nsna),,True,C[C@H](NCCO)C1CCCC2CCCCC21,False,
+113.params,,peptoids/113.params,113,TYPE POLYMER, Amine submonomer: not loaded,,True,COC1CCCC(CNCCO)C1,False,
+013.params,,peptoids/013.params,013,TYPE POLYMER, Amine submonomer: 3-hydroxy aniline,,True,OCCNC1CCCC(O)C1,False,
+633.params,,peptoids/633.params,633,TYPE POLYMER," A peptoid with a side-chain like D-threonine or L-allo-threonine, with an extra hydroxyl on the terminal methyl
+ group.  This is N-((S)-1,2-dihydroxyethyl)glycine.
+ Params file added by Vikram K. Mulligan, Flatiron Institute (vmulligan@flatironinstitute.org) on 9 Nov. 2018.",,True,OCCN[C@@H](O)CO,False,
+001.params,,peptoids/001.params,001,TYPE POLYMER, Amine submonomer: aniline,,True,OCCNC1CCCCC1,False,
+101.params,,peptoids/101.params,101,TYPE POLYMER," Amine submonomer: benzyl amine
+ This is equivalent to a phenylalanine (PHE) side-chain, albeit on the amide nitrogen
+ instead of on the alpha carbon.",,True,OCCNCC1CCCCC1,False,
+129.params,,peptoids/129.params,129,TYPE POLYMER, Amine submonomer: 4-amino N-benzyl piperidine,,True,OCCNC1CCN(CC2CCCCC2)CC1,False,
+125.params,,peptoids/125.params,125,TYPE POLYMER, Amine submonomer: not loaded,,True,OCCNCC1CCNCC1,False,
+TYR.params,,l-caa/TYR.params,TYR,TYPE POLYMER," rosetta residue topology file
+ residue type
+ In rare cases, a tyrosine coordinates a metal with its side-chain oxygen.
+ APL CB to sidechain heavyatom distance -- max observed at residue 74 in ubiquitin
+ ACT_COORD_ATOMS CG CZ END hack to make it run for now...",,True,N[C@H](C=O)Cc1ccc(O)cc1,False,
+CYS.params,,l-caa/CYS.params,CYS,TYPE POLYMER," rosetta residue topology file
+ residue type
+ APL O to CB distance -- max O-CB observed in ubiquitin",,True,N[C@H](C=O)CS,False,
+ASN.params,,l-caa/ASN.params,ASN,TYPE POLYMER," rosetta residue topology file
+ residue type
+ APL O to CB distance; max observed in ubiquitin",,True,NC(=O)C[C@H](N)C=O,False,
+MET.params,ATOM_ALIAS  SD   SE,l-caa/MET.params,MET,TYPE POLYMER," rosetta residue topology file
+ residue type
+ For MSE recognition
+ Note that, for convenience, we classify methionine as an ""honorary"" aliphatic:
+ There are rare cases in which the delta sulfur coordinates a metal.
+ APL CB to sidechain heavyatom distance; swept all chi combos at 5 degree intervals",,True,,False,
+ILE.params,,l-caa/ILE.params,ILE,TYPE POLYMER," rosetta residue topology file
+ residue type
+ APL O to CB distance; max observed in ubiquitin",,True,CC[C@H](C)[C@H](N)C=O,False,
+GLN.params,ATOM_ALIAS 1HB  HB2,l-caa/GLN.params,GLN,TYPE POLYMER," rosetta residue topology file
+ residue type
+ APL CB to sidechain heavyatom distance -- max observed at residue 74 in ubiquitin",,True,,False,
+VAL.params,,l-caa/VAL.params,VAL,TYPE POLYMER," rosetta residue topology file
+ residue type
+ Max distance from C-Beta to the members of the backbone; 3.4473 in all canonical AAs.",,True,CC(C)[C@H](N)C=O,False,
+TRP.params,,l-caa/TRP.params,TRP,TYPE POLYMER," rosetta residue topology file
+ residue type
+ APL CB to sidechain heavyatom distance; swept all chi combos at 5 degree intervals",,True,N[C@H](C=O)Cc1c[nH]c2ccccc12,False,
+ASP.params,segfault,,,,,name,False,,False,
+PRO.params,ATOM_ALIAS 1HB  HB2,l-caa/PRO.params,PRO,TYPE POLYMER," rosetta residue topology file
+ residue type
+ APL Declare that the NV atom should shadow the N atom to the cart-bonded term.
+ APL O to CB distance; max observed in ubiquitin",,True,,False,
+SER.params,,l-caa/SER.params,SER,TYPE POLYMER," rosetta residue topology file
+ residue type
+ APL O to CB distance; max observed in ubiquitin",,True,N[C@H](C=O)CO,False,
+LEU.params,,l-caa/LEU.params,LEU,TYPE POLYMER," rosetta residue topology file
+ residue type
+ APL O to CB distance; max observed in ubiquitin",,True,CC(C)C[C@H](N)C=O,False,
+GLU.params,segfault,,,,,name,False,,False,
+GLY.params,,l-caa/GLY.params,GLY,TYPE POLYMER," rosetta residue topology file
+ residue type
+ APL CA to O distance -- not yet measured; default to max CB to O distance",,True,NCC=O,False,
+PHE.params,,l-caa/PHE.params,PHE,TYPE POLYMER," rosetta residue topology file
+ residue type
+ APL CB to side chain heavyatom distance -- max as observed on residue 74 of ubiquitin",,True,N[C@H](C=O)Cc1ccccc1,False,
+LYS.params,ATOM_ALIAS 1HB  HB2,l-caa/LYS.params,LYS,TYPE POLYMER," rosetta residue topology file
+ residue type
+ APL CB to side chain heavyatom distance --  max observed in residue 74 of ubiquitin",,True,,False,
+THR.params,,l-caa/THR.params,THR,TYPE POLYMER," rosetta residue topology file
+ residue type
+ APL O to CB distance; max observed in ubiquitin",,True,C[C@@H](O)[C@H](N)C=O,False,
+ARG.params,segfault,,,,,name,False,,False,
+ALA.params,ATOM_ALIAS 1HB  HB1,l-caa/ALA.params,ALA,TYPE POLYMER," rosetta residue topology file
+ residue type
+ APL O to CB DISTANCE -- MAX O-CB OBSERVED IN UBQ",,True,,False,
+HIS_D.params,segfault,,,,,name,False,,False,
+HIS.params,,l-caa/HIS.params,HIS,TYPE POLYMER," rosetta residue topology file
+ residue type
+ APL CB to sidechain heavy atom disance -- max observed on residue 74 of ubiquitin",,True,N[C@H](C=O)Cc1c[nH]cn1,False,
+CYV.params,,l-caa/CYV.params,CYS,TYPE POLYMER," rosetta residue topology file
+ CYS withVCB andVSG defined as virtual
+ residue type
+ APL O toVCB distance -- max O-CB observed in ubiquitin",,True,NCC=O,False,
+CYZ.params,,l-caa/CYZ.params,CYS,TYPE POLYMER," rosetta residue topology file
+ CYS with HG defined as virtual
+ residue type
+ APL O to CB distance -- max O-CB observed in ubiquitin",,True,N[C@H](C=O)CS,False,
+isoprene.params,segfault,,,,,name,False,,False,
+AIB.params,,achiral_ncaa/AIB.params,AIB,TYPE POLYMER," Params file defining topology for 2-aminoisobutyric acid (AIB), an achiral
+ amino acid that strongly favours alpha-helices.
+ Params file by Tim Craven; modified by Vikram K. Mulligan.
+ Added 13 February 2017.",,True,CC(C)(N)CO,False,
+UDP.params,segfault,,,,,name,False,,False,
+flavin_oxidized.params,segfault,,,,,name,False,,False,
+flavin_reduced.params,segfault,,,,,name,False,,False,
+SAM.params,segfault,,,,,name,False,,False,
+SAH.params,segfault,,,,,name,False,,False,
+ATP.params,segfault,,,,,name,False,,False,
+flavin_mononucleotide.params,segfault,,,,,name,False,,False,
+DHA.params,segfault,,,,,name,False,,False,
+D-Eul.params,segfault,,,,,name,False,,False,
+L-Eul.params,segfault,,,,,name,False,,False,
+to5-beta-Kdop.params,segfault,,,,,name,False,,False,
+to8-alpha-Kdop.params,segfault,,,,,name,False,,False,
+to4-beta-Kdop.params,segfault,,,,,name,False,,False,
+to7-beta-Kdop.params,segfault,,,,,name,False,,False,
+to8-beta-Kdop.params,segfault,,,,,name,False,,False,
+to7-alpha-Kdop.params,segfault,,,,,name,False,,False,
+to4-alpha-Kdop.params,segfault,,,,,name,False,,False,
+to5-alpha-Kdop.params,segfault,,,,,name,False,,False,
+to3-beta-L-Psip.params,segfault,,,,,name,False,,False,
+to1-alpha-D-Psip.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Psip.params,segfault,,,,,name,False,,False,
+to5-alpha-D-Psip.params,segfault,,,,,name,False,,False,
+to4-alpha-D-Psip.params,segfault,,,,,name,False,,False,
+to4-beta-D-Psip.params,segfault,,,,,name,False,,False,
+to5-beta-L-Psip.params,segfault,,,,,name,False,,False,
+to1-beta-D-Psip.params,segfault,,,,,name,False,,False,
+to4-alpha-L-Psip.params,segfault,,,,,name,False,,False,
+to5-alpha-L-Psip.params,segfault,,,,,name,False,,False,
+to4-beta-L-Psip.params,segfault,,,,,name,False,,False,
+to1-alpha-L-Psip.params,segfault,,,,,name,False,,False,
+to3-beta-D-Psip.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Psip.params,segfault,,,,,name,False,,False,
+to1-beta-L-Psip.params,segfault,,,,,name,False,,False,
+to5-beta-D-Psip.params,segfault,,,,,name,False,,False,
+to5-beta-D-Sorp.params,segfault,,,,,name,False,,False,
+to1-beta-L-Sorp.params,segfault,,,,,name,False,,False,
+to5-alpha-L-Sorp.params,segfault,,,,,name,False,,False,
+to4-alpha-L-Sorp.params,segfault,,,,,name,False,,False,
+to4-beta-L-Sorp.params,segfault,,,,,name,False,,False,
+to3-beta-D-Sorp.params,segfault,,,,,name,False,,False,
+to1-alpha-L-Sorp.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Sorp.params,segfault,,,,,name,False,,False,
+to1-beta-D-Sorp.params,segfault,,,,,name,False,,False,
+to5-beta-L-Sorp.params,segfault,,,,,name,False,,False,
+to1-alpha-D-Sorp.params,segfault,,,,,name,False,,False,
+to3-beta-L-Sorp.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Sorp.params,segfault,,,,,name,False,,False,
+to4-alpha-D-Sorp.params,segfault,,,,,name,False,,False,
+to5-alpha-D-Sorp.params,segfault,,,,,name,False,,False,
+to4-beta-D-Sorp.params,segfault,,,,,name,False,,False,
+to1-beta-L-Frup.params,segfault,,,,,name,False,,False,
+to5-beta-D-Frup.params,segfault,,,,,name,False,,False,
+to4-beta-L-Frup.params,segfault,,,,,name,False,,False,
+to4-alpha-L-Frup.params,segfault,,,,,name,False,,False,
+to5-alpha-L-Frup.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Frup.params,segfault,,,,,name,False,,False,
+to1-alpha-L-Frup.params,segfault,,,,,name,False,,False,
+to3-beta-D-Frup.params,segfault,,,,,name,False,,False,
+to5-beta-L-Frup.params,segfault,,,,,name,False,,False,
+to1-beta-D-Frup.params,segfault,,,,,name,False,,False,
+to4-alpha-D-Fruf.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Frup.params,segfault,,,,,name,False,,False,
+to3-beta-L-Frup.params,segfault,,,,,name,False,,False,
+to1-alpha-D-Frup.params,segfault,,,,,name,False,,False,
+to4-beta-D-Fruf.params,segfault,,,,,name,False,,False,
+to4-beta-D-Frup.params,segfault,,,,,name,False,,False,
+to5-alpha-D-Frup.params,segfault,,,,,name,False,,False,
+to4-alpha-D-Frup.params,segfault,,,,,name,False,,False,
+to5-beta-L-Tagp.params,segfault,,,,,name,False,,False,
+to1-beta-D-Tagp.params,segfault,,,,,name,False,,False,
+to5-alpha-D-Tagp.params,segfault,,,,,name,False,,False,
+to4-alpha-D-Tagp.params,segfault,,,,,name,False,,False,
+to4-beta-D-Tagp.params,segfault,,,,,name,False,,False,
+to3-beta-L-Tagp.params,segfault,,,,,name,False,,False,
+to1-alpha-D-Tagp.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Tagp.params,segfault,,,,,name,False,,False,
+to1-beta-L-Tagp.params,segfault,,,,,name,False,,False,
+to5-beta-D-Tagp.params,segfault,,,,,name,False,,False,
+to1-alpha-L-Tagp.params,segfault,,,,,name,False,,False,
+to3-beta-D-Tagp.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Tagp.params,segfault,,,,,name,False,,False,
+to4-alpha-L-Tagp.params,segfault,,,,,name,False,,False,
+to5-alpha-L-Tagp.params,segfault,,,,,name,False,,False,
+to4-beta-L-Tagp.params,segfault,,,,,name,False,,False,
+to4-alpha-D-Rulf.params,segfault,,,,,name,False,,False,
+to4-beta-D-Rulf.params,segfault,,,,,name,False,,False,
+to1-alpha-D-Rulf.params,segfault,,,,,name,False,,False,
+to3-beta-L-Rulf.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Rulf.params,segfault,,,,,name,False,,False,
+to1-beta-D-Rulf.params,segfault,,,,,name,False,,False,
+to3-beta-D-Rulf.params,segfault,,,,,name,False,,False,
+to1-alpha-L-Rulf.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Rulf.params,segfault,,,,,name,False,,False,
+to4-alpha-L-Rulf.params,segfault,,,,,name,False,,False,
+to4-beta-L-Rulf.params,segfault,,,,,name,False,,False,
+to1-beta-L-Rulf.params,segfault,,,,,name,False,,False,
+to1-beta-D-Xulf.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Xulf.params,segfault,,,,,name,False,,False,
+to3-beta-L-Xulf.params,segfault,,,,,name,False,,False,
+to1-alpha-D-Xulf.params,segfault,,,,,name,False,,False,
+to4-beta-D-Xulf.params,segfault,,,,,name,False,,False,
+to4-alpha-D-Xulf.params,segfault,,,,,name,False,,False,
+to1-beta-L-Xulf.params,segfault,,,,,name,False,,False,
+to4-beta-L-Xulf.params,segfault,,,,,name,False,,False,
+to4-alpha-L-Xulf.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Xulf.params,segfault,,,,,name,False,,False,
+to1-alpha-L-Xulf.params,segfault,,,,,name,False,,False,
+to3-beta-D-Xulf.params,segfault,,,,,name,False,,False,
+to8-alpha-Kdnp.params,segfault,,,,,name,False,,False,
+to4-beta-Neup.params,segfault,,,,,name,False,,False,
+to9-alpha-Kdnp.params,segfault,,,,,name,False,,False,
+to5-beta-Kdnp.params,segfault,,,,,name,False,,False,
+to9-alpha-Neup.params,segfault,,,,,name,False,,False,
+to8-alpha-Neup.params,segfault,,,,,name,False,,False,
+to4-beta-Kdnp.params,segfault,,,,,name,False,,False,
+to7-alpha-Kdnp.params,segfault,,,,,name,False,,False,
+to4-alpha-Neup.params,segfault,,,,,name,False,,False,
+to8-beta-Kdnp.params,segfault,,,,,name,False,,False,
+to9-beta-Neup.params,segfault,,,,,name,False,,False,
+to7-beta-Kdnp.params,segfault,,,,,name,False,,False,
+to5-alpha-Kdnp.params,segfault,,,,,name,False,,False,
+to7-beta-Neup.params,segfault,,,,,name,False,,False,
+to9-beta-Kdnp.params,segfault,,,,,name,False,,False,
+to4-alpha-Kdnp.params,segfault,,,,,name,False,,False,
+to7-alpha-Neup.params,segfault,,,,,name,False,,False,
+to8-beta-Neup.params,segfault,,,,,name,False,,False,
+D-Gly.params,segfault,,,,,name,False,,False,
+L-Gly.params,segfault,,,,,name,False,,False,
+to2-beta-L-Thrf.params,segfault,,,,,name,False,,False,
+to2-alpha-L-Thrf.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Thrf.params,segfault,,,,,name,False,,False,
+to3-beta-D-Thrf.params,segfault,,,,,name,False,,False,
+to2-beta-D-Thrf.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Thrf.params,segfault,,,,,name,False,,False,
+to2-alpha-D-Thrf.params,segfault,,,,,name,False,,False,
+to3-beta-L-Thrf.params,segfault,,,,,name,False,,False,
+to2-beta-L-Eryf.params,segfault,,,,,name,False,,False,
+to3-beta-D-Eryf.params,segfault,,,,,name,False,,False,
+to2-alpha-L-Eryf.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Eryf.params,segfault,,,,,name,False,,False,
+to2-beta-D-Eryf.params,segfault,,,,,name,False,,False,
+to3-beta-L-Eryf.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Eryf.params,segfault,,,,,name,False,,False,
+to2-alpha-D-Eryf.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Altp.params,segfault,,,,,name,False,,False,
+to5-alpha-L-Altf.params,segfault,,,,,name,False,,False,
+to4-alpha-D-Digp.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Digf.params,segfault,,,,,name,False,,False,
+to2-alpha-L-Altp.params,segfault,,,,,name,False,,False,
+to3-beta-L-Digf.params,segfault,,,,,name,False,,False,
+to3-beta-D-Altp.params,segfault,,,,,name,False,,False,
+to6-alpha-L-Altf.params,segfault,,,,,name,False,,False,
+to4-beta-D-Digp.params,segfault,,,,,name,False,,False,
+to6-alpha-L-Altp.params,segfault,,,,,name,False,,False,
+to3-beta-D-Altf.params,segfault,,,,,name,False,,False,
+to4-beta-L-Altp.params,segfault,,,,,name,False,,False,
+to3-beta-L-Digp.params,segfault,,,,,name,False,,False,
+to4-alpha-L-Altp.params,segfault,,,,,name,False,,False,
+to5-alpha-D-Digf.params,segfault,,,,,name,False,,False,
+to2-alpha-L-Altf.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Digp.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Altf.params,segfault,,,,,name,False,,False,
+to5-beta-D-Altf.params,segfault,,,,,name,False,,False,
+to6-beta-D-Altp.params,segfault,,,,,name,False,,False,
+to2-beta-L-Altp.params,segfault,,,,,name,False,,False,
+to2-beta-L-Altf.params,segfault,,,,,name,False,,False,
+to5-beta-L-Digf.params,segfault,,,,,name,False,,False,
+to6-beta-D-Altf.params,segfault,,,,,name,False,,False,
+to4-beta-D-Altp.params,segfault,,,,,name,False,,False,
+to3-beta-D-Digp.params,segfault,,,,,name,False,,False,
+to6-alpha-D-Altp.params,segfault,,,,,name,False,,False,
+to3-beta-L-Altf.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Altf.params,segfault,,,,,name,False,,False,
+to4-alpha-D-Altp.params,segfault,,,,,name,False,,False,
+to5-alpha-L-Digf.params,segfault,,,,,name,False,,False,
+to2-alpha-D-Altf.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Digp.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Digf.params,segfault,,,,,name,False,,False,
+to2-alpha-D-Altp.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Altp.params,segfault,,,,,name,False,,False,
+to5-alpha-D-Altf.params,segfault,,,,,name,False,,False,
+to4-alpha-L-Digp.params,segfault,,,,,name,False,,False,
+to3-beta-L-Altp.params,segfault,,,,,name,False,,False,
+to6-alpha-D-Altf.params,segfault,,,,,name,False,,False,
+to4-beta-L-Digp.params,segfault,,,,,name,False,,False,
+to3-beta-D-Digf.params,segfault,,,,,name,False,,False,
+to6-beta-L-Altf.params,segfault,,,,,name,False,,False,
+to2-beta-D-Altf.params,segfault,,,,,name,False,,False,
+to5-beta-D-Digf.params,segfault,,,,,name,False,,False,
+to2-beta-D-Altp.params,segfault,,,,,name,False,,False,
+to5-beta-L-Altf.params,segfault,,,,,name,False,,False,
+to6-beta-L-Altp.params,segfault,,,,,name,False,,False,
+to2-beta-D-Idof.params,segfault,,,,,name,False,,False,
+to6-beta-L-Idof.params,segfault,,,,,name,False,,False,
+to6-beta-L-Idop.params,segfault,,,,,name,False,,False,
+to5-beta-L-Idof.params,segfault,,,,,name,False,,False,
+to2-beta-D-Idop.params,segfault,,,,,name,False,,False,
+to2-alpha-D-Idof.params,segfault,,,,,name,False,,False,
+to4-alpha-D-Idop.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Idof.params,segfault,,,,,name,False,,False,
+to3-beta-L-Idof.params,segfault,,,,,name,False,,False,
+to6-alpha-D-Idop.params,segfault,,,,,name,False,,False,
+to4-beta-D-Idop.params,segfault,,,,,name,False,,False,
+to6-alpha-D-Idof.params,segfault,,,,,name,False,,False,
+to3-beta-L-Idop.params,segfault,,,,,name,False,,False,
+to5-alpha-D-Idof.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Idop.params,segfault,,,,,name,False,,False,
+to2-alpha-D-Idop.params,segfault,,,,,name,False,,False,
+to2-beta-L-Idop.params,segfault,,,,,name,False,,False,
+to6-beta-D-Idop.params,segfault,,,,,name,False,,False,
+to5-beta-D-Idof.params,segfault,,,,,name,False,,False,
+to6-beta-D-Idof.params,segfault,,,,,name,False,,False,
+to2-beta-L-Idof.params,segfault,,,,,name,False,,False,
+to6-alpha-L-Idof.params,segfault,,,,,name,False,,False,
+to3-beta-D-Idop.params,segfault,,,,,name,False,,False,
+to2-alpha-L-Idop.params,segfault,,,,,name,False,,False,
+to5-alpha-L-Idof.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Idop.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Idof.params,segfault,,,,,name,False,,False,
+to2-alpha-L-Idof.params,segfault,,,,,name,False,,False,
+to4-alpha-L-Idop.params,segfault,,,,,name,False,,False,
+to4-beta-L-Idop.params,segfault,,,,,name,False,,False,
+to3-beta-D-Idof.params,segfault,,,,,name,False,,False,
+to6-alpha-L-Idop.params,segfault,,,,,name,False,,False,
+to2-alpha-D-Talp.params,segfault,,,,,name,False,,False,
+to5-alpha-D-Talf.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Talp.params,segfault,,,,,name,False,,False,
+to6-alpha-D-Talf.params,segfault,,,,,name,False,,False,
+to3-beta-L-Talp.params,segfault,,,,,name,False,,False,
+to4-beta-D-Talp.params,segfault,,,,,name,False,,False,
+to3-beta-L-Talf.params,segfault,,,,,name,False,,False,
+to6-alpha-D-Talp.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Talf.params,segfault,,,,,name,False,,False,
+to2-alpha-D-Talf.params,segfault,,,,,name,False,,False,
+to4-alpha-D-Talp.params,segfault,,,,,name,False,,False,
+to2-beta-D-Talp.params,segfault,,,,,name,False,,False,
+to6-beta-L-Talp.params,segfault,,,,,name,False,,False,
+to5-beta-L-Talf.params,segfault,,,,,name,False,,False,
+to6-beta-L-Talf.params,segfault,,,,,name,False,,False,
+to2-beta-D-Talf.params,segfault,,,,,name,False,,False,
+to3-beta-D-Talf.params,segfault,,,,,name,False,,False,
+to6-alpha-L-Talp.params,segfault,,,,,name,False,,False,
+to4-beta-L-Talp.params,segfault,,,,,name,False,,False,
+to2-alpha-L-Talf.params,segfault,,,,,name,False,,False,
+to4-alpha-L-Talp.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Talf.params,segfault,,,,,name,False,,False,
+to5-alpha-L-Talf.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Talp.params,segfault,,,,,name,False,,False,
+to2-alpha-L-Talp.params,segfault,,,,,name,False,,False,
+to6-alpha-L-Talf.params,segfault,,,,,name,False,,False,
+to3-beta-D-Talp.params,segfault,,,,,name,False,,False,
+to2-beta-L-Talf.params,segfault,,,,,name,False,,False,
+to6-beta-D-Talf.params,segfault,,,,,name,False,,False,
+to6-beta-D-Talp.params,segfault,,,,,name,False,,False,
+to5-beta-D-Talf.params,segfault,,,,,name,False,,False,
+to2-beta-L-Talp.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Quif.params,segfault,,,,,name,False,,False,
+to5-beta-L-Olif.params,segfault,,,,,name,False,,False,
+to2-alpha-D-Quif.params,segfault,,,,,name,False,,False,
+to5-beta-Parf.params,segfault,,,,,name,False,,False,
+to3-alpha-Bacp.params,segfault,,,,,name,False,,False,
+to6-beta-Murf.params,segfault,,,,,name,False,,False,
+to4-alpha-D-Quip.params,segfault,,,,,name,False,,False,
+to4-beta-D-Quip.params,segfault,,,,,name,False,,False,
+to2-beta-L-Glcp.params,segfault,,,,,name,False,,False,
+to3-beta-L-Quif.params,segfault,,,,,name,False,,False,
+to5-beta-D-Glcf.params,segfault,,,,,name,False,,False,
+to6-beta-D-Glcp.params,segfault,,,,,name,False,,False,
+to4-alpha-Murp.params,segfault,,,,,name,False,,False,
+to6-beta-D-Glcf.params,segfault,,,,,name,False,,False,
+to3-beta-L-Quip.params,segfault,,,,,name,False,,False,
+to2-beta-L-Glcf.params,segfault,,,,,name,False,,False,
+to5-beta-D-Rhof.params,segfault,,,,,name,False,,False,
+to2-alpha-D-Quip.params,segfault,,,,,name,False,,False,
+to6-beta-Murp.params,segfault,,,,,name,False,,False,
+to5-alpha-D-Quif.params,segfault,,,,,name,False,,False,
+to3-beta-Bacp.params,segfault,,,,,name,False,,False,
+to5-alpha-Murf.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Quip.params,segfault,,,,,name,False,,False,
+to2-alpha-L-Glcp.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Glcp.params,segfault,,,,,name,False,,False,
+to4-alpha-L-Rhop.params,segfault,,,,,name,False,,False,
+to5-alpha-L-Glcf.params,segfault,,,,,name,False,,False,
+to3-beta-L-Olip.params,segfault,,,,,name,False,,False,
+to3-beta-D-Glcp.params,segfault,,,,,name,False,,False,
+to4-beta-L-Rhop.params,segfault,,,,,name,False,,False,
+to6-alpha-L-Glcf.params,segfault,,,,,name,False,,False,
+to5-alpha-D-Olif.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Olip.params,segfault,,,,,name,False,,False,
+to2-beta-D-Quif.params,segfault,,,,,name,False,,False,
+to6-alpha-Murf.params,segfault,,,,,name,False,,False,
+to6-alpha-Murp.params,segfault,,,,,name,False,,False,
+to2-beta-D-Quip.params,segfault,,,,,name,False,,False,
+to4-alpha-D-Olip.params,segfault,,,,,name,False,,False,
+to4-beta-L-Glcp.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Olif.params,segfault,,,,,name,False,,False,
+to5-beta-L-Quif.params,segfault,,,,,name,False,,False,
+to6-alpha-L-Glcp.params,segfault,,,,,name,False,,False,
+to3-beta-D-Glcf.params,segfault,,,,,name,False,,False,
+to3-beta-L-Olif.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Glcf.params,segfault,,,,,name,False,,False,
+to4-alpha-L-Glcp.params,segfault,,,,,name,False,,False,
+to4-beta-Parp.params,segfault,,,,,name,False,,False,
+to5-alpha-L-Rhof.params,segfault,,,,,name,False,,False,
+to4-beta-D-Olip.params,segfault,,,,,name,False,,False,
+to2-alpha-L-Glcf.params,segfault,,,,,name,False,,False,
+to2-alpha-Parp.params,segfault,,,,,name,False,,False,
+to2-beta-D-Glcf.params,segfault,,,,,name,False,,False,
+to5-beta-L-Rhof.params,segfault,,,,,name,False,,False,
+to6-beta-L-Glcf.params,segfault,,,,,name,False,,False,
+to3-beta-D-Quip.params,segfault,,,,,name,False,,False,
+to5-alpha-L-Quif.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Quip.params,segfault,,,,,name,False,,False,
+to2-alpha-L-Quip.params,segfault,,,,,name,False,,False,
+to2-alpha-L-Quif.params,segfault,,,,,name,False,,False,
+to4-alpha-L-Quip.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Quif.params,segfault,,,,,name,False,,False,
+to4-beta-Murp.params,segfault,,,,,name,False,,False,
+to5-beta-D-Olif.params,segfault,,,,,name,False,,False,
+to3-beta-D-Quif.params,segfault,,,,,name,False,,False,
+to5-beta-L-Glcf.params,segfault,,,,,name,False,,False,
+to6-beta-L-Glcp.params,segfault,,,,,name,False,,False,
+to4-beta-L-Quip.params,segfault,,,,,name,False,,False,
+to2-beta-D-Glcp.params,segfault,,,,,name,False,,False,
+to2-alpha-Parf.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Olif.params,segfault,,,,,name,False,,False,
+to5-beta-D-Quif.params,segfault,,,,,name,False,,False,
+to6-alpha-D-Glcp.params,segfault,,,,,name,False,,False,
+to3-beta-L-Glcf.params,segfault,,,,,name,False,,False,
+to2-beta-L-Quip.params,segfault,,,,,name,False,,False,
+to4-alpha-L-Olip.params,segfault,,,,,name,False,,False,
+to4-beta-D-Glcp.params,segfault,,,,,name,False,,False,
+to4-alpha-D-Glcp.params,segfault,,,,,name,False,,False,
+to5-alpha-D-Rhof.params,segfault,,,,,name,False,,False,
+to4-beta-L-Olip.params,segfault,,,,,name,False,,False,
+to2-alpha-D-Glcf.params,segfault,,,,,name,False,,False,
+to5-beta-Murf.params,segfault,,,,,name,False,,False,
+to3-beta-D-Olif.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Glcf.params,segfault,,,,,name,False,,False,
+to2-beta-Parp.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Glcp.params,segfault,,,,,name,False,,False,
+to2-beta-Parf.params,segfault,,,,,name,False,,False,
+to4-alpha-D-Rhop.params,segfault,,,,,name,False,,False,
+to5-alpha-D-Glcf.params,segfault,,,,,name,False,,False,
+to3-beta-D-Olip.params,segfault,,,,,name,False,,False,
+to2-alpha-D-Glcp.params,segfault,,,,,name,False,,False,
+to5-alpha-Parf.params,segfault,,,,,name,False,,False,
+to2-beta-L-Quif.params,segfault,,,,,name,False,,False,
+to4-alpha-Parp.params,segfault,,,,,name,False,,False,
+to3-beta-L-Glcp.params,segfault,,,,,name,False,,False,
+to4-beta-D-Rhop.params,segfault,,,,,name,False,,False,
+to5-alpha-L-Olif.params,segfault,,,,,name,False,,False,
+to6-alpha-D-Glcf.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Olip.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Gulp.params,segfault,,,,,name,False,,False,
+to5-alpha-D-Gulf.params,segfault,,,,,name,False,,False,
+to2-alpha-D-Gulp.params,segfault,,,,,name,False,,False,
+to6-alpha-D-Gulf.params,segfault,,,,,name,False,,False,
+to3-beta-L-Gulp.params,segfault,,,,,name,False,,False,
+to3-beta-L-Gulf.params,segfault,,,,,name,False,,False,
+to6-alpha-D-Gulp.params,segfault,,,,,name,False,,False,
+to4-beta-D-Gulp.params,segfault,,,,,name,False,,False,
+to4-alpha-D-Gulp.params,segfault,,,,,name,False,,False,
+to2-alpha-D-Gulf.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Gulf.params,segfault,,,,,name,False,,False,
+to5-beta-L-Gulf.params,segfault,,,,,name,False,,False,
+to6-beta-L-Gulp.params,segfault,,,,,name,False,,False,
+to2-beta-D-Gulp.params,segfault,,,,,name,False,,False,
+to2-beta-D-Gulf.params,segfault,,,,,name,False,,False,
+to6-beta-L-Gulf.params,segfault,,,,,name,False,,False,
+to4-beta-L-Gulp.params,segfault,,,,,name,False,,False,
+to3-beta-D-Gulf.params,segfault,,,,,name,False,,False,
+to6-alpha-L-Gulp.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Gulf.params,segfault,,,,,name,False,,False,
+to4-alpha-L-Gulp.params,segfault,,,,,name,False,,False,
+to2-alpha-L-Gulf.params,segfault,,,,,name,False,,False,
+to2-alpha-L-Gulp.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Gulp.params,segfault,,,,,name,False,,False,
+to5-alpha-L-Gulf.params,segfault,,,,,name,False,,False,
+to6-alpha-L-Gulf.params,segfault,,,,,name,False,,False,
+to3-beta-D-Gulp.params,segfault,,,,,name,False,,False,
+to6-beta-D-Gulf.params,segfault,,,,,name,False,,False,
+to2-beta-L-Gulf.params,segfault,,,,,name,False,,False,
+to2-beta-L-Gulp.params,segfault,,,,,name,False,,False,
+to5-beta-D-Gulf.params,segfault,,,,,name,False,,False,
+to6-beta-D-Gulp.params,segfault,,,,,name,False,,False,
+to2-alpha-D-Manf.params,segfault,,,,,name,False,,False,
+to4-alpha-D-Manp.params,segfault,,,,,name,False,,False,
+to2-beta-D-Rhap.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Manf.params,segfault,,,,,name,False,,False,
+to5-beta-L-Rhaf.params,segfault,,,,,name,False,,False,
+to3-beta-L-Manf.params,segfault,,,,,name,False,,False,
+to6-alpha-D-Manp.params,segfault,,,,,name,False,,False,
+to4-beta-D-Manp.params,segfault,,,,,name,False,,False,
+to6-alpha-D-Manf.params,segfault,,,,,name,False,,False,
+to3-beta-L-Manp.params,segfault,,,,,name,False,,False,
+to5-alpha-D-Manf.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Manp.params,segfault,,,,,name,False,,False,
+to5-beta-Tyvf.params,segfault,,,,,name,False,,False,
+to2-beta-D-Rhaf.params,segfault,,,,,name,False,,False,
+to2-alpha-D-Manp.params,segfault,,,,,name,False,,False,
+to3-beta-L-Rhap.params,segfault,,,,,name,False,,False,
+to4-beta-Tyvp.params,segfault,,,,,name,False,,False,
+to2-beta-D-Manf.params,segfault,,,,,name,False,,False,
+to2-alpha-D-Rhap.params,segfault,,,,,name,False,,False,
+to5-alpha-D-Rhaf.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Rhap.params,segfault,,,,,name,False,,False,
+to6-beta-L-Manf.params,segfault,,,,,name,False,,False,
+to6-beta-L-Manp.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Rhaf.params,segfault,,,,,name,False,,False,
+to5-beta-L-Manf.params,segfault,,,,,name,False,,False,
+to2-alpha-D-Rhaf.params,segfault,,,,,name,False,,False,
+to4-alpha-D-Rhap.params,segfault,,,,,name,False,,False,
+to2-beta-D-Manp.params,segfault,,,,,name,False,,False,
+to4-beta-D-Rhap.params,segfault,,,,,name,False,,False,
+to3-beta-L-Rhaf.params,segfault,,,,,name,False,,False,
+to6-alpha-L-Manf.params,segfault,,,,,name,False,,False,
+to3-beta-D-Manp.params,segfault,,,,,name,False,,False,
+to2-alpha-Tyvf.params,segfault,,,,,name,False,,False,
+to2-beta-L-Rhaf.params,segfault,,,,,name,False,,False,
+to2-alpha-L-Manp.params,segfault,,,,,name,False,,False,
+to5-alpha-L-Manf.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Manp.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Manf.params,segfault,,,,,name,False,,False,
+to5-beta-D-Rhaf.params,segfault,,,,,name,False,,False,
+to2-alpha-L-Manf.params,segfault,,,,,name,False,,False,
+to4-alpha-L-Manp.params,segfault,,,,,name,False,,False,
+to2-beta-L-Rhap.params,segfault,,,,,name,False,,False,
+to2-alpha-Tyvp.params,segfault,,,,,name,False,,False,
+to4-beta-L-Manp.params,segfault,,,,,name,False,,False,
+to3-beta-D-Manf.params,segfault,,,,,name,False,,False,
+to6-alpha-L-Manp.params,segfault,,,,,name,False,,False,
+to4-alpha-Tyvp.params,segfault,,,,,name,False,,False,
+to2-alpha-L-Rhaf.params,segfault,,,,,name,False,,False,
+to4-alpha-L-Rhap.params,segfault,,,,,name,False,,False,
+to2-beta-L-Manp.params,segfault,,,,,name,False,,False,
+to6-beta-D-Manp.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Rhaf.params,segfault,,,,,name,False,,False,
+to5-beta-D-Manf.params,segfault,,,,,name,False,,False,
+to2-beta-Tyvf.params,segfault,,,,,name,False,,False,
+to3-beta-D-Rhaf.params,segfault,,,,,name,False,,False,
+to4-beta-L-Rhap.params,segfault,,,,,name,False,,False,
+to5-alpha-Tyvf.params,segfault,,,,,name,False,,False,
+to2-beta-Tyvp.params,segfault,,,,,name,False,,False,
+to3-beta-D-Rhap.params,segfault,,,,,name,False,,False,
+to5-alpha-L-Rhaf.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Rhap.params,segfault,,,,,name,False,,False,
+to6-beta-D-Manf.params,segfault,,,,,name,False,,False,
+to2-beta-L-Manf.params,segfault,,,,,name,False,,False,
+to2-alpha-L-Rhap.params,segfault,,,,,name,False,,False,
+to2-beta-D-Allf.params,segfault,,,,,name,False,,False,
+to6-beta-L-Allf.params,segfault,,,,,name,False,,False,
+to5-beta-L-Allf.params,segfault,,,,,name,False,,False,
+to6-beta-L-Allp.params,segfault,,,,,name,False,,False,
+to2-beta-D-Allp.params,segfault,,,,,name,False,,False,
+to4-alpha-D-Allp.params,segfault,,,,,name,False,,False,
+to2-alpha-D-Allf.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Allf.params,segfault,,,,,name,False,,False,
+to6-alpha-D-Allp.params,segfault,,,,,name,False,,False,
+to3-beta-L-Allf.params,segfault,,,,,name,False,,False,
+to4-beta-D-Allp.params,segfault,,,,,name,False,,False,
+to3-beta-L-Allp.params,segfault,,,,,name,False,,False,
+to6-alpha-D-Allf.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Allp.params,segfault,,,,,name,False,,False,
+to5-alpha-D-Allf.params,segfault,,,,,name,False,,False,
+to2-alpha-D-Allp.params,segfault,,,,,name,False,,False,
+to2-beta-L-Allp.params,segfault,,,,,name,False,,False,
+to5-beta-D-Allf.params,segfault,,,,,name,False,,False,
+to6-beta-D-Allp.params,segfault,,,,,name,False,,False,
+to6-beta-D-Allf.params,segfault,,,,,name,False,,False,
+to2-beta-L-Allf.params,segfault,,,,,name,False,,False,
+to3-beta-D-Allp.params,segfault,,,,,name,False,,False,
+to6-alpha-L-Allf.params,segfault,,,,,name,False,,False,
+to2-alpha-L-Allp.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Allp.params,segfault,,,,,name,False,,False,
+to5-alpha-L-Allf.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Allf.params,segfault,,,,,name,False,,False,
+to4-alpha-L-Allp.params,segfault,,,,,name,False,,False,
+to2-alpha-L-Allf.params,segfault,,,,,name,False,,False,
+to4-beta-L-Allp.params,segfault,,,,,name,False,,False,
+to6-alpha-L-Allp.params,segfault,,,,,name,False,,False,
+to3-beta-D-Allf.params,segfault,,,,,name,False,,False,
+to4-beta-D-Galp.params,segfault,,,,,name,False,,False,
+to5-beta-D-Fucf.params,segfault,,,,,name,False,,False,
+to3-beta-L-Galf.params,segfault,,,,,name,False,,False,
+to6-alpha-D-Galp.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Daup.params,segfault,,,,,name,False,,False,
+to5-alpha-D-Dauf.params,segfault,,,,,name,False,,False,
+to2-beta-L-Fucp.params,segfault,,,,,name,False,,False,
+to3-beta-L-Daup.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Galf.params,segfault,,,,,name,False,,False,
+to2-alpha-D-Galf.params,segfault,,,,,name,False,,False,
+to5-beta-L-Colf.params,segfault,,,,,name,False,,False,
+to4-alpha-D-Galp.params,segfault,,,,,name,False,,False,
+to4-alpha-Daup.params,segfault,,,,,name,False,,False,
+to4-beta-D-Daup.params,segfault,,,,,name,False,,False,
+to2-alpha-D-Galp.params,segfault,,,,,name,False,,False,
+to5-alpha-D-Galf.params,segfault,,,,,name,False,,False,
+to3-beta-L-Dauf.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Galp.params,segfault,,,,,name,False,,False,
+to2-beta-L-Fucf.params,segfault,,,,,name,False,,False,
+to6-alpha-D-Galf.params,segfault,,,,,name,False,,False,
+to3-beta-L-Galp.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Dauf.params,segfault,,,,,name,False,,False,
+to4-alpha-D-Daup.params,segfault,,,,,name,False,,False,
+to6-beta-L-Galf.params,segfault,,,,,name,False,,False,
+to2-beta-D-Galf.params,segfault,,,,,name,False,,False,
+to3-beta-D-Fucp.params,segfault,,,,,name,False,,False,
+to5-alpha-L-Fucf.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Fucp.params,segfault,,,,,name,False,,False,
+to5-beta-L-Dauf.params,segfault,,,,,name,False,,False,
+to5-beta-D-Abef.params,segfault,,,,,name,False,,False,
+to2-alpha-L-Fucp.params,segfault,,,,,name,False,,False,
+to2-alpha-L-Fucf.params,segfault,,,,,name,False,,False,
+to4-alpha-L-Fucp.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Fucf.params,segfault,,,,,name,False,,False,
+to3-beta-D-Fucf.params,segfault,,,,,name,False,,False,
+to2-beta-D-Galp.params,segfault,,,,,name,False,,False,
+to4-beta-L-Fucp.params,segfault,,,,,name,False,,False,
+to6-beta-L-Galp.params,segfault,,,,,name,False,,False,
+to5-beta-L-Galf.params,segfault,,,,,name,False,,False,
+to5-alpha-L-Galf.params,segfault,,,,,name,False,,False,
+to3-beta-D-Dauf.params,segfault,,,,,name,False,,False,
+to2-beta-L-Colf.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Galp.params,segfault,,,,,name,False,,False,
+to4-beta-L-Daup.params,segfault,,,,,name,False,,False,
+to2-alpha-L-Galp.params,segfault,,,,,name,False,,False,
+to4-beta-D-Abep.params,segfault,,,,,name,False,,False,
+to4-alpha-D-Abep.params,segfault,,,,,name,False,,False,
+to4-alpha-L-Daup.params,segfault,,,,,name,False,,False,
+to2-alpha-D-Abef.params,segfault,,,,,name,False,,False,
+to2-beta-D-Fucf.params,segfault,,,,,name,False,,False,
+to6-alpha-L-Galf.params,segfault,,,,,name,False,,False,
+to3-beta-D-Galp.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Dauf.params,segfault,,,,,name,False,,False,
+to3-beta-D-Galf.params,segfault,,,,,name,False,,False,
+to6-alpha-L-Galp.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Daup.params,segfault,,,,,name,False,,False,
+to2-beta-D-Fucp.params,segfault,,,,,name,False,,False,
+to5-alpha-L-Dauf.params,segfault,,,,,name,False,,False,
+to5-alpha-D-Abef.params,segfault,,,,,name,False,,False,
+to4-beta-L-Galp.params,segfault,,,,,name,False,,False,
+to2-alpha-D-Abep.params,segfault,,,,,name,False,,False,
+to5-beta-L-Fucf.params,segfault,,,,,name,False,,False,
+to2-alpha-L-Galf.params,segfault,,,,,name,False,,False,
+to4-alpha-L-Galp.params,segfault,,,,,name,False,,False,
+to3-beta-D-Daup.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Galf.params,segfault,,,,,name,False,,False,
+to2-beta-L-Colp.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Fucf.params,segfault,,,,,name,False,,False,
+to2-beta-D-Abef.params,segfault,,,,,name,False,,False,
+to2-alpha-D-Fucf.params,segfault,,,,,name,False,,False,
+to4-beta-L-Colp.params,segfault,,,,,name,False,,False,
+to4-alpha-D-Fucp.params,segfault,,,,,name,False,,False,
+to4-alpha-L-Colp.params,segfault,,,,,name,False,,False,
+to4-beta-D-Fucp.params,segfault,,,,,name,False,,False,
+to6-beta-D-Galp.params,segfault,,,,,name,False,,False,
+to5-beta-D-Galf.params,segfault,,,,,name,False,,False,
+to2-alpha-L-Colf.params,segfault,,,,,name,False,,False,
+to3-beta-L-Fucf.params,segfault,,,,,name,False,,False,
+to2-beta-L-Galp.params,segfault,,,,,name,False,,False,
+to2-beta-L-Galf.params,segfault,,,,,name,False,,False,
+to3-beta-L-Fucp.params,segfault,,,,,name,False,,False,
+to5-alpha-L-Colf.params,segfault,,,,,name,False,,False,
+to2-alpha-L-Colp.params,segfault,,,,,name,False,,False,
+to6-beta-D-Galf.params,segfault,,,,,name,False,,False,
+to5-beta-D-Dauf.params,segfault,,,,,name,False,,False,
+to2-alpha-D-Fucp.params,segfault,,,,,name,False,,False,
+to5-alpha-D-Fucf.params,segfault,,,,,name,False,,False,
+to2-beta-D-Abep.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Fucp.params,segfault,,,,,name,False,,False,
+to2-beta-D-Lyxf.params,segfault,,,,,name,False,,False,
+to2-beta-D-Lyxp.params,segfault,,,,,name,False,,False,
+to5-beta-L-Lyxf.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Lyxf.params,segfault,,,,,name,False,,False,
+to4-alpha-D-Lyxp.params,segfault,,,,,name,False,,False,
+to2-alpha-D-Lyxf.params,segfault,,,,,name,False,,False,
+to4-beta-D-Lyxp.params,segfault,,,,,name,False,,False,
+to3-beta-L-Lyxf.params,segfault,,,,,name,False,,False,
+to3-beta-L-Lyxp.params,segfault,,,,,name,False,,False,
+to2-alpha-D-Lyxp.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Lyxp.params,segfault,,,,,name,False,,False,
+to5-alpha-D-Lyxf.params,segfault,,,,,name,False,,False,
+to5-beta-D-Lyxf.params,segfault,,,,,name,False,,False,
+to2-beta-L-Lyxp.params,segfault,,,,,name,False,,False,
+to2-beta-L-Lyxf.params,segfault,,,,,name,False,,False,
+to3-beta-D-Lyxp.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Lyxp.params,segfault,,,,,name,False,,False,
+to5-alpha-L-Lyxf.params,segfault,,,,,name,False,,False,
+to2-alpha-L-Lyxp.params,segfault,,,,,name,False,,False,
+to4-alpha-L-Lyxp.params,segfault,,,,,name,False,,False,
+to2-alpha-L-Lyxf.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Lyxf.params,segfault,,,,,name,False,,False,
+to3-beta-D-Lyxf.params,segfault,,,,,name,False,,False,
+to4-beta-L-Lyxp.params,segfault,,,,,name,False,,False,
+to2-alpha-D-Ribp.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Ribp.params,segfault,,,,,name,False,,False,
+to5-alpha-D-Ribf.params,segfault,,,,,name,False,,False,
+to3-beta-L-Ribp.params,segfault,,,,,name,False,,False,
+to4-beta-D-Ribp.params,segfault,,,,,name,False,,False,
+to3-beta-L-Ribf.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Ribf.params,segfault,,,,,name,False,,False,
+to4-alpha-D-Ribp.params,segfault,,,,,name,False,,False,
+to2-alpha-D-Ribf.params,segfault,,,,,name,False,,False,
+to2-beta-D-Ribp.params,segfault,,,,,name,False,,False,
+to5-beta-L-Ribf.params,segfault,,,,,name,False,,False,
+to2-beta-D-Ribf.params,segfault,,,,,name,False,,False,
+to3-beta-D-Ribf.params,segfault,,,,,name,False,,False,
+to4-beta-L-Ribp.params,segfault,,,,,name,False,,False,
+to4-alpha-L-Ribp.params,segfault,,,,,name,False,,False,
+to2-alpha-L-Ribf.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Ribf.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Ribp.params,segfault,,,,,name,False,,False,
+to5-alpha-L-Ribf.params,segfault,,,,,name,False,,False,
+to2-alpha-L-Ribp.params,segfault,,,,,name,False,,False,
+to3-beta-D-Ribp.params,segfault,,,,,name,False,,False,
+to2-beta-L-Ribf.params,segfault,,,,,name,False,,False,
+to5-beta-D-Ribf.params,segfault,,,,,name,False,,False,
+to2-beta-L-Ribp.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Araf.params,segfault,,,,,name,False,,False,
+to2-alpha-L-Araf.params,segfault,,,,,name,False,,False,
+to4-alpha-L-Arap.params,segfault,,,,,name,False,,False,
+to4-beta-L-Arap.params,segfault,,,,,name,False,,False,
+to3-beta-D-Araf.params,segfault,,,,,name,False,,False,
+to3-beta-D-Arap.params,segfault,,,,,name,False,,False,
+to2-alpha-L-Arap.params,segfault,,,,,name,False,,False,
+to5-alpha-L-Araf.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Arap.params,segfault,,,,,name,False,,False,
+to2-beta-L-Araf.params,segfault,,,,,name,False,,False,
+to2-beta-L-Arap.params,segfault,,,,,name,False,,False,
+to5-beta-D-Araf.params,segfault,,,,,name,False,,False,
+to3-beta-L-Arap.params,segfault,,,,,name,False,,False,
+to5-alpha-D-Araf.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Arap.params,segfault,,,,,name,False,,False,
+to2-alpha-D-Arap.params,segfault,,,,,name,False,,False,
+to2-alpha-D-Araf.params,segfault,,,,,name,False,,False,
+to4-alpha-D-Arap.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Araf.params,segfault,,,,,name,False,,False,
+to3-beta-L-Araf.params,segfault,,,,,name,False,,False,
+to4-beta-D-Arap.params,segfault,,,,,name,False,,False,
+to5-beta-L-Araf.params,segfault,,,,,name,False,,False,
+to2-beta-D-Arap.params,segfault,,,,,name,False,,False,
+to2-beta-D-Araf.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Xylp.params,segfault,,,,,name,False,,False,
+to5-alpha-D-Xylf.params,segfault,,,,,name,False,,False,
+to2-alpha-D-Xylp.params,segfault,,,,,name,False,,False,
+to3-beta-L-Xylp.params,segfault,,,,,name,False,,False,
+to3-beta-L-Xylf.params,segfault,,,,,name,False,,False,
+to4-beta-D-Xylp.params,segfault,,,,,name,False,,False,
+to4-alpha-D-Xylp.params,segfault,,,,,name,False,,False,
+to2-alpha-D-Xylf.params,segfault,,,,,name,False,,False,
+to3-alpha-D-Xylf.params,segfault,,,,,name,False,,False,
+to5-beta-L-Xylf.params,segfault,,,,,name,False,,False,
+to2-beta-D-Xylp.params,segfault,,,,,name,False,,False,
+to2-beta-D-Xylf.params,segfault,,,,,name,False,,False,
+to4-beta-L-Xylp.params,segfault,,,,,name,False,,False,
+to3-beta-D-Xylf.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Xylf.params,segfault,,,,,name,False,,False,
+to4-alpha-L-Xylp.params,segfault,,,,,name,False,,False,
+to2-alpha-L-Xylf.params,segfault,,,,,name,False,,False,
+to2-alpha-L-Xylp.params,segfault,,,,,name,False,,False,
+to3-alpha-L-Xylp.params,segfault,,,,,name,False,,False,
+to5-alpha-L-Xylf.params,segfault,,,,,name,False,,False,
+to3-beta-D-Xylp.params,segfault,,,,,name,False,,False,
+to2-beta-L-Xylf.params,segfault,,,,,name,False,,False,
+to2-beta-L-Xylp.params,segfault,,,,,name,False,,False,
+to5-beta-D-Xylf.params,segfault,,,,,name,False,,False,
+MEM.params,segfault,membrane/MEM.params,MEM,TYPE LIGAND," Rosetta Residue Topology File
+ Type: MEM
+ Desc: Defines the position of the implicit membrane
+ Author: Rebecca Alford (rfalford12@gmail.com)
+ Author: Julia Koehler Leman (julia.koehler1982@gmail.com)
+ Last Modified 9/6/14
+  Membrane Thickness
+  Membrane Center
+  Membrane Normal
+  dont interact with anyone",,True,,False,
+EMB.params,segfault,membrane/EMB.params,EMB,TYPE LIGAND," Rosetta Residue Topology File
+ Type: EMB
+ Desc: Defines the embedding of a molecule in the implicit membrane
+ Author: Rebecca Alford (rfalford12@gmail.com)
+ Author: Julia Koehler Leman (julia.koehler1982@gmail.com)
+ Last Modified 9/6/14
+  Embedding Depth
+  Embedding Center
+  Embedding Normal
+  dont interact with anyone",,True,,False,
+C2X.params,segfault,,,,,name,False,,False,
+C3X.params,segfault,,,,,name,False,,False,
+R1A.params,,spin_labels/R1A.params,R1A,TYPE POLYMER,,,True,CC1(C)CC(CSSC[C@H](N)CO)C(C)(C)N1O,False,
+CED.params,segfault,,,,,name,False,,False,
+C4X.params,segfault,,,,,name,False,,False,
+NTA.params,segfault,,,,,name,False,,False,
+2-aminomethyl-phenylalanine.params,,l-ncaa/2-aminomethyl-phenylalanine.params,A34,TYPE POLYMER," 2-aminomethyl-phenylalanine params file created by Doug Renfrew.
+ Tweaked 12 March 2018 by Vikram K. Mulligan (vmullig@uw.edu).",,True,N[C@H](CO)CC1CCCCC1C[NH3+],False,
+2-amino-heptanoic_acid.params,,l-ncaa/2-amino-heptanoic_acid.params,A33,TYPE POLYMER,,,True,CCCCC[C@H](N)CO,False,
+YPN.params,segfault,,,,,name,False,,False,
+NVL.params,,l-ncaa/NVL.params,NVL,TYPE POLYMER," Norvaline prepared by P. Douglas Renfrew (renfrew@unc.edu)
+ AMW: this is NVA in the PDB.",,True,CCC[C@H](N)CO,False,
+4J5.params,segfault,,,,,name,False,,False,
+trifluoro-leucine_ent2.params,,l-ncaa/trifluoro-leucine_ent2.params,C94,TYPE POLYMER,,,True,C[C@@H](C[C@H](N)CO)C(F)(F)F,False,
+2-amino-2-phenylbutyric_acid.params,,l-ncaa/2-amino-2-phenylbutyric_acid.params,A24,TYPE POLYMER,,,True,CC[C@@](N)(CO)C1CCCCC1,False,
+4-methyl-phenylalanine.params,,l-ncaa/4-methyl-phenylalanine.params,B27,TYPE POLYMER,,,True,CC1CCC(C[C@H](N)CO)CC1,False,
+2-allyl-glycine.params,,l-ncaa/2-allyl-glycine.params,A20,TYPE POLYMER,,,True,CCC[C@H](N)CO,False,
+5-bromo-tryptophan.params,ERROR: add_bond: atom CZ2 and/or BRT don't exist!,l-ncaa/5-bromo-tryptophan.params,C80,TYPE POLYMER,,,True,,False,
+alpha-methyl-leucine.params,,l-ncaa/alpha-methyl-leucine.params,B57,TYPE POLYMER,,,True,CC(C)C[C@](C)(N)CO,False,
+7-methyl-tryptophan.params,,l-ncaa/7-methyl-tryptophan.params,C88,TYPE POLYMER,,,True,CC1CCCC2C(C[C@H](N)CO)CNC12,False,
+4.5-dihydroxy-isoleucine.params,,l-ncaa/4.5-dihydroxy-isoleucine.params,dhI,TYPE POLYMER," 4,5-dihydroxy-isoleucine
+ Added by Vikram K. Mulligan, 10 March 2014, for modelling alpha-amanitin.
+ Modified from ILE.params.
+ residue type
+ Gamma hydroxyl oxygen atom
+ Gamma hydroxyl's proton
+ ATOM 2HG1 Hapo HA    0.09   0.000
+ Delta hydroxyl oxygen atom
+ Delta hydroxyl's proton
+ ATOM 3HD1 Hapo HA    0.09   0.000
+ BOND  CG1 2HG1
+ BOND  CD1 3HD1
+ APL O to CB distance; max observed in ubiquitin
+ Torsion/angle/distance measured from 1k83 structure.
+ Torsion/angle/distance based on hydroxyl of serine.
+ ICOOR_INTERNAL   3HD1  120.044632   70.500000    1.089057   CD1   CG1  2HD1
+ Torsion/angle/distance measured from 1k83 structure.
+ Torsion/angle/distance based on hydroxyl of serine.
+ ICOOR_INTERNAL   2HG1  117.500000   70.500000    1.090337   CG1   CB   1HG1",,True,C[C@@H]1[C@@H](CO)NOC[C@@H]1O,False,
+homocysteine.params,,l-ncaa/homocysteine.params,C26,TYPE POLYMER,,,True,N[C@H](CO)CCS,False,
+2-amino-5-phenyl-pentanoic_acid.params,,l-ncaa/2-amino-5-phenyl-pentanoic_acid.params,A31,TYPE POLYMER,,,True,N[C@H](CO)CCCC1CCCCC1,False,
+0TD.params,segfault,,,,,name,False,,False,
+4-amino-tetrahydrothiopyran-4-carboxylic_acid.params,,l-ncaa/4-amino-tetrahydrothiopyran-4-carboxylic_acid.params,B06,TYPE POLYMER," true NU 6 is across the CUT_BOND
+ ICOOR_INTERNAL    CB2   71.593205   69.217655    1.541828   CA    N    LOWER
+ ICOOR_INTERNAL    CB2  -24.000000   69.217655    1.541828   CA    N    LOWER
+ ICOOR_INTERNAL    CB2  -84.000000   69.217655    1.541828   CA    N    LOWER
+ ICOOR_INTERNAL    CB2  -124.000000   69.217655    1.541828   CA    N    LOWER
+ ICOOR_INTERNAL    CG2   59.901852   66.372845    1.527240   CB2   CA    N
+ ICOOR_INTERNAL    SD    62.412721   67.128122    1.814872   CG2   CB2   CA
+ ICOOR_INTERNAL    CG1  -53.843574   81.979932    1.813136   SD    CG2   CB2
+ ICOOR_INTERNAL    CB1   52.377765   66.823933    1.528880   CG1   SD    CG2
+ ICOOR_INTERNAL   VCB1   59.141809   67.349267    1.528583   CA    N    LOWER 
+ ICOOR_INTERNAL   VCA    59.141809   67.349267    1.528583   CB1   CG1   SD 
+ 
+ 
+ ICOOR_INTERNAL    O    -47.912766   61.295150    1.202795   C     CA    N
+ Fake chi to trick packer",,True,NC1(CO)CCSCC1,False,
+beta-chloro-alanine.params,,l-ncaa/beta-chloro-alanine.params,B97,TYPE POLYMER,,,True,N[C@H](CO)CCl,False,
+alpha-methyl-phenylalanine.params,,l-ncaa/alpha-methyl-phenylalanine.params,B58,TYPE POLYMER,,,True,C[C@@](N)(CO)CC1CCCCC1,False,
+V02.params,,l-ncaa/V02.params,V02,TYPE POLYMER,,,True,N[C@H](CO)C1CCC(O)CC1,False,
+4-fluoro-proline.params_rot,,l-ncaa/4-fluoro-proline.params_rot,B19,TYPE POLYMER,,,True,OC[C@@H]1C[C@@H](F)CN1,False,
+beta-cyclohexyl-alanine.params,,l-ncaa/beta-cyclohexyl-alanine.params,C00,TYPE POLYMER," true NU 6 is across the CUT_BOND
+  must build from end of ring, unlike CB
+  build as branch from mc, unlike CG1",,True,N[C@H](CO)CC1CCCCC1,False,
+4-fluoro-tryptophan.params,segfault,,,,,name,False,,False,
+3-hydroxy-tyrosine.params,,l-ncaa/3-hydroxy-tyrosine.params,A80,TYPE POLYMER,,,True,N[C@H](CO)CC1CCC(O)C(O)C1,False,
+NLU.params,,l-ncaa/NLU.params,NLU,TYPE POLYMER," Norleucine -- MADE BY BEN STRANGES
+ ROTAMER_AA MET",,True,CCCC[C@H](N)CO,False,
+5-hydroxy-tryptophan.params,,l-ncaa/5-hydroxy-tryptophan.params,B36,TYPE POLYMER,,,True,N[C@H](CO)CC1CNC2CCC(O)CC12,False,
+beta.beta-diphenyl-alanine.params,,l-ncaa/beta.beta-diphenyl-alanine.params,B96,TYPE POLYMER," Beta,beta-diphenyl-alanine params file, created by Doug Renfrew.
+ Tweaked by Vikram K. Mulligan (vmullig@uw.edu) on 12 March 2018.",,True,N[C@H](CO)C(C1CCCCC1)C1CCCCC1,False,
+homophenylalanine.params,,l-ncaa/homophenylalanine.params,C27,TYPE POLYMER," Homophenylalanine params file added by Doug Renfrew.
+ Tweaked 12 March 2018 by Vikram K. Mulligan (vmullig@uw.edu).",,True,N[C@H](CO)CCC1CCCCC1,False,
+alpha-methyl-3-hydroxy-tyrosine.params,,l-ncaa/alpha-methyl-3-hydroxy-tyrosine.params,B54,TYPE POLYMER,,,True,C[C@@](N)(CO)CC1CCC(O)C(O)C1,False,
+homoserine.params,,l-ncaa/homoserine.params,C30,TYPE POLYMER,,,True,N[C@H](CO)CCO,False,
+alpha-methyl-tyrosine.params,,l-ncaa/alpha-methyl-tyrosine.params,B61,TYPE POLYMER,,,True,C[C@@](N)(CO)CC1CCC(O)CC1,False,
+2-amino-3-methylamino-propanoic_acid.params,segfault,,,,,name,False,,False,
+beta-hydroxy-norvaline.params,,l-ncaa/beta-hydroxy-norvaline.params,C04,TYPE POLYMER,,,True,CC[C@H](O)[C@H](N)CO,False,
+HIP.params,,l-ncaa/HIP.params,HIP,TYPE POLYMER," rosetta residue topology file
+ residue type
+ APL CB to sidechain heavy atom disance -- max observed on residue 74 of ubiquitin",,True,N[C@H](CO)C[C@H]1CNCN1[PH](O)(O)O,False,
+3-methyl-histidine.params,,l-ncaa/3-methyl-histidine.params,A82,TYPE POLYMER,,,True,CN1CNCC1C[C@H](N)CO,False,
+2-amino-4-bromo-4-pentenoic_acid.params,segfault,,,,,name,False,,False,
+V04.params,,l-ncaa/V04.params,V04,TYPE POLYMER,,,True,N[C@H](CO)[C@H](O)C1CCC(O)C(Cl)C1,False,
+5-fluoro-tryptophan.params,,l-ncaa/5-fluoro-tryptophan.params,B35,TYPE POLYMER,,,True,N[C@H](CO)CC1CNC2CCC(F)CC12,False,
+2.4-diaminobutyric_acid.params,,l-ncaa/2.4-diaminobutyric_acid.params,DAB,TYPE POLYMER," 2,4-diaminobutyric acid (DAB), commonly called ""stubby stubby lysine"".
+ Probably initially added by Doug Renfrew.
+ Params file updated 7 March 2017 by Vikram K. Mulligan (vmullig@uw.edu).",,True,N[C@H](CO)CC[NH3+],False,
+4-fluoro-proline_puck.params_rot,,l-ncaa/4-fluoro-proline_puck.params_rot,C89,TYPE POLYMER,,,True,OC[C@@H]1C[C@H](F)CN1,False,
+HLU.params,,l-ncaa/HLU.params,HLU,TYPE POLYMER, made by Ben Stranges,,True,CC(C)CC[C@H](N)CO,False,
+2-amino-octanoic_acid.params,,l-ncaa/2-amino-octanoic_acid.params,A32,TYPE POLYMER," Use 2-amino-heptanoic acid rotlib for first 4 chi angles, extra chi for the rest",,True,CCCCCC[C@H](N)CO,False,
+alpha-amino-glycine.params,,l-ncaa/alpha-amino-glycine.params,B50,TYPE POLYMER,,,True,N[C@@H]([NH3+])CO,False,
+beta-beta-dicyclohexyl-alanine.params,,l-ncaa/beta-beta-dicyclohexyl-alanine.params,B95,TYPE POLYMER," CUT_BOND  CD1  CG1
+ CUT_BOND  CD3  CG2
+ true NU 6 is across the CUT_BOND
+ true NU 6 is across the CUT_BOND
+ ICOOR_INTERNAL   VCG1  -55.2        67.6         1.54023    CD1   CE1   CZ1  build from end of ring, unlike CB
+ ICOOR_INTERNAL   VCD1 -172.569      67.852       1.54023    CG1   CB    CA    build as branch from mc, unlike CG1
+  must build from end of ring, unlike CB
+  build as branch from mc, unlike CG1
+ ICOOR_INTERNAL   VCG2  -55.2        67.6         1.54023    CD3   CE3   CZ2  must build from end of ring, unlike CB
+ ICOOR_INTERNAL   VCD3 -172.569      67.852       1.54023    CG2   CB    CA    build as branch from mc, unlike CD3
+  must build from end of ring, unlike CB
+  build as branch from mc, unlike CD3",,True,N[C@H](CO)C(C1CCCCC1)C1CCCCC1,False,
+2-hydroxy-phenylalanine.params,,l-ncaa/2-hydroxy-phenylalanine.params,A43,TYPE POLYMER,,,True,N[C@H](CO)CC1CCCCC1O,False,
+S56.params,,l-ncaa/S56.params,S56,TYPE POLYMER,,,True,CC(O)N[C@H]1[C@H](O[C@@H]2[C@@H](CO)O[C@@H](NC(O)C[C@H](N)CO)[C@H](NC(C)O)[C@H]2O)O[C@H](CO)[C@@H](O[C@@H]2O[C@H](CO[C@H]3O[C@H](CO)[C@@H](O)[C@H](O[C@H]4O[C@H](CO)[C@@H](O)[C@H](O)[C@@H]4O)[C@@H]3O)[C@@H](O)[C@H](O[C@H]3O[C@H](CO)[C@@H](O)[C@H](O)[C@@H]3O)[C@@H]2O)[C@@H]1O,False,
+hexafluoro-leucine.params,,l-ncaa/hexafluoro-leucine.params,C93,TYPE POLYMER,,,True,N[C@H](CO)CC(C(F)(F)F)C(F)(F)F,False,
+ethionine.params,,l-ncaa/ethionine.params,C20,TYPE POLYMER,,,True,CCSCC[C@H](N)CO,False,
+beta-(2-naphthyl)-alanine.params,,l-ncaa/beta-(2-naphthyl)-alanine.params,B74,TYPE POLYMER," Beta-(2-naphthyl)-alanine params file by Doug Renfrew.
+ Tweaked 12 March 2018 by Vikram K. Mulligan (vmullig@uw.edu).",,True,N[C@H](CO)CC1CCC2CCCCC2C1,False,
+tert-butyl-glycine.params,,l-ncaa/tert-butyl-glycine.params,C55,TYPE POLYMER,,,True,CC(C)(C)[C@H](N)CO,False,
+9-anthryl-alanine.params,,l-ncaa/9-anthryl-alanine.params,B44,TYPE POLYMER," 9-anthryl-alanine params file by Doug Renfrew.
+ Tweaked 12 March 2018 by Vikram K. Mulligan (vmullig@uw.edu).",,True,N[C@H](CO)CC1C2CCCCC2CC2CCCCC21,False,
+6-chloro-tryptophan.params,,l-ncaa/6-chloro-tryptophan.params,C84,TYPE POLYMER,,,True,N[C@H](CO)CC1CNC2CC(Cl)CCC12,False,
+fluoro-leucine_ent2.params,,l-ncaa/fluoro-leucine_ent2.params,C92,TYPE POLYMER,,,True,C[C@@H](CF)C[C@H](N)CO,False,
+alpha-methyl-valine.params,,l-ncaa/alpha-methyl-valine.params,B62,TYPE POLYMER,,,True,CC(C)[C@](C)(N)CO,False,
+penicillamine.params,,l-ncaa/penicillamine.params,C41,TYPE POLYMER,,,True,CC(C)(S)[C@H](N)CO,False,
+ABA.params,,l-ncaa/ABA.params,ABA,TYPE POLYMER, made by Ben Stranges,,True,CC[C@H](N)CO,False,
+4-phenyl-phenylalanine_tyr_rot.params,segfault,,,,,name,False,,False,
+4-amino-piperidine-4-carboxylic-acid.params,,l-ncaa/4-amino-piperidine-4-carboxylic-acid.params,A98,TYPE POLYMER," true NU 6 is across the CUT_BOND
+ ICOOR_INTERNAL   VCB1   59.141809   67.349267    1.528583   CA    N    LOWER 
+ ICOOR_INTERNAL   VCA    59.141809   67.349267    1.528583   CB1   CG1   ND 
+ 
+ 
+ Fake chi to trick packer",,True,NC1(CO)CC[NH2+]CC1,False,
+3-methyl-histidine_prot.params,,l-ncaa/3-methyl-histidine_prot.params,A83,TYPE POLYMER,,,True,CN1CNCC1C[C@H](N)CO,False,
+alpha-methyl-proline.params,,l-ncaa/alpha-methyl-proline.params,B59,TYPE POLYMER,,,True,C[C@@]1(CO)CCCN1,False,
+alpha-methyl-histidine.params,,l-ncaa/alpha-methyl-histidine.params,B56,TYPE POLYMER,,,True,C[C@@](N)(CO)CC1CNCN1,False,
+2-indanyl-glycine_puck2.params,,l-ncaa/2-indanyl-glycine_puck2.params,A45,TYPE POLYMER," AMW: note that we can't use A44 for the other pucker anymore
+ because that collides with a real RNA residue we care about
+ So, let's make the nu torsion sampling system handle this
+ pucker so that we don't need IGL (former A44) and also A45
+ (that is aesthetics-defying).",,True,N[C@H](CO)C1CC2CCCCC2C1,False,
+MPH.params,segfault,,,,,name,False,,False,
+diphenylglycine.params,,l-ncaa/diphenylglycine.params,C15,TYPE POLYMER,,,True,NC(CO)(C1CCCCC1)C1CCCCC1,False,
+6-methyl-tryptophan.params,,l-ncaa/6-methyl-tryptophan.params,B40,TYPE POLYMER,,,True,CC1CCC2C(C[C@H](N)CO)CNC2C1,False,
+6-bromo-tryptophan.params,,l-ncaa/6-bromo-tryptophan.params,C83,TYPE POLYMER,,,True,N[C@H](CO)CC1CNC2CC(Br)CCC12,False,
+phenyl-serine.params,,l-ncaa/phenyl-serine.params,BB8,TYPE POLYMER,,,True,N[C@H](CO)[C@H](O)C1CCCCC1,False,
+7-azatryptophan.params,,l-ncaa/7-azatryptophan.params,C86,TYPE POLYMER,,,True,N[C@H](CO)CC1CNC2NCCCC12,False,
+tert-butyl-cysteine.params,,l-ncaa/tert-butyl-cysteine.params,C54,TYPE POLYMER,,,True,CC(C)(C)SC[C@H](N)CO,False,
+V03.params,,l-ncaa/V03.params,V03,TYPE POLYMER,,,True,N[C@H](CO)C1CC(O)CC(O)C1,False,
+MPA.params,segfault,,,,,name,False,,False,
+TES.params,,l-ncaa/TES.params,TES,TYPE POLYMER,,,True,CC(O)N[C@H]1[C@H](O[C@@H]2[C@@H](CO)O[C@@H](NC(O)C[C@H](N)CO)[C@H](NC(C)O)[C@H]2O)O[C@H](CO)[C@@H](O[C@@H]2O[C@H](CO[C@H]3O[C@H](CO[C@H]4O[C@H](CO)[C@@H](O)[C@H](O)[C@@H]4O)[C@@H](O)[C@H](O[C@H]4O[C@H](CO)[C@@H](O)[C@H](O)[C@@H]4O)[C@@H]3O)[C@@H](O)[C@H](O[C@H]3O[C@H](CO)[C@@H](O)[C@H](O)[C@@H]3O)[C@@H]2O)[C@@H]1O,False,
+4-fluoro-proline_puck.params,,l-ncaa/4-fluoro-proline_puck.params,C89,TYPE POLYMER,,,True,OC[C@@H]1C[C@H](F)CN1,False,
+tert-butyl-alanine.params,,l-ncaa/tert-butyl-alanine.params,C53,TYPE POLYMER,,,True,CC(C)(C)C[C@H](N)CO,False,
+1-methyl-histidine.params,,l-ncaa/1-methyl-histidine.params,A06,TYPE POLYMER,,,True,CN1CNC(C[C@H](N)CO)C1,False,
+3-amino-tyrosine.params,,l-ncaa/3-amino-tyrosine.params,A69,TYPE POLYMER," You will note that NZ1 is not protonated. This is correct! The pka of this
+ amine is around 4.8. Wong, Shen S. Chemistry of Protein Conjugation and
+ Cross-Linking. CRC Press, 1991.",,True,NC1CC(C[C@H](N)CO)CCC1O,False,
+HTY.params,segfault,,,,,name,False,,False,
+4-amino-tetrahydropyran-4-carboxylic_acid.params,,l-ncaa/4-amino-tetrahydropyran-4-carboxylic_acid.params,B02,TYPE POLYMER," true NU 6 is across the CUT_BOND
+ ICOOR_INTERNAL   VCB1   59.141809   67.349267    1.528583   CA    N    LOWER 
+ ICOOR_INTERNAL   VCA    59.141809   67.349267    1.528583   CB1   CG1   OD 
+ 
+ 
+ Fake chi to trick packer",,True,NC1(CO)CCOCC1,False,
+alpha-methyl-tryptophan.params,,l-ncaa/alpha-methyl-tryptophan.params,B60,TYPE POLYMER,,,True,C[C@@](N)(CO)CC1CNC2CCCCC12,False,
+HPR.params,,l-ncaa/HPR.params,HPR,TYPE POLYMER, HPR that should work made by Ben Stranges,,True,OC[C@@H]1C[C@@H](O)CN1,False,
+4-methyl-tryptophan.params,,l-ncaa/4-methyl-tryptophan.params,B28,TYPE POLYMER, Made by Doug Renfrew,,True,CC1CCCC2NCC(C[C@H](N)CO)C12,False,
+trifluoro-alanine.params,,l-ncaa/trifluoro-alanine.params,C60,TYPE POLYMER,,,True,N[C@H](CO)C(F)(F)F,False,
+beta-cyclopentyl-alanine.params,,l-ncaa/beta-cyclopentyl-alanine.params,C01,TYPE POLYMER," virt
+ virt
+ true NU 5 is across the CUT_BOND
+ LOWEST_RING_CONFORMER  4C1
+ 
+ ",,True,N[C@H](CO)CC1CCCC1,False,
+2.4-dimethyl-phenylalanine.params,,l-ncaa/2.4-dimethyl-phenylalanine.params,A12,TYPE POLYMER," 2,4-dimethyl-phenylalanine params file by Doug Renfrew.
+ Tweaked by Vikram K. Mulligan (vmullig@uw.edu) on 12 March 2018.",,True,CC1CCC(C[C@H](N)CO)C(C)C1,False,
+1-methyl-histidine_prot.params,,l-ncaa/1-methyl-histidine_prot.params,A07,TYPE POLYMER,,,True,CN1CNC(C[C@H](N)CO)C1,False,
+allo-isoleucine.params,,l-ncaa/allo-isoleucine.params,B47,TYPE POLYMER,,,True,CC[C@@H](C)[C@H](N)CO,False,
+MTP.params,,l-ncaa/MTP.params,MTP,TYPE POLYMER, Made by Ben Stranges,,True,CC1CCCC2C(C[C@H](N)CO)CNC12,False,
+3-aminomethyl-phenylalanine.params,,l-ncaa/3-aminomethyl-phenylalanine.params,A68,TYPE POLYMER," 3-aminomethyl-phenylalanine params file by Doug Renfrew.
+ Tweaked 12 March 2018 by Vikram K. Mulligan (vmullig@uw.edu).",,True,N[C@H](CO)CC1CCCC(C[NH3+])C1,False,
+V01.params,,l-ncaa/V01.params,V01,TYPE POLYMER,,,True,N[C@H](CO)[C@@H](O)C1CCC(O)C(Cl)C1,False,
+cyclohexyl-glycine.params,,l-ncaa/cyclohexyl-glycine.params,C12,TYPE POLYMER,"  to CB; required for ring flipping
+  to CG1; required for ring flipping
+ NU 6 is across the CUT_BOND
+  ...because CA is equatorial.
+  O here is equivalent to position 6, which is CG1.
+  must build from end of ring, unlike CB
+  build as branch from mc, unlike CG1",,True,N[C@H](CO)C1CCCCC1,False,
+3-methyl-phenylalanine.params,,l-ncaa/3-methyl-phenylalanine.params,A84,TYPE POLYMER,,,True,CC1CCCC(C[C@H](N)CO)C1,False,
+allo-threonine.params,,l-ncaa/allo-threonine.params,B48,TYPE POLYMER,,,True,C[C@H](O)[C@H](N)CO,False,
+trifluoro-leucine.params,,l-ncaa/trifluoro-leucine.params,C61,TYPE POLYMER,,,True,C[C@H](C[C@H](N)CO)C(F)(F)F,False,
+BCS.params,,l-ncaa/BCS.params,BCS,TYPE POLYMER,,,True,N[C@H](CO)CSCC1CCCCC1,False,
+3-hydroxy-phenylalanine.params,,l-ncaa/3-hydroxy-phenylalanine.params,A78,TYPE POLYMER,,,True,N[C@H](CO)CC1CCCC(O)C1,False,
+3-chloro-phenylalanine.params,,l-ncaa/3-chloro-phenylalanine.params,C95,TYPE POLYMER," kdrew: add chloro, parameters taken from 5-chloro-trp
+ NCAA_SEMIROTAMERIC
+ NRCHI_START_ANGLE -30",,True,N[C@H](CO)CC1CCCC(Cl)C1,False,
+4.5-dehydro-leucine.params,,l-ncaa/4.5-dehydro-leucine.params,A91,TYPE POLYMER," 4,5-dehydroleucine.  Params file by Doug Renfrew.
+ Tweaked 12 March 2018 by Vikram K. Mulligan (vmullig@uw.edu).",,True,CC(C)C[C@H](N)CO,False,
+alpha-aminoadipic_acid.params,,l-ncaa/alpha-aminoadipic_acid.params,B49,TYPE POLYMER,,,True,N[C@H](CO)CCCC(O)O,False,
+7-bromo-tryptophan.params,segfault,,,,,name,False,,False,
+amino-ethyl-cysteine.params,,l-ncaa/amino-ethyl-cysteine.params,B63,TYPE POLYMER,,,True,N[C@H](CO)CSCC[NH3+],False,
+4-fluoro-proline.params,,l-ncaa/4-fluoro-proline.params,B19,TYPE POLYMER,"  following PRO convention
+ true NU 5 is across the CUT_BOND
+ LOWEST_RING_CONFORMER  4C1
+ ICOOR_INTERNAL    NV    59.141809   67.349267    1.528583   CD2   CG    CB  
+ ICOOR_INTERNAL   VCD2   59.141809   67.349267    1.528583   N     CA    C   
+ 
+ ",,True,OC[C@@H]1C[C@@H](F)CN1,False,
+beta-fluoro-alanine.params,,l-ncaa/beta-fluoro-alanine.params,C03,TYPE POLYMER,,,True,N[C@H](CO)CF,False,
+fluoro-leucine_ent1.params,,l-ncaa/fluoro-leucine_ent1.params,C91,TYPE POLYMER,,,True,C[C@H](CF)C[C@H](N)CO,False,
+4-aminomethyl-phenylalanine.params,,l-ncaa/4-aminomethyl-phenylalanine.params,A94,TYPE POLYMER," 3-aminomethyl-phenylalanine params file by Doug Renfrew.
+ Tweaked 12 March 2018 by Vikram K. Mulligan (vmullig@uw.edu).",,True,N[C@H](CO)CC1CCC(C[NH3+])CC1,False,
+ornithine.params,,l-ncaa/ornithine.params,ORN,TYPE POLYMER," Rosetta topology file for ornithine, commonly called ""stubby lysine"".
+ File updated 6 March 2017 by Vikram K. Mulligan (vmullig@uw.edu).
+ Probably added by Doug Renfrew originally.
+ residue type
+ APL CB to side chain heavyatom distance --  max observed in residue 74 of ubiquitin; taken from lysine
+ ROTAMER_AA LYS",,True,OC[C@@H]1CCC[NH2+][NH2+]1,False,
+5-methyl-tryptophan.params,,l-ncaa/5-methyl-tryptophan.params,B38,TYPE POLYMER,,,True,CC1CCC2NCC(C[C@H](N)CO)C2C1,False,
+5-chloro-tryptophan.params,ERROR: add_bond: atom CZ2 and/or CLT don't exist!,l-ncaa/5-chloro-tryptophan.params,C81,TYPE POLYMER,,,True,,False,
+HP2.params,,l-ncaa/HP2.params,HP2,TYPE POLYMER," NE2-substituted phospho-HIS is known but not
+ reported in the PDB, so use this three letter
+ code for now.
+ residue type
+ APL CB to sidechain heavy atom disance -- max observed on residue 74 of ubiquitin",,True,N[C@H](CO)C[C@@H]1CN([PH](O)(O)O)CN1,False,
+4-phenyl-phenylalanine.params,,l-ncaa/4-phenyl-phenylalanine.params,B30,TYPE POLYMER," 4-phenyl-phenylalanine params file created by Doug Renfrew.
+ Tweaked 12 March 2018 by Vikram K. Mulligan (vmullig@uw.edu)",,True,N[C@H](CO)CC1CCC(C2CCCCC2)CC1,False,
+4-hydroxy-phenylglycine.params,,l-ncaa/4-hydroxy-phenylglycine.params,B21,TYPE POLYMER,,,True,N[C@H](CO)C1CCC(O)CC1,False,
+2.3-diaminopropionic_acid.params,,l-ncaa/2.3-diaminopropionic_acid.params,DPP,TYPE POLYMER," 2,3-diaminopropionic acid (DAP).  Added a long time ago, possibly by Doug Renfrew.
+ Updated 7 March 2017 by Vikram K. Mulligan (vmullig@uw.edu).
+ Sadly, the PDB code for DAP is DPP, which is slightly harder to remember than DAP.",,True,N[C@@H](C[NH3+])CO,False,
+2-indanyl-glycine_puck1.params,,l-ncaa/2-indanyl-glycine_puck1.params,IGL,TYPE POLYMER,,,True,N[C@H](CO)C1CC2CCCCC2C1,False,
+beta-iodo-alanine.params,,l-ncaa/beta-iodo-alanine.params,C05,TYPE POLYMER,,,True,N[C@H](CO)CI,False,
+1-amino-cyclopentane-carboxylic_acid.params,ERROR: add_bond: atom CG2 and/or CG don't exist!,l-ncaa/1-amino-cyclopentane-carboxylic_acid.params,A04,TYPE POLYMER," true NU 5 is across the CUT_BOND
+ ICOOR_INTERNAL   VCA   -16.967579   75.092865    1.530199   CB1   CG1   CG2   
+ ICOOR_INTERNAL   VCB1  -16.967579   75.092865    1.530199   CA    N    LOWER  
+ 
+ 
+ Fake chi to trick packer",,True,,False,
+4.5-dehydro-lysine.params,,l-ncaa/4.5-dehydro-lysine.params,A92,TYPE POLYMER,,,True,N[C@H](CO)CCCC[NH3+],False,
+2-methyl-phenylalanine.params,,l-ncaa/2-methyl-phenylalanine.params,A48,TYPE POLYMER,,,True,CC1CCCCC1C[C@H](N)CO,False,
+SAL.params,,l-ncaa/SAL.params,SAL,TYPE POLYMER, ICOOR_INTERNAL    H   -175.737237   66.220020    0.997798   N     LOWER CB2,,True,COC1CCC(N)CC1CO,False,
+beta-(1-naphthyl)-alanine.params,,l-ncaa/beta-(1-naphthyl)-alanine.params,B67,TYPE POLYMER," Beta-(1-naphthyl)-alanine params file by Doug Renfrew.
+ Tweaked 12 March 2018 by Vikram K. Mulligan (vmullig@uw.edu).",,True,N[C@H](CO)CC1CCCC2CCCCC21,False,
+phenylglycine.params,,l-ncaa/phenylglycine.params,C42,TYPE POLYMER,,,True,N[C@H](CO)C1CCCCC1,False,
+4-tert-butyl-phenylalanine.params,,l-ncaa/4-tert-butyl-phenylalanine.params,B31,TYPE POLYMER,,,True,CC(C)(C)C1CCC(C[C@H](N)CO)CC1,False,
+APA.params,,l-ncaa/APA.params,APA,TYPE POLYMER,"  Made by Douglas Renfrew (renfrew@unc.edu)
+  and P Ben Stranges (stranges@unc.edu)",,True,NC1CCC(C[C@H](N)CO)CC1,False,
+6-fluoro-tryptophan.params,,l-ncaa/6-fluoro-tryptophan.params,C85,TYPE POLYMER,,,True,N[C@H](CO)CC1CNC2CC(F)CCC12,False,
+4-carboxy-phenylalanine.params,,l-ncaa/4-carboxy-phenylalanine.params,B12,TYPE POLYMER,,,True,N[C@H](CO)CC1CCC(C(O)O)CC1,False,
+BZP.params,,l-ncaa/BZP.params,BZP,TYPE POLYMER,,,True,N[C@H](CO)CC1CCC(C(O)C2CCCCC2)CC1,False,
+n-in-methyl-tryptophan.params,,l-ncaa/n-in-methyl-tryptophan.params,C36,TYPE POLYMER,,,True,CN1CC(C[C@H](N)CO)C2CCCCC21,False,
+dipropyl-glycine.params,,l-ncaa/dipropyl-glycine.params,C16,TYPE POLYMER,,,True,CCCC(N)(CO)CCC,False,
+LMA.params,,cyclosporin/LMA.params,LMA,TYPE POLYMER," Params file for L-betamethyl-alanine (alanine with an extra methyl group on its side-chain CB).
+ Also known as alpha-aminobutyric acid (ABA).
+ Added 6 December 2016 by Tim Craven and Vikram K. Mulligan.
+ residue type
+ APL O to CB distance; max observed in ubiquitin",,True,CC[C@H](N)CO,False,
+BMT.params,ERROR: add_bond: atom CD1 and/or CG don't exist!,cyclosporin/BMT.params,BMT,TYPE POLYMER," Params file for (4R)-4-[(E)-2-butenyl]-4-methyl-L-threonine (BMT), a non-canonical
+ amino acid found in cyclosporin A.  Added by Tim Craven and Vikram K. Mulligan on
+ 6 December 2016.
+ residue type
+ BOND  CG2 2HG2
+ BOND  CG2 3HG2
+ APL O to CB distance; max observed in ubiquitin",,True,,False,
