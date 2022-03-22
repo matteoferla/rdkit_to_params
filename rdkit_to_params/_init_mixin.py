@@ -46,6 +46,7 @@ class _ParamsInitMixin:
         self.METAL_BINDING_ATOMS = Entries.from_name('METAL_BINDING_ATOMS')
         self.ACT_COORD_ATOMS = Entries.from_name('ACT_COORD_ATOMS')
         self.PDB_ROTAMERS = Entries.from_name('PDB_ROTAMERS') #TODO it would be nice to check this file exists.
+        self.OTHERS = Entries.from_name('<UNKNOWN>')  # this is the dumpyard of unknown values.
         ## RDKit route specific
         self.mol = None
         self.generic = False

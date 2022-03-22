@@ -4,7 +4,11 @@ __doc__ = \
 The main class here is `Entries``, which is a fancy list. It gets called for each uppercase attribute 
 in the initialisation of ``Params`` (which happens in ``_ParamsInitMixin`` __e.g.__ ``Entries.from_name('IO_STRING')``).
     """
+
+import warnings
+
 from .version import *
+from typing import Optional, Union
 
 ########################################################################################################################
 
@@ -30,6 +34,26 @@ class Singletony(Enum):
     singleton = 1
     list_singleton = 2
 
+# ----------------------------------------------------------------------------------------------------------------------
+
+def html_span(inner:Union[str, float], color: Optional[str]=None) -> str:
+    """
+    Simple span element for _repr_html_
+
+    '#FA8072'
+    :param inner:
+    :param color: default is #FA8072, salmon if #40e0d0
+    :return:
+    """
+    if color is not None:
+        pass
+    elif isinstance(inner, str):
+        color = '#FA8072'
+    elif isinstance(inner, float):
+        color = '#40e0d0'
+    else:
+        color = 'grey'
+    return f'<span style="color:{color}">{inner}</span>'
 
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -112,6 +136,12 @@ class Entries(abc.MutableSequence):
             lines.append(str(entry))
         return '\n'.join(lines)
 
+    def _repr_html_(self):
+        lines = []
+        for entry in self.data:
+            lines.append(entry._repr_html_())
+        return '<br/>'.join(lines)
+
 
 #########################################################################################################
 
@@ -129,6 +159,9 @@ class GenericEntry:
 
     def __str__(self) -> str:
         return f'{self.header} {self.body}'
+
+    def _repr_html_(self):
+        return f'{html_span(self.header)}: {self.body}'
 
     @classmethod
     def from_str(cls, text):
@@ -149,6 +182,10 @@ class GenericListEntry:
     def __str__(self) -> str:
         v = ' '.join(self.values)
         return f'{self.header} {v}'
+
+    def _repr_html_(self):
+        v = ' '.join(self.values)
+        return f'{html_span(self.header)}: {v}'
 
     @classmethod
     def from_str(cls, text):
@@ -221,17 +258,28 @@ class IO_STRINGEntry:
     name1: str = 'Z'
 
     def __post_init__(self):
-        if len(self.name3) == 2:
-            self.name3 += ' '
-        assert len(self.name3) == 3, f'{self.name3} is not 3 char long'
         assert len(self.name1) == 1, f'{self.name1} is not 1 char long'
+        # ToDo figure out what the official standard is for non-three letter 3-letter codes
+        if len(self.name3) == 3:
+            return
+        elif len(self.name3) == 2:
+            self.name3 += ' '
+        elif len(self.name3) == 1:
+            self.name3 += '  '
+        else:
+            # this will raise an error otherwise.
+            raise ValueError(f'{self.name3} is not 3 char long')
+
 
     def __str__(self) -> str:
         return f'IO_STRING {self.name3} {self.name1}'
 
+    def _repr_html_(self):
+        return f'{html_span("IO_STRING")} {self.name3} {self.name1}'
+
     @classmethod
     def from_str(cls, text):
-        name3, name1 = text.strip().split()
+        name3, name1 = text.rstrip().split()
         return cls(name3, name1)
 
 
@@ -273,6 +321,9 @@ class CONNECTEntry:
     def __str__(self) -> str:
         return f'{self.connect_type} {self.atom_name}'
 
+    def _repr_html_(self):
+        return f'{html_span(self.connect_type)} {self.atom_name}'
+
     @classmethod
     def from_str(cls, text):
         return cls(*text.split())
@@ -297,10 +348,13 @@ class CHIEntry:
     def __str__(self) -> str:
         return f'CHI {self.index} {self.first} {self.second} {self.third} {self.fourth}'
 
+    def _repr_html_(self):
+        return f'{html_span("CHI")} {html_span(self.index)} {self.first} {self.second} {self.third} {self.fourth}'
+
     @classmethod
     def from_str(cls, text: str):
         # 1  C6   C5   C4   C3
-        rex = re.match('(\d+) (.{4}) (.{4}) (.{4}) (.{2,4})', text)
+        rex = re.match('(\d+)\s+(\S{1,4})\s+(\S{1,4})\s+(\S{1,4})\s+(\S{1,4})', text)
         if rex is None:
             raise ValueError(f'CHI entry "{text}" is not formatted correctly')
         data = dict(zip(('index', 'first', 'second', 'third', 'fourth'), rex.groups()))
@@ -343,12 +397,22 @@ class ICOOR_INTERNALEntry:
         return f'ICOOR_INTERNAL  {self.child: <5} {self.phi: >11.6f} {self.theta: >11.6f} {self.distance: >11.6f} ' + \
                f'{self.parent: <5} {self.second_parent: <5} {self.third_parent: <5}'
 
+    def _repr_html_(self):
+        return f'{html_span("ICOOR_INTERNAL")} target:{self.child} '+\
+               f'&phi;:{html_span(self.phi)} '+\
+               f'&theta;:{html_span(self.theta)} '+\
+               f'distance:{html_span(self.distance)} ' + \
+               f'parent:{self.parent} ' + \
+               f'2nd parent:{self.second_parent} ' + \
+               f'3rd parent:{self.third_parent}'
+
+
     @classmethod
     def from_str(cls, text: str):
         # position based.
-        rex = re.match(' (.{5}) (.{11}) (.{11}) (.{11}) (.{5}) (.{5}) (.{1,5})', text)
+        rex = re.match(' (.{5}) (.{11}) (.{11}) (.{11}) (.{5}) (.{5}) (.{1,5})$', text.rstrip())
         # space based... bad.
-        rex2 = re.search('(\w+)\s+([-\d\.]+)\s+([-\d\.]+)\s+([-\d\.]+)\s+(\w+)\s+(\w+)\s+(\w+)', text)
+        rex2 = re.search('(\w+)\s+([-\d\.]+)\s+([-\d\.]+)\s+([-\d\.]+)\s+(\w+)\s+(\w+)\s+(\w+)$', text.rstrip())
         if rex:
             data = list(rex.groups())
         elif rex2:
@@ -385,6 +449,9 @@ class BONDEntry:
         else:
             return f'BOND_TYPE {self.first: >4} {self.second: >4} {self.order}'
 
+    def _repr_html_(self):
+        return f'{html_span("BOND")} {self.first} {self.second} {self.order}'
+
     def __hash__(self):
         return hash('+'.join(sorted([self.first, self.second])))
 
@@ -393,10 +460,10 @@ class BONDEntry:
 
     @classmethod
     def from_str(cls, text: str):
-        rex = re.match('(.{4}) (.{2,4})\s?(.*)', text)
+        rex = re.match('(?P<first>.{1,4}) (?P<second>.{2,4})\s?(?P<order>.*)', text.rstrip())
         if rex is None:
             raise ValueError(f'BOND entry "{text}" is not formatted correctly')
-        data = dict(zip(('first', 'second', 'order'), rex.groups()))
+        data = rex.groupdict()
         data['order'] = data['order'].strip()
         if data['order'] == '':
             data['order'] == 1
@@ -426,6 +493,12 @@ class ATOMEntry:
     def __str__(self) -> str:
         return f'ATOM {self.name: >4} {self.rtype: >4} {self.mtype: >4} {self.partial:.7f}'
 
+    def _repr_html_(self):
+        return f'{html_span("ATOM")} atom:{self.name} '+\
+               f'rosetta-type:{self.rtype} '+\
+               f'm-type:{self.mtype} '+\
+               f'Gasteiger:{html_span(self.partial)}'
+
     def __eq__(self, other):
         """
         ``atomentry == 'CA'`` will return false because ``atomentry.name.strip() == 'CA'`` will return true.
@@ -440,10 +513,11 @@ class ATOMEntry:
 
     @classmethod
     def from_str(cls, text: str):
-        rex = re.match('(.{4}) (.{4}) (.{4}) +([-\d\.]+)', text)
+        rex = re.match('(?P<name>.{1,4})\s*(?P<rtype>.{1,4})\s*(?P<mtype>.{1,4})\s*(?P<partial>[-\d\.]+)',
+                 text.rstrip())
         if rex is None:
             raise ValueError(f'ATOM entry "{text}" is not formatted correctly')
-        data = dict(zip(('name', 'rtype', 'mtype', 'partial'), rex.groups()))
+        data = rex.groupdict()
         data['partial'] = float(data['partial'])
         return cls(**data)
 
@@ -467,12 +541,15 @@ class CUT_BONDEntry:
     def __str__(self) -> str:
         return f'CUT_BOND {self.first: >4} {self.second: >4}'
 
+    def _repr_html_(self):
+        return f'{html_span("CUT_BOND")} {self.first} {self.second}'
+
     @classmethod
     def from_str(cls, text: str):
-        rex = re.match('(.{4}) (.{2,4})', text)
+        rex = re.match('\s?(?P<first>.{1,4})\s+(?P<second>.{1,4})', text.rstrip())
         if rex is None:
             raise ValueError(f'CUT_BOND entry "{text}" is not formatted correctly')
-        data = dict(zip(('first', 'second'), rex.groups()))
+        data = rex.groupdict()
         return cls(**data)
 
 
@@ -492,12 +569,15 @@ class CHARGEEntry:
     def __str__(self) -> str:
         return f'CHARGE {self.atom} FORMAL {self.charge}'
 
+    def _repr_html_(self):
+        return f'{html_span("CHARGE")} {self.atom} {html_span(self.charge)}'
+
     @classmethod
     def from_str(cls, text: str):
-        rex = re.match('(\w+) FORMAL ([-\d])', text)
+        rex = re.match('(?P<atom>\S+) FORMAL (?P<charge>\-?\+?\d)', text.rstrip())
         if rex is None:
             raise ValueError(f'CHARGE entry "{text}" is not formatted correctly')
-        data = dict(zip(('atom', 'charge'), rex.groups()))
+        data = rex.groupdict()
         return cls(**data)
 
 
@@ -637,4 +717,14 @@ class ACT_COORD_ATOMSEntry(GenericListEntry):
 
 Entries.choices['ACT_COORD_ATOMS'] = (ACT_COORD_ATOMSEntry, Singletony.singleton)
 
+
+#########################################################################################################
+
+class UNKNOWNEntry(GenericEntry):
+    @classmethod
+    def from_str(cls, text):
+        return cls(**re.match('(?P<header>\w+) (?P<body>.*)^', text.rstrip()).groupdict())
+
+
+Entries.choices['<UNKNOWN>'] = (UNKNOWNEntry, Singletony.multiton)
 #########################################################################################################
