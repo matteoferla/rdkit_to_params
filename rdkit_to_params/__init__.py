@@ -30,7 +30,7 @@ except ImportError:
 
 #################### rdkit #############################################################################################
 try:
-    from .rdkitside import _RDKitMixin, neutralise, DummyMasker
+    from .rdkitside import _RDKitMixin, neutralize, DummyMasker
     from .constraint import Constraints
     from rdkit import Chem
 except ImportError:
@@ -45,8 +45,8 @@ except ImportError:
     class _RDKitMixin:
         pass
 
-    def neutralise(*args, **kargs):
-        raise ImportError('RDkit is required for neutralise')
+    def neutralize(*args, **kargs):
+        raise ImportError('RDkit is required for `neutralize` (pH 7 charge correction)')
 
 
 #################### main class ########################################################################################
@@ -168,6 +168,8 @@ class Params(_ParamsIoMixin, _RDKitMixin, _PoserMixin):
         """
         rename an atom by atomname or Chem.Atom (the former just calls ``rename_atom_by_name`` as is just for legacy)
 
+        calls ``rename_atom_by_name`` -> ``_rename_atom_in_entries``
+
         :param atom_or_atomname:
         :param newname:
         :return:
@@ -176,6 +178,7 @@ class Params(_ParamsIoMixin, _RDKitMixin, _PoserMixin):
         if newname is None:
             return None
         try:
+            # is there a rdkit.Chem.Mol?
             if self.mol:
                 atom = self.get_atom_by_name(newname)
                 if isinstance(atom_or_atomname, str):
@@ -183,11 +186,14 @@ class Params(_ParamsIoMixin, _RDKitMixin, _PoserMixin):
                 elif isinstance(atom_or_atomname, Chem.Atom) and atom_or_atomname.GetIdx() != atom.GetIdx():
                     raise AssertionError(f'New name {newname} already exists')
                 else:
-                    pass # already changed.
-            if len(self.ATOM) > 0:
-                self.get_correct_atomname(newname)
+                    pass  # already changed.
+            else:
+                # no rdkit.Chem.Mol means that it is not regenerated
+                pass
+            if len(self.ATOM) > 0:  # there are defi
+                newname = self.get_correct_atomname(newname)
         except ValueError:
-            pass # absent
+            pass  # absent
         # change.
         if isinstance(atom_or_atomname, str): #atom name
             oldname = atom_or_atomname
@@ -198,7 +204,7 @@ class Params(_ParamsIoMixin, _RDKitMixin, _PoserMixin):
             if oldname:
                 return self.rename_atom_by_name(oldname, newname)  # alters entry & rdkit
             else:
-                return self._set_PDBInfo_atomname(atom, newname, overwrite=overwrite) # alters rdkit
+                return self._set_PDBInfo_atomname(atom, newname, overwrite=overwrite)  # alters rdkit
         else:
             raise TypeError(f'{type(atom_or_atomname)} is not a string or atom')
 
@@ -265,9 +271,13 @@ class Params(_ParamsIoMixin, _RDKitMixin, _PoserMixin):
             for attr in ('BOND', 'CHARGE', 'CHI', 'CUT_BOND', 'CHARGE'):  # ICOOR_INTERNAL ATOM_ALIAS
                 for entry in getattr(self, attr):
                     for key in 'first', 'second', 'third', 'fourth', 'atom':
-                        if hasattr(entry, key) and getattr(entry, key) == oldname:
+                        if not hasattr(entry, key):
+                            continue
+                        elif getattr(entry, key) == oldname or getattr(entry, key) == oldname.strip():
                             setattr(entry, key, newname)
                             break
+                        else:
+                            pass
             # find ICOOR_INTERNAL entries with ``child``,``parent``,``second_parent``,``third_parent`` attributes,
             # which are atom names 5 char
             for entry in self.ICOOR_INTERNAL:
