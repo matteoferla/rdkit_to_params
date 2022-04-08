@@ -1,10 +1,11 @@
-__all__ = ['neutralise', 'DummyMasker']
+__all__ = ['neutralise', 'neutralize', 'DummyMasker']
 
 from rdkit import Chem
 from rdkit.Chem import AllChem
+import warnings
 
 
-def neutralise(mol: Chem) -> Chem:
+def neutralize(mol: Chem) -> Chem:
     """
     Alters the protonation of tne molecule to be that at pH 7.
     Not great, but does the job.
@@ -44,6 +45,10 @@ def neutralise(mol: Chem) -> Chem:
     # return dict(protons_added=protons_added,
     #             protons_removed=protons_removed)
     return mol
+
+def neutralise(*args, **kwargs):
+    warnings.warn('The GB spelling has been changed to US', category=DeprecationWarning)
+    return neutralize(*args, **kwargs)
 
 class DummyMasker:
     """

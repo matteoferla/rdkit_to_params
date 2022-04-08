@@ -7,6 +7,9 @@ This contains ``make_constraint`` which is creates a constraint file.
 It is completely independent and different in style because it was different.
 It is not integral to the conversion, it's just a utility.
     """
+
+import warnings
+
 from .version import *
 
 ########################################################################################################################
@@ -233,7 +236,7 @@ class Constraints:
             atom.SetProp('_AtomName', name)  # Nonstandard. do not copy
 
     @classmethod
-    def nominalise(cls, mol):
+    def nominalize(cls, mol):
         """
         If the mol has PDBResidueInfo it will fill the nonstandard mol prop _AtomNames and the atom prop _AtomName.
         If it has mol prop _AtomNames will propagate them down to the atoms and viceversa. But will not fill
@@ -263,6 +266,11 @@ class Constraints:
             if len([n is not None for n in names]) == 0:
                 raise ValueError('No type of Atom naming. Use `Params.load_mol`  to fix this!')
             mol.SetProp('_AtomNames', json.dumps(names))
+
+    @classmethod
+    def nominalise(cls, *args, **kwargs):
+        warnings.warn('The GB spelling has been changed to US', category=DeprecationWarning)
+        return cls.nominalize(*args, **kwargs)
 
     @classmethod
     def get_conn(cls, mol: Chem.Mol) -> Chem.Atom:
@@ -310,7 +318,7 @@ class Constraints:
         else:
             cls = celf
             self = cls.mock()
-        self.nominalise(mol)
+        self.nominalize(mol)
         lines = []
         conf = mol.GetConformer()
         # issue of 4 char padded names.
@@ -364,7 +372,7 @@ class Constraints:
                     fill(natom, n/2)
                     return None
 
-        cls.nominalise(mol)
+        cls.nominalize(mol)
         stdevs = {}
         unfixed = [u.strip() for u in unfixed]
         for unname in unfixed:
