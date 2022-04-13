@@ -284,7 +284,13 @@ Do note:
 ## Caveat: I do not know many things!
 
 ### Chemical
-I suspect I am doing stuff weirdly and I am meant to create ligands via ``pyrosetta.rosetta.core.chemical`` and not via params files... If this is so let me know. I don't mind knowing I made a mistake!
+I suspect I am doing stuff weirdly and I am meant to create ligands via ``pyrosetta.rosetta.core.chemical`` and not via params files... 
+If this is so let me know. I don't mind knowing I made a mistake!
+
+Edit: it is indeed possible, but it is far from trivial/sane. The class
+`pyrosetta.rosetta.core.chemical.MutableResidueType` can be operated upon by various
+other classes such as `pyrosetta.rosetta.core.chemical.SetAtomicCharge`.
+A mutable residue type can be converted to a regular residue type via `.make()`.
 
 ### Generic
 I like this generic atom type business, but I am not sure how to use them in RL.
@@ -320,3 +326,11 @@ Throughout the code, dummy atoms (*/R) are changed to carbons or chlorines and t
 Cystathionine and similar twinned amino acids are the problem as I cannot simply make an amino acid backbone be recognised,
 however if protonated as is the case `'`[NH1]C[CH0](=O)`.
 Maybe the `CC(=O)NCC(=O)NC` option may be a better choice after all.
+
+## Footnote
+
+To save a ResidueType in PyRosetta to a params file, the command is:
+
+```python
+pyrosetta.rosetta.core.chemical.write_topology_file(residuetype, 'foo.params')
+```
