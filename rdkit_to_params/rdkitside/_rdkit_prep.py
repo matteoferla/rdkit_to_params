@@ -23,14 +23,15 @@ from rdkit.Chem import AllChem, rdFMCS
 from warnings import warn
 import re, string
 from typing import Optional
-from rdkit_to_params.entries import CONNECTEntry
+from ..entries import CONNECTEntry
+from .utilities import DummyMasker
 
 from ._rdkit_rename import _RDKitRenameMixin
 
 class _RDKitPrepMixin(_RDKitRenameMixin):
 
-    def __init__(self):
-        self.log.critical('This is init should not have been called! This exists to stop the IDE from getting angry/ for debugging.')
+    def __init__(self): # noqa
+        self.log.critical('This is init should not have been called! This exists for debugging')
         self.NAME = 'LIG'
         self.TYPE = Entries.from_name('TYPE')
         self.mol = None
@@ -625,26 +626,29 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
                     else:
                         self.log.warning(f'Could not find a decent atomname for {atom.GetIdx()}')
 
-    def add_Hs(self):
+    def add_Hs(self, add_conformer=True):
         """
         Add Hs before convert_mol step!
+
+        The add `add_conformer` is legacy.
         :return:
         """
         self.log.debug('Adding hydrogens')
-        self.mol = AllChem.AddHs(self.mol)
-        changed = []
+        # add hydrogens w/ coords if there's a conformer
+        self.mol: Chem.Mol = AllChem.AddHs(self.mol, addCoords=self.mol.GetNumConformers() != 0)
+        if add_conformer:
+            self.log.warning('*Depracation*: `Params(..).add_conformer` and `Params(..).add_Hs` are now split, ' +
+                             '"add_conformer=True" (default) maintains this legacy behaviour ' +
+                             'but may change in future')
+            self.add_conformer()
+
+    def add_conformer(self):
         Chem.SanitizeMol(self.mol)
-        for atom in self.mol.GetAtoms():  # TODO switch to DummyMasker
-            if atom.GetSymbol() == '*':
-                atom.SetAtomicNum(6)
-                atom.SetHybridization(Chem.HybridizationType.SP3)
-                changed.append(atom.GetIdx())
-        AllChem.EmbedMolecule(self.mol, useRandomCoords=True)
-        AllChem.MMFFOptimizeMolecule(self.mol)
-        AllChem.ComputeGasteigerCharges(self.mol, throwOnParamFailure=False)
-        for i, atom in enumerate(self.mol.GetAtoms()):
-            if i in changed:
-                atom.SetAtomicNum(0)
+        self.mol.RemoveAllConformers()
+        with DummyMasker(self.mol):
+            AllChem.EmbedMolecule(self.mol, useRandomCoords=True)
+            AllChem.MMFFOptimizeMolecule(self.mol)
+            AllChem.ComputeGasteigerCharges(self.mol, throwOnParamFailure=False)
         self.fix_mol()
 
 
