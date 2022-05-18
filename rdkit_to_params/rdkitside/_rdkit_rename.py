@@ -158,7 +158,8 @@ class _RDKitRenameMixin:
 
     def rename_from_template(self, template: Chem.Mol, overwrite:bool=True):
         """
-        Assigns to the atoms in self.mol the names based on the template, which does not need to be a perfect match.
+        Assigns to the atoms in self.mol the names based on the template,
+        which does not need to be a perfect match.
         See ``_fix_atom_names`` for example usage.
         Does not change the Params.
 
@@ -166,7 +167,7 @@ class _RDKitRenameMixin:
 
         :return: None for now.
         """
-        AllChem.SanitizeMol(template) #this is where half my issues come from.
+        AllChem.SanitizeMol(template)  # this is where half my issues come from.
         mcs = rdFMCS.FindMCS([self.mol, template],
                              atomCompare=rdFMCS.AtomCompare.CompareElements,
                              bondCompare=rdFMCS.BondCompare.CompareAny,
@@ -194,7 +195,7 @@ class _RDKitRenameMixin:
             self.log.info('There are more atoms in mol than were provided.')
         elif self.mol.GetNumAtoms() < len(atomnames):
             #raise ValueError('There are less atoms in mol than were provided.')
-            pass # this is fine.
+            pass  # this is fine.
         # operate
         for k, v in atomnames.items():
             self._set_PDBInfo_atomname(self.mol.GetAtomWithIdx(k), v, overwrite=True)

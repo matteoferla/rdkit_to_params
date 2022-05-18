@@ -365,12 +365,16 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
     def polish_mol(self, resi=1, chain='X'):
         """
         The mol may be inconsistent in its PDBResidueInfo
+
         :return:
         """
         resn = self.NAME[:3]
         self.log.debug(f'Making all PDBResidueInfo resn={resn} resi={resi} chain={chain}')
         for atom in self.mol.GetAtoms():
             info = atom.GetPDBResidueInfo()
+            if info is None:
+                info = Chem.AtomPDBResidueInfo()
+                info.SetName('')  # this is the default but illegal as per dejavu
             info.SetResidueName(resn)
             info.SetResidueNumber(resi)
             info.SetChainId(chain)
@@ -379,6 +383,33 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
                 info.SetIsHeteroAtom(False)
             else:
                 info.SetIsHeteroAtom(True)
+        # is the name unique?
+        self.rename_repeated_atoms()
+
+    def rename_repeated_atoms(self):
+        dejavu: Set[str] = {''}  # set of already seen stripped names plus the illegal '' name
+        to_be_renamed: List[Chem.Atom] = []
+        # partial repetition of ``_fix_atom_names``
+        for atom in self.mol.GetAtoms():
+            name:str = atom.GetPDBResidueInfo().GetName()
+            if not isinstance(name, str) or name.strip() in dejavu:
+                to_be_renamed.append(atom)
+            dejavu.add(name.strip())
+        # rename
+        for atom in to_be_renamed:
+            info: Chem.AtomPDBResidueInfo = atom.GetPDBResidueInfo()
+            element: str = atom.GetSymbol()
+            for i in range(1, 100):
+                name = f'{element: >2}{i: <2}'
+                if name.strip() in dejavu:
+                    continue
+                print(name)
+                info.SetName(name)
+                break
+            else:
+                raise RuntimeError(f'Could not find a unique name for {atom}')
+
+
 
     # ============ VIRT ================================================================================================
     def _parse_w_virtuals(self):

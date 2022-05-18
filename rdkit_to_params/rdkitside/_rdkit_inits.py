@@ -25,6 +25,8 @@ class _RDKitInitMixin(_RDKitCovertMixin):
                  generic: bool = False,
                  atomnames: Optional[Dict[int, str]] = None) -> _RDKitInitMixin:
         """
+        This calls `load_mol` and then `convert_mol` with optional atomnames changes.
+
         :param mol: Rdkit molecule, with explicit protons and all.
         :type mol: Chem.Mol
         :param name: 3-letter name
@@ -40,7 +42,7 @@ class _RDKitInitMixin(_RDKitCovertMixin):
             pass
         else:
             self.rename(atomnames)
-            self.polish_mol()
+        self.polish_mol()
         self.convert_mol()
         return self
 
@@ -111,7 +113,7 @@ class _RDKitInitMixin(_RDKitCovertMixin):
     def _from_smiles_w_pdb(cls, pdb: Chem.Mol, smiles, generic, name):
         dodgy = Chem.SplitMolByPDBResidues(pdb, whiteList=[name])[name]
         AllChem.SanitizeMol(dodgy)
-        good = Chem.MolFromSmiles(smiles) # TODO switch to DummyMasker
+        good = Chem.MolFromSmiles(smiles)  # TODO switch to DummyMasker
         good.SetProp('_Name', name)
         dummies = []
         for atom in good.GetAtoms():
@@ -132,7 +134,7 @@ class _RDKitInitMixin(_RDKitCovertMixin):
         self.convert_mol()
         #####
         #warnings.warn('CHI DISABLED. - has issues with this mode')  # todo correct this issue!
-        self.CHI.data = [] # !!!!
+        self.CHI.data = []  # !!!!
         return self
 
     @staticmethod

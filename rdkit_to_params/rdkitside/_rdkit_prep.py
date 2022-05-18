@@ -42,6 +42,8 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
     def load_mol(cls, mol: Chem.Mol, generic:bool=False, name:Optional[str]=None) -> _RDKitPrepMixin:
         """
         A fully prepared molecule with optional dummy atoms to be coverted into a Params object
+        This simply loads the molecule.
+        The classmethod ``from_mol`` calls ``load_mol`` and then fixes the molecule.
 
         :param mol: fully prepared molecule with optional dummy atoms
         :param generic: generic or classic atom types
@@ -498,16 +500,16 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
             elemental[el] += 1  # compatible mol_to_params.py
             lamename = el + str(elemental[el])
             lamename = self.pad_name(lamename, atom)
-            while lamename in seen:
+            while lamename.strip() in seen:
                 elemental[el] += 1
                 lamename = el + str(elemental[el])
             name = self._set_PDBInfo_atomname(atom, lamename, overwrite=False)
-            if name in seen:
+            if name.strip() in seen:
                 self.log.warning(f'Name clash {name}, second one now called {lamename}')
                 atom.GetPDBResidueInfo().SetName(lamename)
-                seen.append(lamename)
+                seen.append(lamename.strip())
             else:
-                seen.append(name)
+                seen.append(name.strip())
 
     def _add_partial_charges_OLD(self):
         """
