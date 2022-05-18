@@ -37,10 +37,10 @@ github_repository = 'rdkit_to_params'
 # ones.
 extensions = [
     'readthedocs_ext.readthedocs',
+    'sphinx_toolbox.more_autodoc',
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
     'sphinx.ext.todo',
-    'sphinx_toolbox.more_autodoc',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -94,24 +94,11 @@ convert_write(os.path.join(repo_base_path, 'atom_types.md'), 'atom_types.rst')
 
 # --- convert csv to tables -------------------------------------------------
 
-def csv_to_rst(csv_filename, rst_filename):
-    import csv
-    with open(csv_filename) as fh:
-        reader = csv.reader(fh)
-        header = next(reader)
-        rows = [header]
-        for row in reader:
-            rows.append(row)
+def csv_to_rst(csv_filename, rst_filename, title:str=''):
     with open(rst_filename, 'w') as fh:
-        fh.write('.. csv-table::\n')
-        fh.write('\n')
-        fh.write('   :header-rows: 1\n')
-        fh.write('\n')
-        fh.write('   :widths: auto\n')
-        fh.write('\n')
-        for row in rows:
-            fh.write('   ')
-            fh.write(', '.join(row))
-            fh.write('\n')
+        fh.write(f'.. csv-table:: {title}\n')
+        fh.write(f'   :file: {csv_filename}\n')
+        fh.write( '   :header-rows: 1\n')
+        fh.write( '   :widths: auto\n')
 
 csv_to_rst(os.path.join(repo_base_path, 'example', 'round_trip.csv'), 'round_trip.rst')
