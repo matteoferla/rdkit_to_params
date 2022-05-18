@@ -1,29 +1,30 @@
 # RDKit to params
 Create or modify Rosetta params files (topology files) from scratch, RDKit mols or another params file.
 
-> RDKit and Pyrosetta are optional module, but most of the useful functionality comes from the former!
+[![Read the Docs](https://img.shields.io/readthedocs/rdkit-to-params)](https://rdkit-to-params.readthedocs.io/en/latest/index.html)
+[![https img shields io pypi pyversions rdkit to params logo python](https://img.shields.io/pypi/pyversions/rdkit--to--params?logo=python)](https://pypi.org/project/rdkit-to-params)
+[![https img shields io pypi v rdkit to params logo python](https://img.shields.io/pypi/v/rdkit--to--params?logo=python)](https://pypi.org/project/rdkit-to-params)
+[![https img shields io pypi dm rdkit to params logo python](https://img.shields.io/pypi/dm/rdkit_to_params?logo=python)](https://pypi.org/project/rdkit-to-params)
+[![https img shields io github license matteoferla rdkit_to_params logo github](https://img.shields.io/github/license/matteoferla/rdkit_to_params?logo=github)](https://github.com/matteoferla/rdkit_to_params/raw/master/LICENCE)
+[![https img shields io github last commit matteoferla rdkit_to_params logo github](https://img.shields.io/github/last-commit/matteoferla/rdkit_to_params?logo=github)](https://github.com/matteoferla/rdkit_to_params)
+[![https img shields io github commit activity m matteoferla rdkit_to_params logo github](https://img.shields.io/github/commit-activity/m/matteoferla/rdkit_to_params?logo=github)](https://github.com/matteoferla/rdkit_to_params)
+
+## Installation
 
 To install from pip type:
 
     pip install rdkit-to-params
-    
+
 To install the latest version (probably the same) from GitHub
 
-    git clone https://github.com/matteoferla/rdkit_to_params.git
-    pip install .
+    pip install git+https://github.com/matteoferla/rdkit_to_params
     
-(To install rdkit, `conda install -c conda-forge rdkit` or `apt-get`).
+RDKit and PyRosetta are optional module, but most of the useful functionality comes from the former.
+To install rdkit, `conda install -c conda-forge rdkit` or `apt-get` or `pip install rdkit-pypi`.
+To install PyRosetta you need to get a licence (free for academic use) and install it.
+One option for installation without visiting the Rosetta Commons site is:
 
-## Website
-
-For a web app using this see [https://direvo.mutanalyst.com/params](https://direvo.mutanalyst.com/params).
-For the code running the website, see:
-
-* [templates](https://github.com/matteoferla/DirEvo_tools/tree/master/direvo/templates/params)
-* [views](https://github.com/matteoferla/DirEvo_tools/blob/master/direvo/views/params.py)
-
-## Legal Disclaimer
-The author, Matteo Ferla, is not affiliated with either Rosetta or RDKit.
+    pip install pyrosetta_help; PYROSETTA_USERNAME='👾👾👾' PYROSETTA_PASSWORD='👾👾👾' install_pyrosetta
 
 ## Rationale
 This is a fresh rewrite of ``mol_to_params.py``. For three reasons:
@@ -33,6 +34,15 @@ This is a fresh rewrite of ``mol_to_params.py``. For three reasons:
 * RDKit does not save ``mol2`` files, yet knows about atom names and Gasteiger-Massilli charges and more...
 
 It sounds mad, but did not actually take too long.
+
+## Website
+
+For a web app using this see [https://direvo.mutanalyst.com/params](https://direvo.mutanalyst.com/params).
+For the code running the website, see:
+
+* [templates](https://github.com/matteoferla/DirEvo_tools/tree/master/direvo/templates/params)
+* [views](https://github.com/matteoferla/DirEvo_tools/blob/master/direvo/views/params.py)
+
 
 ## Roundtrip
 
@@ -59,6 +69,10 @@ Let's do a roundtrip changing an atomname:
     pose = Params.params_to_pose('some_topology_I_found.params', name3)
     view = nglview.show_rosetta(pose)
     view
+
+## Legal Disclaimer
+The author, Matteo Ferla, is not affiliated with either Rosetta or RDKit.
+
 
 ## From mol object
 ### Requirements
@@ -226,6 +240,7 @@ Here is an example of making a sequence with a custom residue (without writing t
 ```python
 import nglview as nv
 from rdkit_to_params import Params
+import pyrosetta
 
 # make params
 p = Params.from_smiles('CCCCC(N*)C(*)=O', name='NLE')
@@ -330,5 +345,5 @@ Maybe the `CC(=O)NCC(=O)NC` option may be a better choice after all.
 To save a ResidueType in PyRosetta to a params file, the command is:
 
 ```python
-pyrosetta.rosetta.core.chemical.write_topology_file(residuetype, 'foo.params')
+pyrosetta.rosetta.core.chemical.write_topology_file(residuetype, 'foo.params')  # noqa
 ```
