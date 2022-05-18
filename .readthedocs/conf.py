@@ -37,7 +37,7 @@ github_repository = 'rdkit_to_params'
 # ones.
 extensions = [
     'readthedocs_ext.readthedocs',
-    'sphinx_toolbox.more_autodoc',
+    #'sphinx_toolbox.more_autodoc', getattribute error... due to code
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
     'sphinx.ext.todo',
@@ -58,6 +58,14 @@ language = 'en'
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
+
+def skip(app, what, name, obj, would_skip, options):
+    if name in ( '__init__',):
+        return False
+    return would_skip
+
+def setup(app):
+    app.connect('autodoc-skip-member', skip)
 
 # -- Options for HTML output -------------------------------------------------
 
