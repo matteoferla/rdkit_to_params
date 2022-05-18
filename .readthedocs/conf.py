@@ -107,6 +107,9 @@ convert_write(os.path.join(repo_base_path, 'atom_types.md'), 'atom_types.rst')
 
 def csv_to_rst(csv_filename, rst_filename, title:str=''):
     with open(rst_filename, 'w') as fh:
+        fh.write(f'\n{title}\n----------------\n\n')
+        fh.write('\nNB. table may be wider than the divider housing it. ' +
+                 'Download the CSV in GitHub for a better view.\n\n')
         fh.write(f'.. csv-table:: {title}\n')
         fh.write(f'   :file: {csv_filename}\n')
         fh.write( '   :header-rows: 1\n')
