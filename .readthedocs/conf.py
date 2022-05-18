@@ -40,6 +40,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
     'sphinx.ext.todo',
+    'sphinx_toolbox.more_autodoc',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -69,3 +70,24 @@ html_static_path = [] #'_static'
 always_document_param_types = True
 typehints_defaults = 'braces'
 todo_include_todos = True
+
+# --- add md files ---------------------------------------------------------
+
+import m2r2  # noqa
+import os, re
+
+repo_base_path = os.path.abspath("../../")
+
+def convert_write(markdown_filename, srt_filename):
+    # unlike Fragmenstein there are no images to convert
+    # so we can just copy the file
+    with open(markdown_filename) as fh:
+        markdown_block = fh.read()
+    #markdown_block = re.sub(r'\[(?P<label>.*?)\]\((?P<link>.*?)\)', fix_md_link, markdown_block)
+    rst_block = m2r2.convert(markdown_block)
+    with open(srt_filename, 'w') as fh:
+        fh.write(rst_block)
+
+convert_write(os.path.join(repo_base_path, 'README.md'), 'introduction.rst')
+convert_write(os.path.join(repo_base_path, 'database_entries.md'), 'database_entries.rst')
+convert_write(os.path.join(repo_base_path, 'atom_types.md'), 'atom_types.rst')

@@ -10,9 +10,10 @@ Welcome to rdkit_to_params's documentation!
    :maxdepth: 4
    :caption: Contents:
 
+   introduction
+   atom_types
+   database_entries
    rdkit_to_params
-   setup
-   tests
 
 
 Indices and tables
