@@ -54,7 +54,6 @@ except ImportError:
 
 class Params(_ParamsIoMixin, _RDKitMixin, _PoserMixin):
     """
-
     ``Params`` creates and manipulates params files. It can handles several types of params operations,
     such as "atom name surgery" and ``rdkit.Chem.Mol`` to a params file.
 
@@ -63,7 +62,7 @@ class Params(_ParamsIoMixin, _RDKitMixin, _PoserMixin):
     * ``Params.load(filename)`` will instantiate from file.
     * ``Params.from_mol(mol)`` will instantiate from ``Chem.Mol``
     * ``p.dump(filename)`` will save a file.
-    * ``loads`` and ``dumps``for strings.
+    * ``loads`` and ``dumps`` for strings.
     * ``p.fields`` will return all header fields.
     * ``p.test`` tests the params file in PyRosetta.
     * ``p.rename_atom(old, new)`` changes an atom name

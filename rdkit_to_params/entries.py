@@ -1,8 +1,10 @@
 ########################################################################################################################
 __doc__ = \
     """
-The main class here is `Entries``, which is a fancy list. It gets called for each uppercase attribute 
-in the initialisation of ``Params`` (which happens in ``_ParamsInitMixin`` __e.g.__ ``Entries.from_name('IO_STRING')``).
+The main class here is `Entries``, which is a fancy list. 
+It gets called for each uppercase attribute 
+in the initialisation of ``Params`` 
+(which happens in ``_ParamsInitMixin`` __e.g.__ ``Entries.from_name('IO_STRING')``).
     """
 
 import warnings

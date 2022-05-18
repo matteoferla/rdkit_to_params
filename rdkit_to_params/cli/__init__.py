@@ -4,7 +4,7 @@ __version__ = '0.1'
 __doc__ = """
 Command line interface to RDKit to params.
 NB. For most applications, the website is better.
-""".strip()
+"""
 
 from typing import *
 import argparse
