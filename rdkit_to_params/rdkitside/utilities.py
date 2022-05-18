@@ -85,10 +85,10 @@ class DummyMasker:
 
     def unmask(self):
         for dummy in self.dummies:
-            assert dummy.HasBoolProp('dummy'), 'The atoms have changed somehow? (weird cornercase)'
+            assert dummy.HasProp('dummy'), 'The atoms have changed somehow? (weird cornercase)'
             dummy.SetAtomicNum(0)
             if dummy.HasProp('_GasteigerCharge') and self.blank_Gasteiger:
-                dummy.SetDoublesProp('_GasteigerCharge', 0.)
+                dummy.SetDoubleProp('_GasteigerCharge', 0.)
         self.is_masked = False
 
     def __enter__(self):
