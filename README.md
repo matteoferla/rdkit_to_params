@@ -70,10 +70,6 @@ Let's do a roundtrip changing an atomname:
     view = nglview.show_rosetta(pose)
     view
 
-## Legal Disclaimer
-The author, Matteo Ferla, is not affiliated with either Rosetta or RDKit.
-
-
 ## From mol object
 ### Requirements
 For the sake of sanity, `EmbedMolecule`, `Chem.AddHs(mol)` or any other operation is assumed to have been done beforehand.
@@ -347,3 +343,14 @@ To save a ResidueType in PyRosetta to a params file, the command is:
 ```python
 pyrosetta.rosetta.core.chemical.write_topology_file(residuetype, 'foo.params')  # noqa
 ```
+
+## Legal Disclaimer
+The author, Matteo Ferla, is not affiliated with either Rosetta or RDKit.
+
+[![Matteo Ferla orcid](https://img.shields.io/badge/orcid-0000--0002--5508--4673-a6ce39?logo=orcid)](https://orcid.org/0000--0002--5508--4673)
+[![Matteo Ferla googlescholar](https://img.shields.io/badge/google--scholar-gF--bp_cAAAAJ-success?logo=googlescholar)](https://scholar.google.com/citations?user=gF--bp_cAAAAJ&hl=en)
+[![Matteo Ferla twitter](https://img.shields.io/twitter/follow/matteoferla?label=Follow&logo=twitter)](https://twitter.com/matteoferla) 
+[![Matteo Ferla stackoverflow](https://img.shields.io/stackexchange/stackoverflow/r/4625475?logo=stackoverflow)](https://stackoverflow.com/users/4625475)
+[![Matteo Ferla stackexchange](https://img.shields.io/stackexchange/bioinformatics/r/6322?logo=stackexchange)](https://bioinformatics.stackexchange.com/users/6322) 
+[![Matteo Ferla googlemail](https://img.shields.io/badge/email-gmail-informational&logo=googlemail)](https://mailhide.io/e/Ey3RNO2G) 
+[![Matteo Ferla Oxford](https://img.shields.io/badge/email-Oxford-informational&logo=googlemail)](https://mailhide.io/e/Y1dbgyyE)
