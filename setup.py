@@ -17,8 +17,12 @@ from importlib import util
 import os
 
 this_directory = os.path.abspath(os.path.dirname(__file__))
-with open(os.path.join(this_directory, 'README.md'), encoding='utf-8') as f:
-    long_description = f.read()
+if os.path.exists(os.path.join(this_directory, 'README.md')):
+    with open(os.path.join(this_directory, 'README.md'), encoding='utf-8') as f:
+        long_description = f.read()
+else:
+    long_description = __doc__
+
 description = 'Create or modify Rosetta params files (topology files) from scratch, RDKit mols or another params file.'
 
 # ---------- Non pip modules  ------------------------------------------------------------------------------------------
