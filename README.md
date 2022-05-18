@@ -22,10 +22,8 @@ For the code running the website, see:
 * [templates](https://github.com/matteoferla/DirEvo_tools/tree/master/direvo/templates/params)
 * [views](https://github.com/matteoferla/DirEvo_tools/blob/master/direvo/views/params.py)
 
-## Legal thingamabob
-The author, Matteo Ferla, is not affiliated with either Rosetta or RDKit and the presence of the latter's
-name in the package's title is completely coincidental.
-And yes, I am copying my legal mumbojumbo from South Park.
+## Legal Disclaimer
+The author, Matteo Ferla, is not affiliated with either Rosetta or RDKit.
 
 ## Rationale
 This is a fresh rewrite of ``mol_to_params.py``. For three reasons:
@@ -71,7 +69,7 @@ And that the user is going to do `Chem.MolToPDBFile(params.mol)` or `Chem.MolToP
 The molecule should preferably be **not** Kekulised.
 3letter name of residue is either from the title row (``_Name``) if a 3letter word or from the PDBInfo or 'LIG'.
 
-Dummy atom (*/R) is assumed to be a CONNECT —ligand only atm.
+Dummy atom (\*/R) is assumed to be a CONNECT —ligand only atm.
 
 Here is a conversion to an amino acid from a SMILES (quickest way):
 
@@ -318,13 +316,13 @@ I have not coded yet, because I forgot:
 * change option to override starting atom.
 * tweak the logic of `NAME` after some thinking.
 * ~~output constrain file for the CONNECT atom.~~
-* make a webpage to do the conversion from mol/sdf/pdb/SMILES —suggestions for free JS molecule editor?
+* make a better webpage to do the conversion from mol/sdf/pdb/SMILES
 
 The `from_mol` class method recognises `*[NH]CC(~O)*` and assigns it as a backbone properly.
 However, `Chem.MolFromSmiles('*[NH]CC(~O)*')` cannot be embedded, so is a bit of a horrible one for users to use.
-Throughout the code, dummy atoms (*/R) are changed to carbons or chlorines and then changed back.
+Throughout the code, dummy atoms (\*/R) are changed to carbons or chlorines and then changed back.
 Cystathionine and similar twinned amino acids are the problem as I cannot simply make an amino acid backbone be recognised,
-however if protonated as is the case `'`[NH1]C[CH0](=O)`.
+however if protonated as is the case `[NH1]C[CH0](=O)`.
 Maybe the `CC(=O)NCC(=O)NC` option may be a better choice after all.
 
 ## Footnote
