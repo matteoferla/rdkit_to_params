@@ -9,10 +9,18 @@
 # -- pyrosetta install -------------------------------------------------------
 import os
 
-import pyrosetta_help
-pyrosetta_help.install_pyrosetta(username=os.environ.get('PYROSETTA_USERNAME'),
-                                 password=os.environ.get('PYROSETTA_PASSWORD'),
-                                 )
+# import pyrosetta_help
+# pyrosetta_help.install_pyrosetta(username=os.environ.get('PYROSETTA_USERNAME'),
+#                                  password=os.environ.get('PYROSETTA_PASSWORD'),
+#                                  )
+
+
+from unittest.mock import MagicMock
+import sys
+
+sys.modules['pyrosetta'] = MagicMock()
+
+
 
 # -- Project information -----------------------------------------------------
 
