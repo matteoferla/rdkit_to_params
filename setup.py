@@ -5,7 +5,7 @@ __url__ = "https://github.com/matteoferla/rdkit_to_params"
 __email__ = "matteo.ferla@gmail.com"
 __date__ = "29 January 2021 A.D."
 __license__ = "MIT"
-__version__ = "1.2"
+__version__ = "1.2.1"
 __citation__ = "https://advances.sciencemag.org/content/7/16/eabf8711 (Fragmenstein)"
 
 # ---------- imports  --------------------------------------------------------------------------------------------------
@@ -58,5 +58,15 @@ setup(
     extras_require={},  # none pip
     entry_points={
             'console_scripts': ['smiles-to-params=rdkit_to_params.cli:smiles'],
-        }
+        },
+    classifiers=[ # https://pypi.org/classifiers/
+        'Development Status :: 5 - Production/Stable', # Development Status :: 4 - Beta
+        'Intended Audience :: Science/Research',
+        'Topic :: Scientific/Engineering :: Bio-Informatics',
+        'Topic :: Scientific/Engineering :: Chemistry',
+        'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+    ],
 )
