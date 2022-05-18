@@ -6,14 +6,13 @@
 
 # -- Path setup --------------------------------------------------------------
 
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
-#
-# import os
-# import sys
-# sys.path.insert(0, '/Users/matteo/Coding/rdkit_to_params')
+# -- pyrosetta install -------------------------------------------------------
+import os
 
+import pyrosetta_help
+pyrosetta_help.install_pyrosetta(username=os.environ.get('PYROSETTA_USERNAME'),
+                                 password=os.environ.get('PYROSETTA_PASSWORD'),
+                                 )
 
 # -- Project information -----------------------------------------------------
 

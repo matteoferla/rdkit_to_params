@@ -18,6 +18,8 @@ rdkit\_to\_params.constraint module
 
 .. automodule:: rdkit_to_params.constraint
    :members:
+   :inherited-members:
+   :private-members:
    :undoc-members:
    :show-inheritance:
 
@@ -26,6 +28,8 @@ rdkit\_to\_params.entries module
 
 .. automodule:: rdkit_to_params.entries
    :members:
+   :inherited-members:
+   :private-members:
    :undoc-members:
    :show-inheritance:
 
@@ -42,5 +46,7 @@ Module contents
 
 .. automodule:: rdkit_to_params
    :members:
+   :inherited-members:
+   :private-members:
    :undoc-members:
    :show-inheritance:
