@@ -14,6 +14,7 @@ Welcome to rdkit_to_params's documentation!
    atom_types
    database_entries
    rdkit_to_params
+   round_trip
 
 
 Indices and tables

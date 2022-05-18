@@ -76,7 +76,7 @@ todo_include_todos = True
 import m2r2  # noqa
 import os, re
 
-repo_base_path = os.path.abspath("../../")
+repo_base_path = os.path.abspath("../")
 
 def convert_write(markdown_filename, srt_filename):
     # unlike Fragmenstein there are no images to convert
@@ -91,3 +91,27 @@ def convert_write(markdown_filename, srt_filename):
 convert_write(os.path.join(repo_base_path, 'README.md'), 'introduction.rst')
 convert_write(os.path.join(repo_base_path, 'database_entries.md'), 'database_entries.rst')
 convert_write(os.path.join(repo_base_path, 'atom_types.md'), 'atom_types.rst')
+
+# --- convert csv to tables -------------------------------------------------
+
+def csv_to_rst(csv_filename, rst_filename):
+    import csv
+    with open(csv_filename) as fh:
+        reader = csv.reader(fh)
+        header = next(reader)
+        rows = [header]
+        for row in reader:
+            rows.append(row)
+    with open(rst_filename, 'w') as fh:
+        fh.write('.. csv-table::\n')
+        fh.write('\n')
+        fh.write('   :header-rows: 1\n')
+        fh.write('\n')
+        fh.write('   :widths: auto\n')
+        fh.write('\n')
+        for row in rows:
+            fh.write('   ')
+            fh.write(', '.join(row))
+            fh.write('\n')
+
+csv_to_rst(os.path.join(repo_base_path, 'example', 'round_trip.csv'), 'round_trip.rst')
