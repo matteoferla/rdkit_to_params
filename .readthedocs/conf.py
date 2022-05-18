@@ -83,20 +83,23 @@ todo_include_todos = True
 
 import m2r2  # noqa
 import os, re
+from typing import Optional
 
 repo_base_path = os.path.abspath("../")
 
-def convert_write(markdown_filename, srt_filename):
+def convert_write(markdown_filename, srt_filename, change_title:Optional[str]=None):
     # unlike Fragmenstein there are no images to convert
     # so we can just copy the file
     with open(markdown_filename) as fh:
         markdown_block = fh.read()
+    if change_title:
+        markdown_block = re.sub(r'#+\s*(.*)', r'# ' + change_title, markdown_block, 1)
     #markdown_block = re.sub(r'\[(?P<label>.*?)\]\((?P<link>.*?)\)', fix_md_link, markdown_block)
     rst_block = m2r2.convert(markdown_block)
     with open(srt_filename, 'w') as fh:
         fh.write(rst_block)
 
-convert_write(os.path.join(repo_base_path, 'README.md'), 'introduction.rst')
+convert_write(os.path.join(repo_base_path, 'README.md'), 'introduction.rst', 'RDKit-to-Params overview')
 convert_write(os.path.join(repo_base_path, 'database_entries.md'), 'database_entries.rst')
 convert_write(os.path.join(repo_base_path, 'atom_types.md'), 'atom_types.rst')
 
