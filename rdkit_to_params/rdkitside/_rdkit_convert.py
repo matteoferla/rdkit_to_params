@@ -13,6 +13,7 @@ from ..version import *
 
 from ._rdkit_prep import _RDKitPrepMixin
 from .utilities import DummyMasker
+from ..entries import Entries
 
 from typing import *
 from collections import defaultdict, deque, namedtuple
@@ -56,11 +57,14 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         if len(self.TYPE) == 0:
             self.TYPE.append('LIGAND')
         # remove all previous entries.
-        self.ATOM.data = []
-        self.CUT_BOND.data = []
-        self.CHI.data = []
-        self.BOND.data = []
-        self.CHARGE.data = []
+        for attr_name in Entries.choices:
+            # do not blank these:
+            if attr_name in ['#', 'comment','IO_STRING', 'ROTAMER_AA', 'AA', 'PROPERTIES', 'VARIANT', '<UNKNOWN>']:
+                continue
+            elif not hasattr(self, attr_name):
+                continue
+            else:
+                getattr(self, attr_name).clear()
         # correct for ions
         if self.mol.GetNumAtoms() >= 3:
             # ICOOR
