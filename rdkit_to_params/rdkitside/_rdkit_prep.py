@@ -81,9 +81,10 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         mol.SetProp('_Name', name)
         mol = Chem.AddHs(mol)
         # cannot embed more than one dummy
+        # Todo: why was this not switched to ``with DummyMasker(self.mol):``
         changed = []
         for atom in mol.GetAtoms():
-            if atom.GetSymbol() == '*':
+            if atom.GetAtomicNum() == 0:  # atom.GetSymbol() == '*':
                 atom.SetAtomicNum(6)
                 atom.SetHybridization(Chem.HybridizationType.SP3)
                 changed.append(atom.GetIdx())
@@ -222,7 +223,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
             Hs = [a for a in atom.GetNeighbors() if a.GetSymbol() == 'H']
             if atom.HasProp('_rType') and atom.GetProp('_rType').strip():
                 pass
-            elif symbol == '*':
+            elif atom.GetAtomicNum() == 0:  # symbol == '*' or symbol == 'R':
                 atom.SetProp('_rType', 'VIRT')
             elif symbol == 'C':
                 if atom.GetIsAromatic():
@@ -315,7 +316,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
             Hs = [a for a in atom.GetNeighbors() if a.GetSymbol() == 'H']
             if atom.HasProp('_rType') and atom.GetProp('_rType').strip():
                 pass
-            elif symbol == '*':
+            elif atom.GetAtomicNum() == 0: # symbol == '*':
                 atom.SetProp('_rType', 'VIRT')
             elif symbol == 'C':
                 if atom.GetIsAromatic():
@@ -495,7 +496,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         for i in range(self.mol.GetNumAtoms()):
             atom = self.mol.GetAtomWithIdx(i)
             el = atom.GetSymbol().upper()
-            if el == '*':
+            if atom.GetAtomicNum() == 0:
                 el = 'CONN'
             elemental[el] += 1  # compatible mol_to_params.py
             lamename = el + str(elemental[el])
@@ -547,7 +548,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
     def _add_partial_charges(self):
         changed = []
         for atom in self.mol.GetAtoms():
-            if atom.GetSymbol() == '*':
+            if atom.GetAtomicNum() == 0:
                 atom.SetAtomicNum(6)
                 atom.SetHybridization(Chem.HybridizationType.SP3)
                 changed.append(atom.GetIdx())
@@ -599,7 +600,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
             atomname = self._get_PDBInfo_atomname(atom, throw=False)
             if atomname:
                 atom.SetProp('_OriginalName', atomname)
-            if atom.GetSymbol() != '*':
+            if atom.GetAtomicNum() == 0:
                 self._set_PDBInfo_atomname(atom, f'XX{i: <2}', overwrite=True)
 
     def move_back(self):

@@ -278,7 +278,7 @@ class Constraints:
         Get connecting atom of mol.
         """
         for atom in mol.GetAtoms():
-            if atom.GetSymbol() == '*':
+            if atom.GetAtomicNum() == 0: # atom.GetSymbol() == '*':
                 return atom.GetNeighbors()[0]
         else:
             raise ValueError('Dummy atom not found')

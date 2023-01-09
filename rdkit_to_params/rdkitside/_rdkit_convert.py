@@ -201,7 +201,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
                 self.log.debug(f'Ordering atoms by being not hydrogen or dummy')
                 distance_penaltifier = lambda atom: 0
             hydrogen_penaltifier = lambda atom: 0 if atom.GetSymbol() != 'H' else 100
-            dummy_penaltifier = lambda atom: 0 if atom.GetSymbol() != '*' else 200
+            dummy_penaltifier = lambda atom: 0 if atom.GetAtomicNum() == 0 else 200
             scorer = lambda atom: distance_penaltifier(atom) + \
                                   hydrogen_penaltifier(atom) + \
                                   dummy_penaltifier(atom)
