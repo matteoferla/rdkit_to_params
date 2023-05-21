@@ -25,11 +25,11 @@ class ParamTestCases(unittest.TestCase):
         self.assertIsNotNone(Chem.MolFromPDBBlock(pdbblock))
 
     def test_aa_smiles(self):
-        p = Params.from_smiles('*OC(=O)C(Cc1ccccc1)N*',  # recognised as amino acid.
+        p = Params.from_smiles('*C(=O)C(Cc1ccccc1)N*',  # recognised as amino acid.
                                name='PHX',  # optional.
                                # atomnames={4: 'CZ'}  # optional, rando atom name for CB
                                )
-        self.assertTrue(p.is_aminoacid())
+        self.assertTrue(p.is_aminoacid(), 'Should be an amino acid.')
 
     def test_renames(self):
         p = Params.from_smiles('CC(ONC)O', atomnames=['CA', 'CB', 'OX', 'ON', 'CX', 'CG'])

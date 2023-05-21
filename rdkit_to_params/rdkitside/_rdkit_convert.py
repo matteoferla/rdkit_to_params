@@ -59,7 +59,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         # remove all previous entries.
         for attr_name in Entries.choices:
             # do not blank these:
-            if attr_name in ['#', 'comment','IO_STRING', 'ROTAMER_AA', 'AA', 'PROPERTIES', 'VARIANT', '<UNKNOWN>']:
+            if attr_name in ['#', 'TYPE', 'comment','IO_STRING', 'ROTAMER_AA', 'AA', 'PROPERTIES', 'VARIANT', '<UNKNOWN>']:
                 continue
             elif not hasattr(self, attr_name):
                 continue
