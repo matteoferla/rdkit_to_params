@@ -59,7 +59,7 @@ class _PoserMixin:
         relax = pyrosetta.rosetta.protocols.relax.FastRelax(scorefxn, cycles)
         relax.apply(pose)
 
-    def add_residuetype(self, pose: pyrosetta.Pose, reset:bool=False) \
+    def add_residuetype(self, pose: pyrosetta.Pose, reset:bool=True) \
                                             -> pyrosetta.rosetta.core.chemical.ResidueTypeSet:
         """
         Adds the params to a copy of a residue type set of a pose.
