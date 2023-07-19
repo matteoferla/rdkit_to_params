@@ -600,7 +600,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
             atomname = self._get_PDBInfo_atomname(atom, throw=False)
             if atomname:
                 atom.SetProp('_OriginalName', atomname)
-            if atom.GetAtomicNum() == 0:
+            if atom.GetAtomicNum() != 0:
                 self._set_PDBInfo_atomname(atom, f'XX{i: <2}', overwrite=True)
 
     def move_back(self):
