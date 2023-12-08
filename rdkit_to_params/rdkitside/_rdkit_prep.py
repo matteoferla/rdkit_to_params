@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import warnings
+
 from rdkit_to_params.entries import Entries
 
 import os
@@ -243,6 +245,9 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
                     atom.SetProp('_rType', 'Nlys')
                 elif atom.GetHybridization() == Chem.HybridizationType.SP2:
                     atom.SetProp('_rType', 'NH2O')  # or Narg if the orbitals are funky...
+                elif atom.GetHybridization() == Chem.HybridizationType.SP:
+                    atom.SetProp('_rType', 'Nhis')
+                    warnings.warn('SP hybridized nitrogen. This is not supported by Rosetta fa_standard')
                 else:
                     raise ValueError(f'No idea what this nitrogen {atom.GetHybridization()} is')
             elif symbol == 'O':

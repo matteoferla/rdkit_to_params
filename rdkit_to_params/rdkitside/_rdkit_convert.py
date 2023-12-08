@@ -51,8 +51,10 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
             self.comments.append(title)
             self.NAME = self._get_resn_from_PDBInfo()
         self.log.debug(f'{title} is being converted (`.convert_mol`)')
-        assert len(Chem.GetMolFrags(self.mol)) == 1, f'{title} is split in {len(Chem.GetMolFrags(self.mol))}'
-        # SMILES
+        if len(Chem.GetMolFrags(self.mol)) > 1:
+            self.log.warn(f'{title} is split in {len(Chem.GetMolFrags(self.mol))}')
+            self.mol = Chem.GetMolFrags(self.mol, asMols=True)[0]
+         # SMILES
         self.comments.append(Chem.MolToSmiles(self.mol))
         if len(self.TYPE) == 0:
             self.TYPE.append('LIGAND')
