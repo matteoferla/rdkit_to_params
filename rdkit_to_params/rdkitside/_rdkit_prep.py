@@ -81,7 +81,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         if mol is None:
             raise ValueError('The SMILES string could not be converted')
         mol.SetProp('_Name', name)
-        mol = Chem.AddHs(mol)
+        mol = Chem.AddHs(mol, addCoords=bool(mol.GetNumConformers()))
         # cannot embed more than one dummy
         # Todo: why was this not switched to ``with DummyMasker(self.mol):``
         changed = []
@@ -211,7 +211,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
                   ]
         for group in groups:
             template = Chem.MolFromSmarts(group['SMARTS'])
-            template = Chem.AddHs(template, explicitOnly=True)
+            template = Chem.AddHs(template, explicitOnly=True, addCoords=bool(template.GetNumConformers()))
             types = group['types']
             for match in self.mol.GetSubstructMatches(template):
                 for i, n in enumerate(types):

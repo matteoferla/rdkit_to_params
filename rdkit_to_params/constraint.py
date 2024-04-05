@@ -123,7 +123,7 @@ class Constraints:
     # =================== dependent methods ============================================================================
 
     def _get_conformer(self, mol):
-        mol = Chem.AddHs(mol)
+        mol = Chem.AddHs(mol, addCoords=bool(mol.GetNumConformers()))
         AllChem.EmbedMolecule(mol)
         AllChem.MMFFOptimizeMolecule(mol)
         return mol.GetConformer()

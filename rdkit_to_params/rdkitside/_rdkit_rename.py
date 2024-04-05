@@ -135,7 +135,7 @@ class _RDKitRenameMixin:
         """
         assert self.mol.HasSubstructMatch(substructure), 'Bad backbone match'
         originals = []
-        substructure = Chem.AddHs(substructure, explicitOnly=True)
+        substructure = Chem.AddHs(substructure, explicitOnly=True, addCoords=bool(substructure.GetNumConformers()))
         for name, idx in zip(atomnames, self.mol.GetSubstructMatch(substructure)):
             atom = self.mol.GetAtomWithIdx(idx)
             oldname = self._get_PDBInfo_atomname(atom, throw=False)

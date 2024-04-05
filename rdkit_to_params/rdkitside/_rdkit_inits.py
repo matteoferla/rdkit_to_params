@@ -121,7 +121,7 @@ class _RDKitInitMixin(_RDKitCovertMixin):
                 atom.SetAtomicNum(9)
                 dummies.append(atom.GetIdx())
         Chem.SanitizeMol(good)
-        good = AllChem.AddHs(good)
+        good = AllChem.AddHs(good, addCoords=bool(good.GetNumConformers()))
         AllChem.EmbedMolecule(good)
         AllChem.ComputeGasteigerCharges(good)
         AllChem.MMFFOptimizeMolecule(good)
