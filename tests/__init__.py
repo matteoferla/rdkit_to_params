@@ -38,5 +38,9 @@ class ParamTestCases(unittest.TestCase):
         self.assertEqual(p.ATOM[0].name, ' CZ ')
         p.test()
 
+    def test_covalent_from_mol(self):
+        mol = Chem.MolFromSmiles('CC(=O)C(Cc1ccccc1)N*')
+        p = Params.from_mol(mol, name='PHX')
+
 if __name__ == '__main__':
     unittest.main()

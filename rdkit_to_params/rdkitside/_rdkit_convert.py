@@ -238,7 +238,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
 
     def _parse_atom(self, atom: Chem.Atom) -> None:
         self.log.debug(f'Parsing {atom.GetSymbol()} at position {atom.GetIdx()}')
-        if atom.GetSymbol() == '*':
+        if atom.GetAtomicNum() == 0: # * (Chem.Atom) or R (Chem.QueryAtom)
             neighbor = atom.GetNeighbors()[0]
             n_name = self._get_PDBInfo_atomname(neighbor)
             if self.is_aminoacid() and neighbor.GetSymbol() == 'N':
@@ -378,7 +378,13 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         self.log.debug(f'Making all PDBResidueInfo resn={resn} resi={resi} chain={chain}')
         for atom in self.mol.GetAtoms():
             info = atom.GetPDBResidueInfo()
-            if info is None:
+            if info is not None:
+                pass
+            if atom.HasProp('molFileAlias'):
+                info = Chem.AtomPDBResidueInfo()
+                info.SetName(atom.GetProp('molFileAlias'))
+            else:
+
                 info = Chem.AtomPDBResidueInfo()
                 info.SetName('')  # this is the default but illegal as per dejavu
             info.SetResidueName(resn)

@@ -627,7 +627,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
                     self._set_PDBInfo_atomname(atom, original, overwrite=True)
                 else:
                     for i in range(1, 100):
-                        candidate = f'{atom.GetSymbol: >2}{i: <2}'
+                        candidate = f'{atom.GetSymbol(): >2}{i: <2}'
                         if candidate not in atomnames:
                             self._set_PDBInfo_atomname(atom, candidate, overwrite=True)
                             break
