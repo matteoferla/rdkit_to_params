@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rdkit_to_params"
+version = "1.2.11"
+description = "Create or modify Rosetta params files (topology files) from scratch, RDKit mols or another params file."
+readme = "README.md"
+requires-python = ">=3.6"
+license = {text = "MIT"}
+authors = [
+    {name = "Matteo Ferla", email = "matteo.ferla@gmail.com"},
+]
+urls = { "Homepage" = "https://github.com/matteoferla/rdkit_to_params", "Citation" = "https://advances.sciencemag.org/content/7/16/eabf8711" }
+dependencies = [
+    "rdkit",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Scientific/Engineering :: Chemistry",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+
+[project.optional-dependencies]
+# none listed
+
+[project.scripts]
+smiles-to-params = "rdkit_to_params.cli:smiles"
+
+[tool.setuptools]
+packages = ["rdkit_to_params"]

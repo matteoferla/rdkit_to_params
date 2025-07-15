@@ -335,7 +335,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
                                   'second': self._get_PDBInfo_atomname(self.mol.GetAtomWithIdx(ring_set[-1]))})
 
     def _parse_bond(self, bond: Chem.Bond) -> None:
-        if any([atom.GetSymbol() == '*' for atom in (bond.GetBeginAtom(), bond.GetEndAtom())]):
+        if any([atom.GetAtomicNum() == 0 for atom in (bond.GetBeginAtom(), bond.GetEndAtom())]):
             return None  # CONNECT.
         order = bond.GetBondTypeAsDouble()
         if order == 0:
