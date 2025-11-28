@@ -137,7 +137,9 @@ The above is actually a bit convoluted for example purposes as `Params.from_smil
 In some cases one has a PDB file with a ligand that needs parameterising.
 Assuming one has also the smiles of the ligand (PubChem has an super easy search), one can do
 
-    p = Params.from_smiles_w_pdbfile(pdb_file, smiles, 'XXX') # the name has to match.
+```python
+p = Params.from_smiles_w_pdbfile(pdb_file, smiles, 'XXX') # the name has to match.
+```
     
 The smiles does not need to match full. It can contain more atoms or even one`*` (CONNECT).
 The smiles gets parameterised. So be suse to add correct charges properly —hydrogens are added.
@@ -166,18 +168,53 @@ The class method ``add_names`` simply uses these, but returns a mol
 
 If you have two mol objects from whatever routes, the basic operation is:
 
-    p = Params.load_mol(mol, generic=False, name='LIG')
-    p.rename_from_template(template) # or whatever middle step
-    
-    p.convert_mol()
+```python
+p = Params.load_mol(mol, generic=False, name='LIG')
+p.rename_from_template(template) # or whatever middle step
+
+p.convert_mol()
+```
+
 
 Note that `convert_mol` should be called once and is already called in the two `from_XXX` classmethods.
 
-    p = Params.from_mol(...)
-    p.convert_mol() # No!!!
-    p.mol # is the mol...
-    p2 = Params.load_mol(p.mol)
-    p2.convert_mol() # Yes
+```python
+p = Params.from_mol(...)
+p.convert_mol() # No!!!
+p.mol # is the mol...
+p2 = Params.load_mol(p.mol)
+p2.convert_mol() # Yes
+```
+
+## Partial charges
+
+The partial charges in the `rdkit.Chem.Atom property` to use can be set via `pcharge_prop_name` argument in `from_mol` and `load_mol`
+among others.
+By default it is `'_GasteigerCharge'`, which is the Gasteiger-Marsili charge assigned by RDKit.
+Custom partial charges need to be assigned to the atoms beforehand, for example:
+
+```python
+import psi4
+from rdkit import Chem
+from rdkit_to_params import Params
+
+mol: Chem.Mol = ...  # your molecule
+pcharge_prop_name: str = 'ESPCharge'  # custom property name for partial charges
+mol_string = f"{Chem.GetFormalCharge(mol)} 1\n" + "\n".join(Chem.MolToXYZBlock(mol).split('\n')[2:])  # charge, multiplicity, then coords
+psi4_mol = psi4.geometry(mol_string)
+psi4.set_options({
+    'basis': '6-31G*',
+    'scf_type': 'df'
+})
+energy, wfn = psi4.energy('B3LYP', return_wfn=True)
+psi4.set_options({'CUBEPROP_TASKS': ['ESP']})
+psi4.cubeprop(wfn)
+charges: list[float] = wfn.atomic_point_charges().np.tolist()
+for i, atom in enumerate(mol.GetAtoms()):
+    atom.SetDoubleProp(pcharge_prop_name, charges[i])
+    
+p = Params.from_mol(mol, pcharge_prop_name=pcharge_prop_name, name='LIG')
+```
 
 ## Constraints
 
@@ -186,14 +223,16 @@ in order to stop janky topologies.
 The class is instantiated with a pair of SMILES, each with at least a real atom and with one attachment point,
 the first is the ligand and the second is its peptide target. The names of the heavy atoms and the Rosetta residue "numbers".
 
-    from rdkit_to_params import Constraints
-    c = Constraints(smiles=('*C(=N)', '*SC'), names= ['*', 'CX', 'NY', '*', 'SG', 'CB'], ligand_res= '1B', target_res='145A')
-    c.dump('con.con')
-    # individual strings can be accessed
-    c.atom_pair_constraint
-    c.angle_constraint
-    c.dihedral_constaint
-    c.custom_constaint # if you want to add your own before `str`, `.dumps`, `.dump`.
+```python
+from rdkit_to_params import Constraints
+c = Constraints(smiles=('*C(=N)', '*SC'), names= ['*', 'CX', 'NY', '*', 'SG', 'CB'], ligand_res= '1B', target_res='145A')
+c.dump('con.con')
+# individual strings can be accessed
+c.atom_pair_constraint
+c.angle_constraint
+c.dihedral_constaint
+c.custom_constaint # if you want to add your own before `str`, `.dumps`, `.dump`.
+```
 
 Do note that to make covalent links work in Rosetta, NGL and a few other places you need a LINK record, here is a f-string
 for it:
@@ -210,16 +249,18 @@ and the bond order is derived from the rosetta types that get assigned.
 To extract and correct a ligand, consider the following
 
     
-    # pose to string
-    buffer = pyrosetta.rosetta.std.stringbuf()
-    pose.dump_pdb(pyrosetta.rosetta.std.ostream(buffer))
-    pdbblock = buffer.str()
-    # get the residue
-    mol = Chem.MolFromPDBBlock(pdbblock, proximityBonding=False, removeHs=False)
-    ligand = Chem.SplitMolByPDBResidues(mol, whiteList=[params.NAME])[params.NAME]
-    # fix bond order
-    template = AllChem.DeleteSubstructs(params.mol, Chem.MolFromSmiles('*'))
-    AllChem.AssignBondOrdersFromTemplate(template, ligand)
+```python
+# pose to string
+buffer = pyrosetta.rosetta.std.stringbuf()
+pose.dump_pdb(pyrosetta.rosetta.std.ostream(buffer))
+pdbblock = buffer.str()
+# get the residue
+mol = Chem.MolFromPDBBlock(pdbblock, proximityBonding=False, removeHs=False)
+ligand = Chem.SplitMolByPDBResidues(mol, whiteList=[params.NAME])[params.NAME]
+# fix bond order
+template = AllChem.DeleteSubstructs(params.mol, Chem.MolFromSmiles('*'))
+AllChem.AssignBondOrdersFromTemplate(template, ligand)
+```
 
 ## Amino acids
 
@@ -275,11 +316,13 @@ Pyrosetta is optional because it has a non-standard installation.
 
 To make a cap, there is a quick way:
 
-    p = Params.from_smiles('*NCC', name='CAP', atomnames={1: ' N  ', 2: ' CA '})
-    p.make_C_terminal_cap(mainchain_atoms=['N', 'CA'])
-    
-    p = Params.from_smiles('*C(=O)C', name='CAP', atomnames={1: ' C  ', 2: ' O  ', 3: ' CA '})
-    p.make_N_terminal_cap(mainchain_atoms=['C', 'CA'])
+```python
+p = Params.from_smiles('*NCC', name='CAP', atomnames={1: ' N  ', 2: ' CA '})
+p.make_C_terminal_cap(mainchain_atoms=['N', 'CA'])
+
+p = Params.from_smiles('*C(=O)C', name='CAP', atomnames={1: ' C  ', 2: ' O  ', 3: ' CA '})
+p.make_N_terminal_cap(mainchain_atoms=['C', 'CA'])
+```
 
 These methods also accept `connection_idx`, which is the Fortran-style index of the connection that will become a LOWER/UPPER.
 i.e. if the cap is further connected but not as a polymer, say `*NCC*`.
@@ -320,14 +363,6 @@ There are some other things to pay attention to:
 * CHI struggles with rings, so currently `C1CCCCC1CCC` has only one CHI (C7, C8, C9, H10), even if (C6, C7, C8, C9) most probably counts.
 
 ## To Do
-I have not coded yet, because I forgot:
-
-* ~~an auto-assignment of `NBR_ATOM` and `NBR_RADIUS` for `from_mol`.~~
-* add rotamer line in `from_mol`
-* change option to override starting atom.
-* tweak the logic of `NAME` after some thinking.
-* ~~output constrain file for the CONNECT atom.~~
-* make a better webpage to do the conversion from mol/sdf/pdb/SMILES
 
 The `from_mol` class method recognises `*[NH]CC(~O)*` and assigns it as a backbone properly.
 However, `Chem.MolFromSmiles('*[NH]CC(~O)*')` cannot be embedded, so is a bit of a horrible one for users to use.

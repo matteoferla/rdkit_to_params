@@ -1,47 +1,124 @@
 from __future__ import annotations
 
+import os
 import warnings
 
 from rdkit_to_params.entries import Entries
 
-import os
-
 ########################################################################################################################
-__doc__ = \
-    """
+__doc__ = """
 The main class here is ``_RDKitPrepMixin``, which adds the various pre checks.
 It does not rely on any ``Params`` entry stuff. So can be used by itself for testing.
 
     """
 
-from ..version import *
 
 ########################################################################################################################
 
-from typing import List, Dict, Union
-from collections import defaultdict, deque, namedtuple
-from rdkit import Chem
-from rdkit.Chem import AllChem, rdFMCS
+import re
+import string
+from collections import defaultdict
+from typing import Dict, List, Optional, Union
 from warnings import warn
-import re, string
-from typing import Optional
-from ..entries import CONNECTEntry
-from .utilities import DummyMasker
 
-from ._rdkit_rename import _RDKitRenameMixin
+from rdkit import Chem
+from rdkit.Chem import AllChem
+
+from rdkit_to_params.rdkitside._rdkit_rename import _RDKitRenameMixin
+from rdkit_to_params.rdkitside.utilities import DummyMasker
+
+# Element to Rosetta type mapping for single-type elements
+ELEMENT_TO_RTYPE = {
+    "B": "Bsp2", "F": "F", "CL": "Cl", "BR": "Br", "I": "I",
+    "ZN": "Zn2p", "CO": "Co2p", "CU": "Cu2p", "MG": "Mg2p", "CA": "Ca2p",
+    "Si": "Si", "NA": "Na1p", "K": "K1p", "HE": "He", "LI": "Li",
+    "BE": "Be", "NE": "Ne", "AL": "Al", "AR": "Ar", "SC": "Sc",
+    "TI": "Ti", "V": "V", "CR": "Cr", "MN": "Mn", "NI": "Ni",
+    "GA": "Ga", "GE": "Ge", "AS": "As", "SE": "Se", "KR": "Kr",
+    "RB": "Rb", "SR": "Sr", "Y": "Y", "ZR": "Zr", "NB": "Nb",
+    "MO": "Mo", "TC": "Tc", "RU": "Ru", "RH": "Rh", "PD": "Pd",
+    "AG": "Ag", "CD": "Cd", "IN": "In", "SN": "Sn", "SB": "Sb",
+    "TE": "Te", "XE": "Xe", "CS": "Cs", "BA": "Ba", "LA": "La",
+    "CE": "Ce", "PR": "Pr", "ND": "Nd", "PM": "Pm", "SM": "Sm",
+    "EU": "Eu", "GD": "Gd", "TB": "Tb", "DY": "Dy", "HO": "Ho",
+    "ER": "Er", "TM": "Tm", "YB": "Yb", "LU": "Lu", "HF": "Hf",
+    "TA": "Ta", "W": "W", "RE": "Re", "OS": "Os", "IR": "Ir",
+    "PT": "Pt", "AU": "Au", "HG": "Hg", "TL": "Tl", "PB": "Pb",
+    "BI": "Bi", "PO": "Po", "AT": "At", "RN": "Rn", "FR": "Fr",
+    "RA": "Ra", "AC": "Ac", "TH": "Th", "PA": "Pa", "U": "U",
+    "NP": "Np", "PU": "Pu", "AM": "Am", "CM": "Cm", "BK": "Bk",
+    "CF": "Cf", "ES": "Es", "FM": "Fm", "MD": "Md", "NO": "No", "LR": "Lr",
+}
+
+# SMARTS patterns for functional group recognition (rtypes)
+RTYPE_PATTERNS = [
+    {"name": "silane", "SMARTS": "[Si]~O", "types": ["Si", "OSi"]},
+    {"name": "phosphoric", "SMARTS": "P[OH]", "types": ["Pha", "OHha", "Hha"]},
+    {"name": "phosphate", "SMARTS": "P~O", "types": ["Pha", "OPha"]},
+    {"name": "free carbonic acid?", "SMARTS": "C(=O)(O)O", "types": ["CO3", "OC3", "OC3"]},
+    {"name": "carboxylate", "SMARTS": "C(=O)[O-]", "types": ["COO", "OOC", "OOC"]},
+    {"name": "carboxylic", "SMARTS": "C(=O)[OH]", "types": ["COO", "OOC", "OH"]},
+    {"name": "ester", "SMARTS": "C(=O)OC", "types": ["COO", "Oet2", "Oet3", None]},
+    {"name": "ester?", "SMARTS": "C(=O)O", "types": ["COO", "OOC", "OOC"]},
+    {"name": "3amide", "SMARTS": "C(=O)N(C)C", "types": ["CNH2", "ONH2", "Npro", None, None]},
+    {"name": "2amide", "SMARTS": "C(=O)NC", "types": ["CNH2", "ONH2", "Nbb", None]},
+    {"name": "amide", "SMARTS": "C(=O)N", "types": ["CNH2", "ONH2", "NH2O"]},
+    {"name": "keto-aldehyde", "SMARTS": "C(=O)", "types": [None, "OOC"]},
+    {"name": "2amine", "SMARTS": "CNC", "types": [None, "Nbb", None]},
+    {"name": "azo", "SMARTS": "NN", "types": ["NtrR", "NtrR"]},
+    {"name": "azo_aromatic", "SMARTS": "nn", "types": ["NtrR", "NtrR"]},
+    {"name": "aramid?", "SMARTS": "nc(o)c", "types": ["NtrR", "aroC", "Oaro", None]},
+    {"name": "nitrile", "SMARTS": "C#N", "types": ["COO", "NtrR"]},
+    {"name": "imino", "SMARTS": "C=N", "types": [None, "Nhis"]},
+    {"name": "nitro", "SMARTS": "[N+](=O)[O-]", "types": ["Nhis", "OOC", "OOC"]},
+    {"name": "nitro_aro", "SMARTS": "n(=o)o", "types": ["Nhis", "OOC", "OOC"]},
+    {"name": "furan", "SMARTS": "coc", "types": ["aroC", "Oaro", "aroC"]},
+    {"name": "ether", "SMARTS": "COC", "types": [None, "Oet3", None]},
+    {"name": "hydroxyl", "SMARTS": "[OH]", "types": ["OH"]},
+    {"name": "guanidium", "SMARTS": "NC(=N)N", "types": ["Narg", "aroC", "Narg", "Narg"]},
+]
+
+# SMARTS patterns for functional group recognition (genrtypes - generic types)
+GENRTYPE_PATTERNS = [
+    {"name": "carboxylate", "SMARTS": "C(=O)[O-]", "types": ["COO", "OOC", "OOC"]},
+    {"name": "carboxylic", "SMARTS": "C(=O)[OH]", "types": ["COO", "OOC", "OH"]},
+    {"name": "ester", "SMARTS": "C(=O)OC", "types": ["COO", "Oal", "Oet", None]},
+    {"name": "ester2", "SMARTS": "C(=O)O", "types": ["COO", "OOC", "OOC"]},
+    {"name": "3amide", "SMARTS": "C(=O)[NH0]", "types": ["CNH2", "ONH2", "Nad3"]},
+    {"name": "amide", "SMARTS": "C(=O)N", "types": ["CNH2", "ONH2", "NH2O"]},
+    {"name": "keto-aldehyde", "SMARTS": "C(=O)", "types": [None, "Oal"]},
+    {"name": "2amine", "SMARTS": "CNC", "types": [None, "Nam2", None]},
+    {"name": "azo", "SMARTS": "NN", "types": ["Nad3", "Nad3"]},
+    {"name": "nitrile", "SMARTS": "C#N", "types": ["CTp", "NG1"]},
+    {"name": "imino", "SMARTS": "C=[NH]", "types": [None, "Nin"]},
+    {"name": "2imino", "SMARTS": "C=[NH0]", "types": [None, "Nim"]},
+    {"name": "2amine2", "SMARTS": "CNC", "types": [None, "Nam", None]},
+    {"name": "nitro", "SMARTS": "[N+](=O)[O-]", "types": ["NGb", "Ont", "Ont"]},
+    {"name": "nitro_aro", "SMARTS": "n(=o)o", "types": ["NGb", "Ont", "Ont"]},
+    {"name": "furan", "SMARTS": "coc", "types": ["aroC", "Ofu", "aroC"]},
+    {"name": "ether", "SMARTS": "COC", "types": [None, "Oet", None]},
+    {"name": "hydroxyl", "SMARTS": "[OH]", "types": ["OH"]},
+    {"name": "guanidium", "SMARTS": "NC(=N)N", "types": ["Narg", "aroC", "Narg", "Narg"]},
+]
+
 
 class _RDKitPrepMixin(_RDKitRenameMixin):
-
-    def __init__(self): # noqa
-        self.log.critical('This is init should not have been called! This exists for debugging')
-        self.NAME = 'LIG'
-        self.TYPE = Entries.from_name('TYPE')
+    def __init__(self) -> None:  # noqa
+        self.log.critical("This is init should not have been called! This exists for debugging")
+        self.NAME = "LIG"
+        self.TYPE = Entries.from_name("TYPE")
         self.mol = None
         self.generic = False
         self._rtype = []
 
     @classmethod
-    def load_mol(cls, mol: Chem.Mol, generic:bool=False, name:Optional[str]=None) -> _RDKitPrepMixin:
+    def load_mol(
+        cls,
+        mol: Chem.Mol,
+        generic: bool = False,
+        name: Optional[str] = None,
+        pcharge_prop_name: str = "_GasteigerCharge",
+    ) -> _RDKitPrepMixin:
         """
         A fully prepared molecule with optional dummy atoms to be coverted into a Params object
         This simply loads the molecule.
@@ -53,21 +130,23 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         :return:
         """
         self = cls()
-        self.log.debug('`load_mol` called...')
+        self.log.debug("`load_mol` called...")
         self.mol = mol
         self.generic = generic
-        self.TYPE.append('LIGAND')
+        self.TYPE.append("LIGAND")
         if name is None:
             self.log.warning('Residue `name` not specified defaulting to "LIG"')
-            name = 'LIG'
+            name = "LIG"
         self.NAME = name
-        self.mol.SetProp('_Name', name)
-        self.fix_mol()
+        self.mol.SetProp("_Name", name)
+        self.fix_mol(pcharge_prop_name)
         # conversion elsewhere
         return self
 
     @classmethod
-    def load_smiles(cls, smiles:str, generic:bool=False, name:Optional[str]=None) -> _RDKitPrepMixin:
+    def load_smiles(
+        cls, smiles: str, generic: bool = False, name: Optional[str] = None
+    ) -> _RDKitPrepMixin:
         """
         A SMILES with optional dummy atoms to be coverted into a Params object
 
@@ -76,11 +155,11 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         :param name: 3 letter name
         :return:
         """
-        cls.log.debug('`load_smiles` called...')
+        cls.log.debug("`load_smiles` called...")
         mol = Chem.MolFromSmiles(smiles)
         if mol is None:
-            raise ValueError('The SMILES string could not be converted')
-        mol.SetProp('_Name', name)
+            raise ValueError("The SMILES string could not be converted")
+        mol.SetProp("_Name", name)
         mol = Chem.AddHs(mol, addCoords=bool(mol.GetNumConformers()))
         # cannot embed more than one dummy
         # Todo: why was this not switched to ``with DummyMasker(self.mol):``
@@ -98,20 +177,24 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         # operate upon!
         return cls.load_mol(mol, generic, name)
 
-
-    def fix_mol(self):
-        self.log.debug('`fix_mol` called...')
+    def fix_mol(self, pcharge_prop_name: str = "_GasteigerCharge") -> None:
+        """
+        Fix the molecule by adding partial charges, atom names, and Rosetta atom types.
+        The partial charge default is `_GasteigerCharge`,
+        which is what RDKit generates.
+        """
+        self.log.debug("`fix_mol` called...")
         # partial charges.
-        if not self.mol.GetAtomWithIdx(0).HasProp('_GasteigerCharge'):
-            self.log.debug('... Adding Gasteiger')
-            self._add_partial_charges()
+        if not self.mol.GetAtomWithIdx(0).HasProp(pcharge_prop_name):
+            self.log.debug(f"... Adding partial charges (prop: {pcharge_prop_name})")
+            self._add_partial_charges(pcharge_prop_name)
         self._fix_atom_names()
         if self.generic is True:
             self._add_genrtypes()
         else:
             self._add_rtypes()
 
-    def dump_pdb(self, filename: str, overwrite=False, stripped=True) -> None:
+    def dump_pdb(self, filename: str, overwrite: bool = False, stripped: bool = True) -> None:
         """
         Write first conformer to a PDB file.
 
@@ -120,11 +203,11 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         :param stripped: remove * atoms?
         :return: None
         """
-        self.log.debug(f'Writing PDB to file {filename}')
+        self.log.debug(f"Writing PDB to file {filename}")
         mol = self._prep_dump_pdb(filename, overwrite, stripped)
         Chem.MolToPDBFile(mol, filename)
 
-    def dump_pdb_conf(self, filename: str, overwrite=False, stripped=True) -> int:
+    def dump_pdb_conf(self, filename: str, overwrite: bool = False, stripped: bool = True) -> int:
         """
         Write conformers to a PDB file.
 
@@ -133,7 +216,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         :param stripped: remove * atoms?
         :return: number of conf written
         """
-        self.log.debug(f'Writing PDB conformers to file {filename}')
+        self.log.debug(f"Writing PDB conformers to file {filename}")
         mol = self._prep_dump_pdb(filename, overwrite, stripped)
         w = Chem.PDBWriter(filename)
         for cid in range(mol.GetNumConformers()):
@@ -142,317 +225,365 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         w.close()
         return n
 
-    def _prep_dump_pdb(self, filename: str, overwrite=False, stripped=True) -> Chem.Mol:
+    def _prep_dump_pdb(
+        self, filename: str, overwrite: bool = False, stripped: bool = True
+    ) -> Chem.Mol:
         if os.path.exists(filename) and overwrite:
-            raise FileExistsError('The file already exists')
+            raise FileExistsError("The file already exists")
         if stripped:
             return self.dummyless
         else:
             return self.mol
 
-    def dumps_pdb(self, stripped=True) -> str:
+    def dumps_pdb(self, stripped: bool = True) -> str:
         if stripped:
             Chem.MolToPDBBlock(self.dummyless)
         else:
             Chem.MolToPDBBlock(self.mol)
 
     @property
-    def dummyless(self):
-        return Chem.DeleteSubstructs(self.mol, Chem.MolFromSmiles('*'))
+    def dummyless(self) -> Chem.Mol:
+        return Chem.DeleteSubstructs(self.mol, Chem.MolFromSmiles("*"))
 
     def _add_rtypes(self) -> None:
-        """
-        Add Rosetta Atom types to each atom.
-        Mostly a guess...
-        """
+        """Add Rosetta Atom types to each atom. Refactored for lower complexity."""
+        # Apply SMARTS pattern matching for functional groups
+        self._apply_rtype_patterns()
 
-        # These are the elements with a single type.
-        # Some have oxidation states '2p', but only one...
-        element_to_type = {'B': 'Bsp2', 'F': 'F', 'CL': 'Cl', 'BR': 'Br', 'I': 'I', 'ZN': 'Zn2p', 'CO': 'Co2p',
-                           'CU': 'Cu2p', 'MG': 'Mg2p', 'CA': 'Ca2p', 'Si': 'Si', 'NA': 'Na1p', 'K': 'K1p', 'HE': 'He',
-                           'LI': 'Li', 'BE': 'Be', 'NE': 'Ne', 'AL': 'Al', 'AR': 'Ar', 'SC': 'Sc', 'TI': 'Ti', 'V': 'V',
-                           'CR': 'Cr', 'MN': 'Mn', 'NI': 'Ni', 'GA': 'Ga', 'GE': 'Ge', 'AS': 'As', 'SE': 'Se',
-                           'KR': 'Kr', 'RB': 'Rb', 'SR': 'Sr', 'Y': 'Y', 'ZR': 'Zr', 'NB': 'Nb', 'MO': 'Mo', 'TC': 'Tc',
-                           'RU': 'Ru', 'RH': 'Rh', 'PD': 'Pd', 'AG': 'Ag', 'CD': 'Cd', 'IN': 'In', 'SN': 'Sn',
-                           'SB': 'Sb', 'TE': 'Te', 'XE': 'Xe', 'CS': 'Cs', 'BA': 'Ba', 'LA': 'La', 'CE': 'Ce',
-                           'PR': 'Pr', 'ND': 'Nd', 'PM': 'Pm', 'SM': 'Sm', 'EU': 'Eu', 'GD': 'Gd', 'TB': 'Tb',
-                           'DY': 'Dy', 'HO': 'Ho', 'ER': 'Er', 'TM': 'Tm', 'YB': 'Yb', 'LU': 'Lu', 'HF': 'Hf',
-                           'TA': 'Ta', 'W': 'W', 'RE': 'Re', 'OS': 'Os', 'IR': 'Ir', 'PT': 'Pt', 'AU': 'Au', 'HG': 'Hg',
-                           'TL': 'Tl', 'PB': 'Pb', 'BI': 'Bi', 'PO': 'Po', 'AT': 'At', 'RN': 'Rn', 'FR': 'Fr',
-                           'RA': 'Ra', 'AC': 'Ac', 'TH': 'Th', 'PA': 'Pa', 'U': 'U', 'NP': 'Np', 'PU': 'Pu', 'AM': 'Am',
-                           'CM': 'Cm', 'BK': 'Bk', 'CF': 'Cf', 'ES': 'Es', 'FM': 'Fm', 'MD': 'Md', 'NO': 'No',
-                           'LR': 'Lr'}
+        # Assign types to remaining atoms based on element
+        for atom in self.mol.GetAtoms():
+            if atom.HasProp("_rType") and atom.GetProp("_rType").strip():
+                continue  # Already assigned
 
-        groups = [
-                  {'name': 'silane', 'SMARTS': '[Si]~O', 'types': ['Si', 'OSi']},
-                  {'name': 'phosphoric', 'SMARTS': 'P[OH]', 'types': ['Pha', 'OHha', 'Hha']},
-                  {'name': 'phosphate', 'SMARTS': 'P~O', 'types': ['Pha', 'OPha']},
-                  {'name': 'free carbonic acid?', 'SMARTS': 'C(=O)(O)O', 'types': ['CO3', 'OC3', 'OC3']}, # no idea.
-                  {'name': 'carboxylate', 'SMARTS': 'C(=O)[O-]', 'types': ['COO', 'OOC', 'OOC']},
-                  {'name': 'carboxylic', 'SMARTS': 'C(=O)[OH]', 'types': ['COO', 'OOC', 'OH']},
-                  {'name': 'ester', 'SMARTS': 'C(=O)OC', 'types': ['COO', 'Oet2', 'Oet3', None]},
-                  {'name': 'ester?', 'SMARTS': 'C(=O)O', 'types': ['COO', 'OOC', 'OOC']},
-                  {'name': '3amide', 'SMARTS': 'C(=O)N(C)C', 'types': ['CNH2', 'ONH2', 'Npro', None, None]},
-                  {'name': '3amide', 'SMARTS': 'C(=O)NC', 'types': ['CNH2', 'ONH2', 'Nbb', None]},
-                  {'name': 'amide', 'SMARTS': 'C(=O)N', 'types': ['CNH2', 'ONH2', 'NH2O']},
-                  {'name': 'keto-aldehyde', 'SMARTS': 'C(=O)', 'types': [None, 'OOC']}, ## ???
-                  {'name': '2amine', 'SMARTS': 'CNC', 'types': [None, 'Nbb', None]}, # actually Nbb is a amide.
-                  {'name': 'azo', 'SMARTS': 'NN', 'types': ['NtrR', 'NtrR']},
-                  {'name': 'azo', 'SMARTS': 'nn', 'types': ['NtrR', 'NtrR']},
-                  {'name': 'aramid?', 'SMARTS': 'nc(o)c', 'types': ['NtrR', 'aroC', 'Oaro', None]}, # unsure how it's written
-                  {'name': 'nitrile', 'SMARTS': 'C#N', 'types': ['COO', 'NtrR']}, ## the old one uses Nhis??!
-                  {'name': 'imino', 'SMARTS': 'C=N', 'types': [None, 'Nhis']},
-                  {'name': 'nitro', 'SMARTS': '[N+](=O)[O-]', 'types': ['Nhis','OOC', 'OOC']},
-                  {'name': 'nitro_aro', 'SMARTS': 'n(=o)o', 'types': ['Nhis','OOC', 'OOC']},
-                  {'name': 'furan', 'SMARTS': 'coc', 'types': ['aroC', 'Oaro', 'aroC']},
-                  {'name': 'ether', 'SMARTS': 'COC', 'types': [None, 'Oet3', None]},
-                  {'name': 'hydroxyl', 'SMARTS': '[OH]', 'types': ['OH']},
-                  {'name': 'guanidium', 'SMARTS': 'NC(=N)N', 'types': ['Narg', 'aroC', 'Narg', 'Narg']},
-                  ]
-        for group in groups:
-            template = Chem.MolFromSmarts(group['SMARTS'])
-            template = Chem.AddHs(template, explicitOnly=True, addCoords=bool(template.GetNumConformers()))
-            types = group['types']
+            self._assign_atom_rtype(atom)
+
+    def _apply_rtype_patterns(self) -> None:
+        """Apply SMARTS patterns to identify functional groups."""
+        for group in RTYPE_PATTERNS:
+            template = Chem.MolFromSmarts(group["SMARTS"])
+            template = Chem.AddHs(
+                template, explicitOnly=True, addCoords=bool(template.GetNumConformers())
+            )
+            types = group["types"]
             for match in self.mol.GetSubstructMatches(template):
-                for i, n in enumerate(types):
+                for i, rtype in enumerate(types):
                     j = match[i]
                     atom = self.mol.GetAtomWithIdx(j)
-                    if n is not None and not (atom.HasProp('_rType') and atom.GetProp('_rType').strip()):
-                        atom.SetProp('_rType', n)
-        # Simple atoms
-        for atom in self.mol.GetAtoms():
-            symbol = atom.GetSymbol()
-            Hs = [a for a in atom.GetNeighbors() if a.GetSymbol() == 'H']
-            if atom.HasProp('_rType') and atom.GetProp('_rType').strip():
-                pass
-            elif atom.GetAtomicNum() == 0:  # symbol == '*' or symbol == 'R':
-                atom.SetProp('_rType', 'VIRT')
-            elif symbol == 'C':
-                if atom.GetIsAromatic():
-                    atom.SetProp('_rType', 'aroC')
-                    for n in Hs:
-                        n.SetProp('_rType', 'Haro')
-                else:
-                    atom.SetProp('_rType', 'CH' + str(len(Hs)))
-            elif symbol == 'N':
-                if atom.GetIsAromatic() and len(Hs) == 0:
-                    atom.SetProp('_rType', 'Nhis')
-                elif atom.GetIsAromatic():  # could also be NtrR...
-                    atom.SetProp('_rType', 'Ntrp')
-                elif atom.GetHybridization() == Chem.HybridizationType.SP3 and len(Hs) < 3:
-                    atom.SetProp('_rType', 'Npro')  # Nbb is a SP2
-                elif atom.GetHybridization() == Chem.HybridizationType.SP3:
-                    atom.SetProp('_rType', 'Nlys')
-                elif atom.GetHybridization() == Chem.HybridizationType.SP2:
-                    atom.SetProp('_rType', 'NH2O')  # or Narg if the orbitals are funky...
-                elif atom.GetHybridization() == Chem.HybridizationType.SP:
-                    atom.SetProp('_rType', 'Nhis')
-                    warnings.warn('SP hybridized nitrogen. This is not supported by Rosetta fa_standard')
-                else:
-                    raise ValueError(f'No idea what this nitrogen {atom.GetHybridization()} is')
-            elif symbol == 'O':
-                if atom.GetIsAromatic():
-                    atom.SetProp('_rType', 'Oaro')
-                elif atom.GetHybridization() == Chem.HybridizationType.SP2:
-                    atom.SetProp('_rType', 'Oet2')
-                elif atom.GetHybridization() == Chem.HybridizationType.SP3:
-                    atom.SetProp('_rType', 'Oet3')
-                else:
-                    raise ValueError(f'No idea what this oxygen {atom.GetHybridization()} is')
-            elif symbol == 'H':
-                n = atom.GetNeighbors()[0]
-                if n.GetSymbol() == 'C' and n.GetIsAromatic():
-                    atom.SetProp('_rType', 'Haro')
-                elif n.GetSymbol() == 'C':
-                    atom.SetProp('_rType', 'Hapo')
-                elif n.GetSymbol() == 'S':
-                    atom.SetProp('_rType', 'HS')
-                else:
-                    atom.SetProp('_rType', 'Hpol')
-            elif symbol == 'S':
-                if len(Hs) == 1:
-                    atom.SetProp('_rType', 'SH1')
-                else:
-                    atom.SetProp('_rType', 'S')
-            elif symbol == 'P':
-                atom.SetProp('_rType', 'Phos')
-            elif symbol.upper() in element_to_type:
-                atom.SetProp('_rType', element_to_type[symbol.upper()])
-            else:
-                self.log.warning(f'No idea what this {atom.GetSymbol()} {atom.GetHybridization()} is. assigning it REPLS')
-                atom.SetProp('_rType', 'REPLS')
+                    if rtype is not None and not (
+                        atom.HasProp("_rType") and atom.GetProp("_rType").strip()
+                    ):
+                        atom.SetProp("_rType", rtype)
+
+    def _assign_atom_rtype(self, atom: Chem.Atom) -> None:
+        """Assign rtype to atom based on element and properties."""
+        symbol = atom.GetSymbol()
+
+        # Handle special cases first
+        if atom.GetAtomicNum() == 0:  # Dummy atom
+            atom.SetProp("_rType", "VIRT")
+            return
+
+        # Dispatch to element-specific methods
+        if symbol == "C":
+            self._assign_carbon_rtype(atom)
+        elif symbol == "N":
+            self._assign_nitrogen_rtype(atom)
+        elif symbol == "O":
+            self._assign_oxygen_rtype(atom)
+        elif symbol == "H":
+            self._assign_hydrogen_rtype(atom)
+        elif symbol == "S":
+            self._assign_sulfur_rtype(atom)
+        elif symbol == "P":
+            atom.SetProp("_rType", "Phos")
+        elif symbol.upper() in ELEMENT_TO_RTYPE:
+            atom.SetProp("_rType", ELEMENT_TO_RTYPE[symbol.upper()])
+        else:
+            self.log.warning(
+                f"No idea what this {symbol} {atom.GetHybridization()} is. assigning it REPLS"
+            )
+            atom.SetProp("_rType", "REPLS")
+
+    def _assign_carbon_rtype(self, atom: Chem.Atom) -> None:
+        """Assign rtype for carbon atoms."""
+        Hs = [a for a in atom.GetNeighbors() if a.GetSymbol() == "H"]
+
+        if atom.GetIsAromatic():
+            atom.SetProp("_rType", "aroC")
+            for h_atom in Hs:
+                h_atom.SetProp("_rType", "Haro")
+        else:
+            atom.SetProp("_rType", "CH" + str(len(Hs)))
+
+    def _assign_nitrogen_rtype(self, atom: Chem.Atom) -> None:
+        """Assign rtype for nitrogen atoms."""
+        Hs = [a for a in atom.GetNeighbors() if a.GetSymbol() == "H"]
+
+        if atom.GetIsAromatic() and len(Hs) == 0:
+            atom.SetProp("_rType", "Nhis")
+        elif atom.GetIsAromatic():
+            atom.SetProp("_rType", "Ntrp")
+        elif atom.GetHybridization() == Chem.HybridizationType.SP3 and len(Hs) < 3:
+            atom.SetProp("_rType", "Npro")
+        elif atom.GetHybridization() == Chem.HybridizationType.SP3:
+            atom.SetProp("_rType", "Nlys")
+        elif atom.GetHybridization() == Chem.HybridizationType.SP2:
+            atom.SetProp("_rType", "NH2O")
+        elif atom.GetHybridization() == Chem.HybridizationType.SP:
+            atom.SetProp("_rType", "Nhis")
+            warnings.warn("SP hybridized nitrogen. This is not supported by Rosetta fa_standard")
+        else:
+            raise ValueError(f"No idea what this nitrogen {atom.GetHybridization()} is")
+
+    def _assign_oxygen_rtype(self, atom: Chem.Atom) -> None:
+        """Assign rtype for oxygen atoms."""
+        if atom.GetIsAromatic():
+            atom.SetProp("_rType", "Oaro")
+        elif atom.GetHybridization() == Chem.HybridizationType.SP2:
+            atom.SetProp("_rType", "Oet2")
+        elif atom.GetHybridization() == Chem.HybridizationType.SP3:
+            atom.SetProp("_rType", "Oet3")
+        else:
+            raise ValueError(f"No idea what this oxygen {atom.GetHybridization()} is")
+
+    def _assign_hydrogen_rtype(self, atom: Chem.Atom) -> None:
+        """Assign rtype for hydrogen atoms."""
+        n = atom.GetNeighbors()[0]
+        if n.GetSymbol() == "C" and n.GetIsAromatic():
+            atom.SetProp("_rType", "Haro")
+        elif n.GetSymbol() == "C":
+            atom.SetProp("_rType", "Hapo")
+        elif n.GetSymbol() == "S":
+            atom.SetProp("_rType", "HS")
+        else:
+            atom.SetProp("_rType", "Hpol")
+
+    def _assign_sulfur_rtype(self, atom: Chem.Atom) -> None:
+        """Assign rtype for sulfur atoms."""
+        Hs = [a for a in atom.GetNeighbors() if a.GetSymbol() == "H"]
+        if len(Hs) == 1:
+            atom.SetProp("_rType", "SH1")
+        else:
+            atom.SetProp("_rType", "S")
+
 
     def _add_genrtypes(self) -> None:
-        """
-        Add Rosetta Atom types to each atom.
-        """
-        groups = [{'name': 'carboxylate', 'SMARTS': 'C(=O)[O-]', 'types': ['COO', 'OOC', 'OOC']},
-                  {'name': 'carboxylic', 'SMARTS': 'C(=O)[OH]', 'types': ['COO', 'OOC', 'OH']},
-                  {'name': 'ester', 'SMARTS': 'C(=O)OC', 'types': ['COO', 'Oal', 'Oet', None]},
-                  {'name': 'ester', 'SMARTS': 'C(=O)O', 'types': ['COO', 'OOC', 'OOC']},
-                  {'name': '3amide', 'SMARTS': 'C(=O)[NH0]', 'types': ['CNH2', 'ONH2', 'Nad3']},
-                  {'name': 'amide', 'SMARTS': 'C(=O)N', 'types': ['CNH2', 'ONH2', 'NH2O']},
-                  {'name': 'keto-aldehyde', 'SMARTS': 'C(=O)', 'types': [None, 'Oal']},
-                  {'name': '2amine', 'SMARTS': 'CNC', 'types': [None, 'Nam2', None]},
-                  {'name': 'azo', 'SMARTS': 'NN', 'types': ['Nad3', 'Nad3']},
-                  {'name': 'nitrile', 'SMARTS': 'C#N', 'types': ['CTp', 'NG1']},
-                  {'name': 'imino', 'SMARTS': 'C=[NH]', 'types': [None, 'Nin']},
-                  {'name': '2imino', 'SMARTS': 'C=[NH0]', 'types': [None, 'Nim']},
-                  {'name': '2amine', 'SMARTS': 'CNC', 'types': [None, 'Nam', None]},
-                  {'name': 'nitro', 'SMARTS': '[N+](=O)[O-]', 'types': ['NGb', 'Ont', 'Ont']},
-                  {'name': 'nitro_aro', 'SMARTS': 'n(=o)o', 'types': ['NGb', 'Ont', 'Ont']},
-                  {'name': 'furan', 'SMARTS': 'coc', 'types': ['aroC', 'Ofu', 'aroC']},
-                  {'name': 'ether', 'SMARTS': 'COC', 'types': [None, 'Oet', None]},
-                  {'name': 'hydroxyl', 'SMARTS': '[OH]', 'types': ['OH']},
-                  {'name': 'guanidium', 'SMARTS': 'NC(=N)N', 'types': ['Narg', 'aroC', 'Narg', 'Narg']}
-                  ]
-        for group in groups:
-            template = Chem.MolFromSmarts(group['SMARTS'])
-            types = group['types']
+        """Add Rosetta generic Atom types to each atom. Refactored for lower complexity."""
+        # Apply SMARTS pattern matching for functional groups
+        self._apply_genrtype_patterns()
+
+        # Assign types to remaining atoms based on element
+        for atom in self.mol.GetAtoms():
+            if atom.HasProp("_rType") and atom.GetProp("_rType").strip():
+                continue  # Already assigned
+
+            self._assign_atom_genrtype(atom)
+
+    def _apply_genrtype_patterns(self) -> None:
+        """Apply SMARTS patterns to identify functional groups for generic types."""
+        for group in GENRTYPE_PATTERNS:
+            template = Chem.MolFromSmarts(group["SMARTS"])
+            types = group["types"]
             for match in self.mol.GetSubstructMatches(template):
-                for i, n in enumerate(types):
+                for i, genrtype in enumerate(types):
                     j = match[i]
                     atom = self.mol.GetAtomWithIdx(j)
-                    if n is not None and not (atom.HasProp('_rType') and atom.GetProp('_rType').strip()):
-                        atom.SetProp('_rType', n)
-        # Generic atoms
-        for atom in self.mol.GetAtoms():
-            symbol = atom.GetSymbol()
-            Hs = [a for a in atom.GetNeighbors() if a.GetSymbol() == 'H']
-            if atom.HasProp('_rType') and atom.GetProp('_rType').strip():
-                pass
-            elif atom.GetAtomicNum() == 0: # symbol == '*':
-                atom.SetProp('_rType', 'VIRT')
-            elif symbol == 'C':
-                if atom.GetIsAromatic():
-                    atom.SetProp('_rType', 'aroC')
-                    for n in Hs:
-                        n.SetProp('_rType', 'Haro')
-                elif atom.GetHybridization() == Chem.HybridizationType.SP3:
-                    if len(Hs) > 0:
-                        atom.SetProp('_rType', 'CH' + str(len(Hs)))
-                    else:
-                        atom.SetProp('_rType', 'CS')
-                elif atom.GetHybridization() == Chem.HybridizationType.SP2:
-                    if len(Hs) > 0:
-                        atom.SetProp('_rType', 'CD' + str(len(Hs)))
-                    else:
-                        atom.SetProp('_rType', 'CD')
-                elif atom.GetHybridization() == Chem.HybridizationType.SP:
-                    atom.SetProp('_rType', 'CT')
-                else:
-                    raise ValueError(f'No idea what this carbon {atom.GetHybridization()} is')
-            elif symbol == 'N':
-                if atom.GetIsAromatic():
-                    atom.SetProp('_rType', 'NGb')
-                elif atom.GetHybridization() == Chem.HybridizationType.SP3 and len(Hs) == 0:
-                    atom.SetProp('_rType', 'NG3')
-                elif atom.GetHybridization() == Chem.HybridizationType.SP3:
-                    atom.SetProp('_rType', 'Nam')
-                elif atom.GetHybridization() == Chem.HybridizationType.SP2 and len(Hs) == 0:
-                    atom.SetProp('_rType', 'NG2')
-                elif atom.GetHybridization() == Chem.HybridizationType.SP2 and len(Hs) == 1:
-                    atom.SetProp('_rType', 'NG21')
-                elif atom.GetHybridization() == Chem.HybridizationType.SP2 and len(Hs) == 2:
-                    atom.SetProp('_rType', 'NG22')
-                elif atom.GetHybridization() == Chem.HybridizationType.SP and len(Hs) == 0:
-                    atom.SetProp('_rType', 'NG1')
-                else:
-                    raise ValueError(f'No idea what this nitrogen {atom.GetHybridization()} is')
-            elif symbol == 'O':
-                if atom.GetIsAromatic():
-                    atom.SetProp('_rType', 'Oaro')
-                elif atom.GetHybridization() == Chem.HybridizationType.SP2 and len(Hs) == 0:
-                    atom.SetProp('_rType', 'OG2')
-                elif atom.GetHybridization() == Chem.HybridizationType.SP3 and len(Hs) == 0:
-                    atom.SetProp('_rType', 'OG3')
-                elif atom.GetHybridization() == Chem.HybridizationType.SP3 and len(Hs) == 1:
-                    atom.SetProp('_rType', 'OG31')
-                else:
-                    raise ValueError(f'No idea what this oxygen {atom.GetHybridization()} is')
-            elif symbol == 'H':
-                n = atom.GetNeighbors()[0]
-                if n.GetSymbol() == 'C' and n.GetIsAromatic():
-                    atom.SetProp('_rType', 'Haro')
-                elif n.GetSymbol() == 'C':
-                    atom.SetProp('_rType', 'Hapo')
-                elif n.GetSymbol() == 'S':
-                    atom.SetProp('_rType', 'HS')
-                elif n.GetSymbol() == 'N':
-                    atom.SetProp('_rType', 'HN')
-                elif n.GetSymbol() == 'O':
-                    atom.SetProp('_rType', 'HO')
-                else:
-                    atom.SetProp('_rType', 'HG')
-            elif symbol == 'S':
-                if len(Hs) == 1:
-                    atom.SetProp('_rType', 'Sth')
-                elif len(Hs) == 0:
-                    atom.SetProp('_rType', 'Ssl')
-                elif atom.GetHybridization() == Chem.HybridizationType.SP3 and atom.GetExplicitValence() == 6:
-                    atom.SetProp('_rType', 'SG5')
-                elif atom.GetHybridization() == Chem.HybridizationType.SP3:
-                    atom.SetProp('_rType', 'SG3')
-                elif atom.GetHybridization() == Chem.HybridizationType.SP2:
-                    atom.SetProp('_rType', 'SG2')
-                else:
-                    raise ValueError(f'No idea what this S {atom.GetHybridization()} is')
-            elif symbol == 'P':
-                if atom.GetHybridization() == Chem.HybridizationType.SP3 and atom.GetExplicitValence() == 6:
-                    atom.SetProp('_rType', 'PG5')
-                elif atom.GetHybridization() == Chem.HybridizationType.SP3:
-                    atom.SetProp('_rType', 'PG3')
-                else:
-                    raise ValueError(f'No idea what this S {atom.GetHybridization()} is')
-            elif symbol in ('F', 'Cl', 'Br', 'I'):
-                n = atom.GetNeighbors()[0]
-                if n.GetIsAromatic():
-                    atom.SetProp('_rType', symbol + 'R')
-                else:
-                    atom.SetProp('_rType', symbol)
-            else:
-                raise ValueError(f'No idea what this {atom.GetSymbol()} {atom.GetHybridization()} is')
+                    if genrtype is not None and not (
+                        atom.HasProp("_rType") and atom.GetProp("_rType").strip()
+                    ):
+                        atom.SetProp("_rType", genrtype)
 
-    def _aminoacid_override(self, elemental):
-        aa = Chem.MolFromSmiles('*NCC(~O)*')
+    def _assign_atom_genrtype(self, atom: Chem.Atom) -> None:
+        """Assign generic rtype to atom based on element and properties."""
+        symbol = atom.GetSymbol()
+
+        # Handle special cases first
+        if atom.GetAtomicNum() == 0:  # Dummy atom
+            atom.SetProp("_rType", "VIRT")
+            return
+
+        # Dispatch to element-specific methods
+        if symbol == "C":
+            self._assign_carbon_genrtype(atom)
+        elif symbol == "N":
+            self._assign_nitrogen_genrtype(atom)
+        elif symbol == "O":
+            self._assign_oxygen_genrtype(atom)
+        elif symbol == "H":
+            self._assign_hydrogen_genrtype(atom)
+        elif symbol == "S":
+            self._assign_sulfur_genrtype(atom)
+        elif symbol == "P":
+            self._assign_phosphorus_genrtype(atom)
+        elif symbol in ("F", "Cl", "Br", "I"):
+            self._assign_halogen_genrtype(atom)
+        else:
+            raise ValueError(
+                f"No idea what this {atom.GetSymbol()} {atom.GetHybridization()} is"
+            )
+
+    def _assign_carbon_genrtype(self, atom: Chem.Atom) -> None:
+        """Assign generic rtype for carbon atoms."""
+        Hs = [a for a in atom.GetNeighbors() if a.GetSymbol() == "H"]
+
+        if atom.GetIsAromatic():
+            atom.SetProp("_rType", "aroC")
+            for h_atom in Hs:
+                h_atom.SetProp("_rType", "Haro")
+        elif atom.GetHybridization() == Chem.HybridizationType.SP3:
+            if len(Hs) > 0:
+                atom.SetProp("_rType", "CH" + str(len(Hs)))
+            else:
+                atom.SetProp("_rType", "CS")
+        elif atom.GetHybridization() == Chem.HybridizationType.SP2:
+            if len(Hs) > 0:
+                atom.SetProp("_rType", "CD" + str(len(Hs)))
+            else:
+                atom.SetProp("_rType", "CD")
+        elif atom.GetHybridization() == Chem.HybridizationType.SP:
+            atom.SetProp("_rType", "CT")
+        else:
+            raise ValueError(f"No idea what this carbon {atom.GetHybridization()} is")
+
+    def _assign_nitrogen_genrtype(self, atom: Chem.Atom) -> None:
+        """Assign generic rtype for nitrogen atoms."""
+        Hs = [a for a in atom.GetNeighbors() if a.GetSymbol() == "H"]
+
+        if atom.GetIsAromatic():
+            atom.SetProp("_rType", "NGb")
+        elif atom.GetHybridization() == Chem.HybridizationType.SP3 and len(Hs) == 0:
+            atom.SetProp("_rType", "NG3")
+        elif atom.GetHybridization() == Chem.HybridizationType.SP3:
+            atom.SetProp("_rType", "Nam")
+        elif atom.GetHybridization() == Chem.HybridizationType.SP2 and len(Hs) == 0:
+            atom.SetProp("_rType", "NG2")
+        elif atom.GetHybridization() == Chem.HybridizationType.SP2 and len(Hs) == 1:
+            atom.SetProp("_rType", "NG21")
+        elif atom.GetHybridization() == Chem.HybridizationType.SP2 and len(Hs) == 2:
+            atom.SetProp("_rType", "NG22")
+        elif atom.GetHybridization() == Chem.HybridizationType.SP and len(Hs) == 0:
+            atom.SetProp("_rType", "NG1")
+        else:
+            raise ValueError(f"No idea what this nitrogen {atom.GetHybridization()} is")
+
+    def _assign_oxygen_genrtype(self, atom: Chem.Atom) -> None:
+        """Assign generic rtype for oxygen atoms."""
+        Hs = [a for a in atom.GetNeighbors() if a.GetSymbol() == "H"]
+
+        if atom.GetIsAromatic():
+            atom.SetProp("_rType", "Oaro")
+        elif atom.GetHybridization() == Chem.HybridizationType.SP2 and len(Hs) == 0:
+            atom.SetProp("_rType", "OG2")
+        elif atom.GetHybridization() == Chem.HybridizationType.SP3 and len(Hs) == 0:
+            atom.SetProp("_rType", "OG3")
+        elif atom.GetHybridization() == Chem.HybridizationType.SP3 and len(Hs) == 1:
+            atom.SetProp("_rType", "OG31")
+        else:
+            raise ValueError(f"No idea what this oxygen {atom.GetHybridization()} is")
+
+    def _assign_hydrogen_genrtype(self, atom: Chem.Atom) -> None:
+        """Assign generic rtype for hydrogen atoms."""
+        neighbor = atom.GetNeighbors()[0]
+        neighbor_symbol = neighbor.GetSymbol()
+
+        if neighbor_symbol == "C" and neighbor.GetIsAromatic():
+            atom.SetProp("_rType", "Haro")
+        elif neighbor_symbol == "C":
+            atom.SetProp("_rType", "Hapo")
+        elif neighbor_symbol == "S":
+            atom.SetProp("_rType", "HS")
+        elif neighbor_symbol == "N":
+            atom.SetProp("_rType", "HN")
+        elif neighbor_symbol == "O":
+            atom.SetProp("_rType", "HO")
+        else:
+            atom.SetProp("_rType", "HG")
+
+    def _assign_sulfur_genrtype(self, atom: Chem.Atom) -> None:
+        """Assign generic rtype for sulfur atoms."""
+        Hs = [a for a in atom.GetNeighbors() if a.GetSymbol() == "H"]
+
+        if len(Hs) == 1:
+            atom.SetProp("_rType", "Sth")
+        elif len(Hs) == 0:
+            atom.SetProp("_rType", "Ssl")
+        elif (
+            atom.GetHybridization() == Chem.HybridizationType.SP3
+            and atom.GetExplicitValence() == 6
+        ):
+            atom.SetProp("_rType", "SG5")
+        elif atom.GetHybridization() == Chem.HybridizationType.SP3:
+            atom.SetProp("_rType", "SG3")
+        elif atom.GetHybridization() == Chem.HybridizationType.SP2:
+            atom.SetProp("_rType", "SG2")
+        else:
+            raise ValueError(f"No idea what this S {atom.GetHybridization()} is")
+
+    def _assign_phosphorus_genrtype(self, atom: Chem.Atom) -> None:
+        """Assign generic rtype for phosphorus atoms."""
+        if (
+            atom.GetHybridization() == Chem.HybridizationType.SP3
+            and atom.GetExplicitValence() == 6
+        ):
+            atom.SetProp("_rType", "PG5")
+        elif atom.GetHybridization() == Chem.HybridizationType.SP3:
+            atom.SetProp("_rType", "PG3")
+        else:
+            raise ValueError(f"No idea what this P {atom.GetHybridization()} is")
+
+    def _assign_halogen_genrtype(self, atom: Chem.Atom) -> None:
+        """Assign generic rtype for halogen atoms (F, Cl, Br, I)."""
+        symbol = atom.GetSymbol()
+        neighbor = atom.GetNeighbors()[0]
+
+        if neighbor.GetIsAromatic():
+            atom.SetProp("_rType", symbol + "R")
+        else:
+            atom.SetProp("_rType", symbol)
+
+    def _aminoacid_override(self, elemental: Dict[str, Union[str, None]]) -> None:
+        aa = Chem.MolFromSmiles("*NCC(~O)*")
         if self.mol.HasSubstructMatch(aa):
-            self.log.info('Ligand detected to be polymer!')
-            self.TYPE.append('POLYMER')
-            aa_map = dict([('LOWER', None),
-                           (' N  ', 'Nbb'),
-                           (' CA ', 'CAbb'),
-                           (' C  ', 'CObb'),
-                           (' O  ', 'OCbb'),
-                           ('UPPER', None)
-                           ])
+            self.log.info("Ligand detected to be polymer!")
+            self.TYPE.append("POLYMER")
+            aa_map = dict(
+                [
+                    ("LOWER", None),
+                    (" N  ", "Nbb"),
+                    (" CA ", "CAbb"),
+                    (" C  ", "CObb"),
+                    (" O  ", "OCbb"),
+                    ("UPPER", None),
+                ]
+            )
             self.rename_by_substructure(aa, list(aa_map.keys()))
             # fix amine and H for secondary (proline)
-            amine = self.get_atom_by_name(' N  ')
-            hs = [n for n in amine.GetNeighbors() if n.GetSymbol() == 'H']
+            amine = self.get_atom_by_name(" N  ")
+            hs = [n for n in amine.GetNeighbors() if n.GetSymbol() == "H"]
             if len(hs):
-                self._set_PDBInfo_atomname(hs[0], ' H  ', overwrite=True)
-                aa_map[' H  '] = 'HNbb'
+                self._set_PDBInfo_atomname(hs[0], " H  ", overwrite=True)
+                aa_map[" H  "] = "HNbb"
             else:
-                aa_map[' N  '] = 'Npro'
-            ca = self.get_atom_by_name(' CA ')
+                aa_map[" N  "] = "Npro"
+            ca = self.get_atom_by_name(" CA ")
             for neigh in ca.GetNeighbors():
-                if neigh.GetSymbol() == 'H':
-                    self.rename_atom(neigh, ' HA ')
+                if neigh.GetSymbol() == "H":
+                    self.rename_atom(neigh, " HA ")
             if self.greekification:
                 self.greekify()
             # add rtypes
             self.retype_by_name(aa_map)
             # change conn
-            elemental['CONN'] = 2  # when LOWER and UPPER exist the CONN is CONN3.
+            elemental["CONN"] = 2  # when LOWER and UPPER exist the CONN is CONN3.
             # add properties
-            self.PROPERTIES.append('PROTEIN')
-            self.PROPERTIES.append('ALPHA_AA')
-            self.PROPERTIES.append('L_AA')
+            self.PROPERTIES.append("PROTEIN")
+            self.PROPERTIES.append("ALPHA_AA")
+            self.PROPERTIES.append("L_AA")
             # HYDROPHOBIC ALIPHATIC
-            self.FIRST_SIDECHAIN_ATOM.append('CB')
-            self.BACKBONE_AA.append('ALA')
+            self.FIRST_SIDECHAIN_ATOM.append("CB")
+            self.BACKBONE_AA.append("ALA")
 
-    def greekify(self, ascii=True):
+    def greekify(self, ascii: bool = True) -> None:
         """
         Converts the atom names into relative names, i.e. using the Greek alphabet.
 
@@ -465,35 +596,38 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         Also, no PBD file has CA with upper case alpha). It is mainly as an experiment to see what happens TBH
         """
         if ascii:
-            greek = list('ABGDEZHTIKLMNXOPRS')
+            greek = list("ABGDEZHTIKLMNXOPRS")
         else:
-            greek = list('ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ')
+            greek = list("ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ")
 
         greekdex = defaultdict(list)
-        ca = self.get_atom_by_name('CA')
+        ca = self.get_atom_by_name("CA")
         for atom in self.mol.GetAtoms():
-            is_backbone = (atom.GetPDBResidueInfo() is not None and
-                    atom.GetPDBResidueInfo().GetName().strip() in ('LOWER', 'UPPER', 'N', 'CA', 'C', 'H', 'HA', 'O', 'OXT'))
-            if atom.GetSymbol() != 'H' and not is_backbone:
+            is_backbone = (
+                atom.GetPDBResidueInfo() is not None
+                and atom.GetPDBResidueInfo().GetName().strip()
+                in ("LOWER", "UPPER", "N", "CA", "C", "H", "HA", "O", "OXT")
+            )
+            if atom.GetSymbol() != "H" and not is_backbone:
                 n = len(Chem.GetShortestPath(self.mol, ca.GetIdx(), atom.GetIdx())) - 1
                 greekdex[n].append(atom)
         for k in greekdex:
             if len(greek) <= k:
-                pass # finished the greek!
+                pass  # finished the greek!
             elif len(greekdex[k]) == 0:
-                pass # impossible tho
+                pass  # impossible tho
             elif len(greekdex[k]) == 1:
-                name = f'{greekdex[k][0].GetSymbol(): >2}{greek[k]} '
+                name = f"{greekdex[k][0].GetSymbol(): >2}{greek[k]} "
                 self.rename_atom(greekdex[k][0], name)
             elif len(greekdex[k]) < 36:
-                l = list(string.digits+string.ascii_uppercase)[1:]
+                letters = list(string.digits + string.ascii_uppercase)[1:]
                 for i, atom in enumerate(greekdex[k]):
-                    name = f'{atom.GetSymbol(): >2}{greek[k]}{l[i]}'
+                    name = f"{atom.GetSymbol(): >2}{greek[k]}{letters[i]}"
                     self.rename_atom(greekdex[k][i], name)
             else:
                 pass  # no renaming. This is insane corner case. A 36 HA AA is madness.
 
-    def _fix_atom_names(self):
+    def _fix_atom_names(self) -> None:
         elemental = defaultdict(int)
         seen = []
         # Amino acid overwrite.
@@ -502,7 +636,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
             atom = self.mol.GetAtomWithIdx(i)
             el = atom.GetSymbol().upper()
             if atom.GetAtomicNum() == 0:
-                el = 'CONN'
+                el = "CONN"
             elemental[el] += 1  # compatible mol_to_params.py
             lamename = el + str(elemental[el])
             lamename = self.pad_name(lamename, atom)
@@ -511,13 +645,13 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
                 lamename = el + str(elemental[el])
             name = self._set_PDBInfo_atomname(atom, lamename, overwrite=False)
             if name.strip() in seen:
-                self.log.warning(f'Name clash {name}, second one now called {lamename}')
+                self.log.warning(f"Name clash {name}, second one now called {lamename}")
                 atom.GetPDBResidueInfo().SetName(lamename)
                 seen.append(lamename.strip())
             else:
                 seen.append(name.strip())
 
-    def _add_partial_charges_OLD(self):
+    def _add_partial_charges_OLD(self) -> None:
         """
         This is pointless convoluted.
         :return:
@@ -534,8 +668,8 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
             try:
                 AllChem.ComputeGasteigerCharges(mol, throwOnParamFailure=True)
             except ValueError as err:
-                warn(f'{err.__class__.__name__}: {err}')
-                dodgy = re.search('parameters for Element\: ([*\w]+)', str(err)).group(1)
+                warn(f"{err.__class__.__name__}: {err}")
+                dodgy = re.search(r"parameters for Element\: ([*\w]+)", str(err)).group(1)
                 for atom in mol.GetAtoms():
                     if atom.GetSymbol() == dodgy:
                         valence = atom.GetExplicitValence()
@@ -544,13 +678,13 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
             else:
                 break
         for i in range(self.mol.GetNumAtoms()):
-            gc = mol.GetAtomWithIdx(i).GetDoubleProp('_GasteigerCharge')
-            if str(gc) != 'nan':
-                self.mol.GetAtomWithIdx(i).SetDoubleProp('_GasteigerCharge', gc)
+            gc = mol.GetAtomWithIdx(i).GetDoubleProp("_GasteigerCharge")
+            if str(gc) != "nan":
+                self.mol.GetAtomWithIdx(i).SetDoubleProp("_GasteigerCharge", gc)
             else:
-                self.mol.GetAtomWithIdx(i).SetDoubleProp('_GasteigerCharge', 0.)
+                self.mol.GetAtomWithIdx(i).SetDoubleProp("_GasteigerCharge", 0.0)
 
-    def _add_partial_charges(self):
+    def _add_partial_charges(self, pcharge_prop_name: str = "_GasteigerCharge") -> None:
         changed = []
         for atom in self.mol.GetAtoms():
             if atom.GetAtomicNum() == 0:
@@ -562,11 +696,26 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         for i, atom in enumerate(self.mol.GetAtoms()):
             if i in changed:
                 atom.SetAtomicNum(0)
-            gc = atom.GetDoubleProp('_GasteigerCharge')
-            if str(gc) != 'nan':
-                atom.SetDoubleProp('_GasteigerCharge', 0.)
+            gc = atom.GetDoubleProp(pcharge_prop_name)
+            if str(gc) != "nan":
+                atom.SetDoubleProp(pcharge_prop_name, 0.0)
 
-    def _get_resn_from_PDBInfo(self):
+    def set_partial_charges_from_list(
+        self, charges: List[float], pcharge_prop_name: str = "_GasteigerCharge"
+    ) -> None:
+        """
+        Sets the partial charges from a list.
+
+        :param charges: list of charges.
+        :param pcharge_prop_name: name of property to set.
+        :return:
+        """
+        if len(charges) != self.mol.GetNumAtoms():
+            raise ValueError("Length of charges does not match number of atoms")
+        for i, atom in enumerate(self.mol.GetAtoms()):
+            atom.SetDoubleProp(pcharge_prop_name, charges[i])
+
+    def _get_resn_from_PDBInfo(self) -> str:
         """
         Gets the residue name for PDB info.
 
@@ -577,24 +726,24 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         if names:
             return names[0]
         else:
-            return 'LIG'
+            return "LIG"
 
     @classmethod
-    def pad_name(self, name, atom=None):
-        if name in ('CONN1','CONN2','CONN3','CONN4', 'LOWER', 'UPPER'):
+    def pad_name(cls, name: str, atom: Optional[Chem.Atom] = None) -> str:
+        if name in ("CONN1", "CONN2", "CONN3", "CONN4", "LOWER", "UPPER"):
             return name
         elif len(name) == 4:
             return name
         elif len(name) > 4:
             return name[:4]
-        elif name[0] == ' ':
+        elif name[0] == " ":
             return name.ljust(4)
         elif len(name) < 4 and (atom is None or len(atom.GetSymbol()) == 1):
-            return ' ' + name.ljust(3)
+            return " " + name.ljust(3)
         else:
             return name.ljust(4)
 
-    def move_aside(self):
+    def move_aside(self) -> None:
         """
         Changes the names of the atoms to not clash.
 
@@ -604,11 +753,11 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
             atom = self.mol.GetAtomWithIdx(i)
             atomname = self._get_PDBInfo_atomname(atom, throw=False)
             if atomname:
-                atom.SetProp('_OriginalName', atomname)
+                atom.SetProp("_OriginalName", atomname)
             if atom.GetAtomicNum() != 0:
-                self._set_PDBInfo_atomname(atom, f'XX{i: <2}', overwrite=True)
+                self._set_PDBInfo_atomname(atom, f"XX{i: <2}", overwrite=True)
 
-    def move_back(self):
+    def move_back(self) -> None:
         """
         Removes the ugly XX!
 
@@ -621,42 +770,60 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         # find bad ones!
         for atom in self.mol.GetAtoms():
             atomname = self._get_PDBInfo_atomname(atom, throw=False)
-            if 'XX' in atomname:
-                original = atom.GetProp('_OriginalName')
+            if "XX" in atomname:
+                original = atom.GetProp("_OriginalName")
                 if original not in atomnames:
                     self._set_PDBInfo_atomname(atom, original, overwrite=True)
                 else:
                     for i in range(1, 100):
-                        candidate = f'{atom.GetSymbol(): >2}{i: <2}'
+                        candidate = f"{atom.GetSymbol(): >2}{i: <2}"
                         if candidate not in atomnames:
                             self._set_PDBInfo_atomname(atom, candidate, overwrite=True)
                             break
                     else:
-                        self.log.warning(f'Could not find a decent atomname for {atom.GetIdx()}')
+                        self.log.warning(f"Could not find a decent atomname for {atom.GetIdx()}")
 
-    def add_Hs(self, add_conformer=True):
+    def add_Hs(self, add_conformer: bool = True) -> None:
         """
         Add Hs before convert_mol step!
 
         The add `add_conformer` is legacy.
         :return:
         """
-        self.log.debug('Adding hydrogens')
+        self.log.debug("Adding hydrogens")
         # add hydrogens w/ coords if there's a conformer
         self.mol: Chem.Mol = AllChem.AddHs(self.mol, addCoords=self.mol.GetNumConformers() != 0)
         if add_conformer:
-            self.log.warning('*Depracation*: `Params(..).add_conformer` and `Params(..).add_Hs` are now split, ' +
-                             '"add_conformer=True" (default) maintains this legacy behaviour ' +
-                             'but may change in future')
+            self.log.warning(
+                "*Depracation*: `Params(..).add_conformer` and `Params(..).add_Hs` are now split, "
+                + '"add_conformer=True" (default) maintains this legacy behaviour '
+                + "but may change in future"
+            )
             self.add_conformer()
 
-    def add_conformer(self):
+    def add_conformer(self) -> None:
         Chem.SanitizeMol(self.mol)
         self.mol.RemoveAllConformers()
         with DummyMasker(self.mol):
             AllChem.EmbedMolecule(self.mol, useRandomCoords=True)
             AllChem.MMFFOptimizeMolecule(self.mol)
             AllChem.ComputeGasteigerCharges(self.mol, throwOnParamFailure=False)
-        self.fix_mol()
+        self.fix_mol(pcharge_prop_name="_GasteigerCharge")
 
+    def generate_conformers(self, num_confs: int = 100) -> int:
+        """
+        Generate multiple conformers for the molecule.
+        NB. Requires `.write_conformers` to be called later to write them out
+        and set `PDB_ROTAMERS`.
 
+        :param num_confs: number of conformers to generate.
+        :return: number of conformers generated.
+        """
+        with DummyMasker(self.mol):
+            AllChem.EmbedMultipleConfs(self.mol, numConfs=num_confs)
+            for conf_id in range(num_confs):
+                AllChem.MMFFOptimizeMolecule(self.mol, confId=conf_id)
+            first_atoms = (
+                [0, 1, 2] if self.mol.GetNumAtoms() >= 3 else list(range(self.mol.GetNumAtoms()))
+            )
+            AllChem.AlignMolConformers(self.mol, atomIds=first_atoms)

@@ -1,31 +1,30 @@
 from __future__ import annotations
 
 ########################################################################################################################
-__doc__ = \
-    """
+__doc__ = """
 This contains ``make_constraint`` which is creates a constraint file.
 It is completely independent and different in style because it was different.
 It is not integral to the conversion, it's just a utility.
     """
 
+import json
 import warnings
+from typing import Dict, List, Optional, Tuple, Union
 
-from .version import *
-
-########################################################################################################################
-
-from typing import Tuple, List, Union, Optional, Dict
 from rdkit import Chem
 from rdkit.Chem import AllChem
 
-import json
+########################################################################################################################
 
 
 class Constraints:
-    def __init__(self, smiles: Tuple[str, str],
-                 names: List[str],
-                 ligand_res: Union[str, int],
-                 target_res: Union[str, int]):
+    def __init__(
+        self,
+        smiles: Tuple[str, str],
+        names: List[str],
+        ligand_res: Union[str, int],
+        target_res: Union[str, int],
+    ):
         """
         Generate the required constraints for a covalent bond as CONN1 does not deal with distance and torsions.
 
@@ -78,47 +77,64 @@ class Constraints:
         self.cov_template = Chem.MolFromSmiles(smiles[0])
         self.target_template = Chem.MolFromSmiles(smiles[1])
         # check all is good
-        assert self.cov_template.GetNumAtoms() + self.target_template.GetNumAtoms() == len(names), \
-            f'{len(names)} were provided but the SMILES have {self.cov_template.GetNumAtoms()}+{self.target_template.GetNumAtoms()} atoms.'
+        assert self.cov_template.GetNumAtoms() + self.target_template.GetNumAtoms() == len(names), (
+            f"{len(names)} were provided but the SMILES have {self.cov_template.GetNumAtoms()}+{self.target_template.GetNumAtoms()} atoms."
+        )
         # assign names
-        self.assign_names(self.cov_template, self.names[:self.cov_template.GetNumAtoms()])
-        self.assign_names(self.target_template, self.names[self.cov_template.GetNumAtoms():])
+        self.assign_names(self.cov_template, self.names[: self.cov_template.GetNumAtoms()])
+        self.assign_names(self.target_template, self.names[self.cov_template.GetNumAtoms() :])
         # combine and embed
         self.combo = self.join_by_dummy(self.cov_template, self.target_template)
         self._conformer = None
         # get conn names of covalent peptide residue (target) and covalent ligand
-        self.target_con_name = self.get_conn(self.target_template).GetProp('_AtomName')
-        self.cov_con_name = self.get_conn(self.cov_template).GetProp('_AtomName')
+        self.target_con_name = self.get_conn(self.target_template).GetProp("_AtomName")
+        self.cov_con_name = self.get_conn(self.cov_template).GetProp("_AtomName")
         # get atom instances of self.combo
-        self.target_con = self.get_atom(self.combo, self.target_con_name) # from combo not target_template
-        self.cov_con = self.get_atom(self.combo, self.cov_con_name) # from combo not cov_template
+        self.target_con = self.get_atom(
+            self.combo, self.target_con_name
+        )  # from combo not target_template
+        self.cov_con = self.get_atom(self.combo, self.cov_con_name)  # from combo not cov_template
+
         # get second atoms
-        get_neigh = lambda this, other: [neigh for neigh in this.GetNeighbors() if neigh.GetProp('_AtomName') != other.GetProp('_AtomName')][0]
+        def get_neigh(this, other):
+            return [
+                neigh
+                for neigh in this.GetNeighbors()
+                if neigh.GetProp("_AtomName") != other.GetProp("_AtomName")
+            ][0]
+
         self.target_fore = get_neigh(self.target_con, self.cov_con)
         self.cov_fore = get_neigh(self.cov_con, self.target_con)
-        self.target_fore_name = self.target_fore.GetProp('_AtomName')
-        self.cov_fore_name = self.cov_fore.GetProp('_AtomName')
+        self.target_fore_name = self.target_fore.GetProp("_AtomName")
+        self.cov_fore_name = self.cov_fore.GetProp("_AtomName")
         # do maths
         ## Note: constraint is in Radian not Degree...
-        self.atom_pair_constraint = f'AtomPair {self.target_con_name} {self.target_res} ' + \
-                                    f'{self.cov_con_name} {self.ligand_res} ' + \
-                                    f'HARMONIC {self.distance:.2f} 0.2\n'
-        self.angle_constraint = f'Angle {self.target_fore_name} {self.target_res} ' + \
-                                f'{self.target_con_name} {self.target_res} ' + \
-                                f'{self.cov_con_name} {self.ligand_res} ' + \
-                                f'HARMONIC {self.angle_target:.2f} 0.35\n'
-        self.angle_constraint += f'Angle {self.target_con_name} {self.target_res} ' + \
-                                 f'{self.cov_con_name} {self.ligand_res} ' + \
-                                 f' {self.cov_fore_name} {self.ligand_res} ' + \
-                                 f'HARMONIC {self.angle_covalent:.2f} 0.35\n'
-        self.dihedral_constraint = f'Dihedral {self.target_fore_name} {self.target_res} ' + \
-                                   f'{self.target_con_name} {self.target_res} ' + \
-                                   f'{self.cov_con_name} {self.ligand_res} ' + \
-                                   f'{self.cov_fore_name} {self.ligand_res} ' + \
-                                   f'CIRCULARHARMONIC {self.dihedral:.2f} 0.35\n'
-        self.coordinate_constraint = ''
-        self.custom_constraint = ''
-
+        self.atom_pair_constraint = (
+            f"AtomPair {self.target_con_name} {self.target_res} "
+            + f"{self.cov_con_name} {self.ligand_res} "
+            + f"HARMONIC {self.distance:.2f} 0.2\n"
+        )
+        self.angle_constraint = (
+            f"Angle {self.target_fore_name} {self.target_res} "
+            + f"{self.target_con_name} {self.target_res} "
+            + f"{self.cov_con_name} {self.ligand_res} "
+            + f"HARMONIC {self.angle_target:.2f} 0.35\n"
+        )
+        self.angle_constraint += (
+            f"Angle {self.target_con_name} {self.target_res} "
+            + f"{self.cov_con_name} {self.ligand_res} "
+            + f" {self.cov_fore_name} {self.ligand_res} "
+            + f"HARMONIC {self.angle_covalent:.2f} 0.35\n"
+        )
+        self.dihedral_constraint = (
+            f"Dihedral {self.target_fore_name} {self.target_res} "
+            + f"{self.target_con_name} {self.target_res} "
+            + f"{self.cov_con_name} {self.ligand_res} "
+            + f"{self.cov_fore_name} {self.ligand_res} "
+            + f"CIRCULARHARMONIC {self.dihedral:.2f} 0.35\n"
+        )
+        self.coordinate_constraint = ""
+        self.custom_constraint = ""
 
     # =================== dependent methods ============================================================================
 
@@ -128,7 +144,7 @@ class Constraints:
         AllChem.MMFFOptimizeMolecule(mol)
         return mol.GetConformer()
 
-    @property #cached
+    @property  # cached
     def conformer(self):
         if self._conformer is None:
             self._conformer = self._get_conformer(self.combo)
@@ -136,39 +152,47 @@ class Constraints:
 
     @property
     def distance(self):
-        return Chem.rdMolTransforms.GetBondLength(self.conformer,
-                                                  self.cov_con.GetIdx(),
-                                                  self.target_con.GetIdx())
+        return Chem.rdMolTransforms.GetBondLength(
+            self.conformer, self.cov_con.GetIdx(), self.target_con.GetIdx()
+        )
 
     @property
     def angle_target(self):
-        return Chem.rdMolTransforms.GetAngleRad(self.conformer,
-                                                self.target_fore.GetIdx(),
-                                                self.target_con.GetIdx(),
-                                                self.cov_con.GetIdx())
+        return Chem.rdMolTransforms.GetAngleRad(
+            self.conformer,
+            self.target_fore.GetIdx(),
+            self.target_con.GetIdx(),
+            self.cov_con.GetIdx(),
+        )
 
     @property
     def angle_covalent(self):
-        return Chem.rdMolTransforms.GetAngleRad(self.conformer,
-                                                self.target_con.GetIdx(),
-                                                self.cov_con.GetIdx(),
-                                                self.cov_fore.GetIdx())
+        return Chem.rdMolTransforms.GetAngleRad(
+            self.conformer,
+            self.target_con.GetIdx(),
+            self.cov_con.GetIdx(),
+            self.cov_fore.GetIdx(),
+        )
 
     @property
     def dihedral(self):
-        return Chem.rdMolTransforms.GetDihedralRad(self.conformer,
-                                                   self.target_fore.GetIdx(),
-                                                   self.target_con.GetIdx(),
-                                                   self.cov_con.GetIdx(),
-                                                   self.cov_fore.GetIdx())
+        return Chem.rdMolTransforms.GetDihedralRad(
+            self.conformer,
+            self.target_fore.GetIdx(),
+            self.target_con.GetIdx(),
+            self.cov_con.GetIdx(),
+            self.cov_fore.GetIdx(),
+        )
 
     def __str__(self):
         # make
-        constraints = [self.atom_pair_constraint,
-                       self.angle_constraint,
-                       self.dihedral_constraint,
-                       self.custom_constraint]
-        return ''.join(constraints)
+        constraints = [
+            self.atom_pair_constraint,
+            self.angle_constraint,
+            self.dihedral_constraint,
+            self.custom_constraint,
+        ]
+        return "".join(constraints)
 
     def _repr_html_(self):
         return str(self)
@@ -177,21 +201,23 @@ class Constraints:
         return str(self)
 
     def dump(self, filename):
-        with open(filename, 'w') as w:
+        with open(filename, "w") as w:
             w.write(str(self))
 
     @classmethod
     def _get_new_index(self, mol: Chem.Mol, index: int) -> int:
         for atom in mol.GetAtoms():
-            if atom.GetDoubleProp('_originalIdx') == index:
+            if atom.GetDoubleProp("_originalIdx") == index:
                 return atom.GetIdx()
 
     def get_atom(self, mol: Chem.Mol, name: str) -> Chem.Atom:
         for atom in mol.GetAtoms():
-            if atom.HasProp('_AtomName') and name == atom.GetProp('_AtomName'):  # Nonstandard. do not copy
+            if atom.HasProp("_AtomName") and name == atom.GetProp(
+                "_AtomName"
+            ):  # Nonstandard. do not copy
                 return atom
         else:
-            raise ValueError(f'Atom {name} not found')
+            raise ValueError(f"Atom {name} not found")
 
     # =================== utilities ====================================================================================
 
@@ -203,27 +229,27 @@ class Constraints:
         :return:
         """
         self = cls.__new__(cls)
-        self.smiles = ''
+        self.smiles = ""
         self.names = []
-        self.ligand_res = 'LIG'
-        self.target_res = 'CYS'
+        self.ligand_res = "LIG"
+        self.target_res = "CYS"
         self.cov_template = None
         self.target_template = None
         self.combo = None
         self._conformer = None
-        self.target_con_name = ''
+        self.target_con_name = ""
         self.target_con = None
-        self.cov_con_name = ''
+        self.cov_con_name = ""
         self.cov_con = None
         self.target_fore = None
-        self.target_fore_name = ''
+        self.target_fore_name = ""
         self.cov_fore = None
-        self.cov_fore_name = ''
-        self.atom_pair_constraint = ''
-        self.angle_constraint = ''
-        self.dihedral_constraint = ''
-        self.coordinate_constraint = ''
-        self.custom_constraint = ''
+        self.cov_fore_name = ""
+        self.atom_pair_constraint = ""
+        self.angle_constraint = ""
+        self.dihedral_constraint = ""
+        self.coordinate_constraint = ""
+        self.custom_constraint = ""
         return self
 
     @classmethod
@@ -233,7 +259,7 @@ class Constraints:
         totally non-standard way. PDBInfo is correct way. But too much effort.
         """
         for name, atom in zip(names, mol.GetAtoms()):
-            atom.SetProp('_AtomName', name)  # Nonstandard. do not copy
+            atom.SetProp("_AtomName", name)  # Nonstandard. do not copy
 
     @classmethod
     def nominalize(cls, mol):
@@ -245,31 +271,34 @@ class Constraints:
         :param mol:
         :return:
         """
-        if mol.GetAtomWithIdx(0).GetPDBResidueInfo() is not None: #has PDB info!
+        if mol.GetAtomWithIdx(0).GetPDBResidueInfo() is not None:  # has PDB info!
             names = []
             for atom in mol.GetAtoms():
                 info = atom.GetPDBResidueInfo()
                 if info is not None:
                     n = info.GetName()
-                    atom.SetProp('_AtomName', n)
+                    atom.SetProp("_AtomName", n)
                     names.append(n)
                 else:
                     names.append(None)
-            mol.SetProp('_AtomNames', json.dumps(names))
-        elif mol.HasProp('_AtomNames'):
-            names = json.loads(mol.GetProp('_AtomNames'))
+            mol.SetProp("_AtomNames", json.dumps(names))
+        elif mol.HasProp("_AtomNames"):
+            names = json.loads(mol.GetProp("_AtomNames"))
             for name, atom in zip(mol.GetAtoms(), names):
                 if name is not None:
-                    atom.SetProp('_AtomName', name)
+                    atom.SetProp("_AtomName", name)
         else:
-            names = [atom.GetProp('_AtomName') if atom.HasProp('_AtomName') else None for atom in mol.GetAtoms()]
+            names = [
+                atom.GetProp("_AtomName") if atom.HasProp("_AtomName") else None
+                for atom in mol.GetAtoms()
+            ]
             if len([n is not None for n in names]) == 0:
-                raise ValueError('No type of Atom naming. Use `Params.load_mol`  to fix this!')
-            mol.SetProp('_AtomNames', json.dumps(names))
+                raise ValueError("No type of Atom naming. Use `Params.load_mol`  to fix this!")
+            mol.SetProp("_AtomNames", json.dumps(names))
 
     @classmethod
     def nominalise(cls, *args, **kwargs):
-        warnings.warn('The GB spelling has been changed to US', category=DeprecationWarning)
+        warnings.warn("The GB spelling has been changed to US", category=DeprecationWarning)
         return cls.nominalize(*args, **kwargs)
 
     @classmethod
@@ -278,10 +307,10 @@ class Constraints:
         Get connecting atom of mol.
         """
         for atom in mol.GetAtoms():
-            if atom.GetAtomicNum() == 0: # atom.GetSymbol() == '*':
+            if atom.GetAtomicNum() == 0:  # atom.GetSymbol() == '*':
                 return atom.GetNeighbors()[0]
         else:
-            raise ValueError('Dummy atom not found')
+            raise ValueError("Dummy atom not found")
 
     @classmethod
     def join_by_dummy(cls, a: Chem.Mol, b: Chem.Mol) -> Chem.Mol:
@@ -289,18 +318,26 @@ class Constraints:
         # may cause issues of valence. So I did it this more convoluted way.
         # but did not check first... and this approach leads to sanitisation...
         for atom in a.GetAtoms():
-            atom.SetDoubleProp('_originalIdx', atom.GetIdx())
+            atom.SetDoubleProp("_originalIdx", atom.GetIdx())
         conn = cls.get_conn(a)
-        mod_a = Chem.DeleteSubstructs(a, Chem.MolFromSmiles('*'))
+        mod_a = Chem.DeleteSubstructs(a, Chem.MolFromSmiles("*"))
         i = cls._get_new_index(mod_a, conn.GetIdx())
-        combo = Chem.ReplaceSubstructs(b, Chem.MolFromSmiles('*'), mod_a, replacementConnectionPoint=i)[0]
+        combo = Chem.ReplaceSubstructs(
+            b, Chem.MolFromSmiles("*"), mod_a, replacementConnectionPoint=i
+        )[0]
         combo.UpdatePropertyCache()
         Chem.SanitizeMol(combo)
         return combo
 
     @classmethod  # /bound method!
-    def make_coordinate_constraints(celf, mol, ligand_res, ref_res, ref_atomname='CA',
-                                    stdevs: Optional[Dict[Union[str,int], float]] = None) -> Constraints:
+    def make_coordinate_constraints(
+        celf,
+        mol,
+        ligand_res,
+        ref_res,
+        ref_atomname="CA",
+        stdevs: Optional[Dict[Union[str, int], float]] = None,
+    ) -> Constraints:
         """
         Returns an instance (or the same instance if called as a bound method) with added ``.coordinate_constraint``.
         If no stdevs are supplied all non dummy atoms have a HARMONIC with std 1.
@@ -313,7 +350,7 @@ class Constraints:
         :type stdevs: Union[str,int], float]]
         :return:
         """
-        if hasattr(celf, '__class__'):
+        if hasattr(celf, "__class__"):
             self = celf
         else:
             cls = celf
@@ -324,32 +361,44 @@ class Constraints:
         # issue of 4 char padded names.
         sstdevs = {k.strip if isinstance(k, str) else k: v for k, v in stdevs.items()}
         for i, atom in enumerate(mol.GetAtoms()):
-            if atom.GetSymbol() == '*':
+            if atom.GetSymbol() == "*":
                 continue
             elif sstdevs is not None:
-                n = atom.GetProp('_AtomName').strip() if atom.HasProp('_AtomName') else None
-                if i in sstdevs and sstdevs[i] not in (float('inf'), float('nan'), None):
+                n = atom.GetProp("_AtomName").strip() if atom.HasProp("_AtomName") else None
+                if i in sstdevs and sstdevs[i] not in (
+                    float("inf"),
+                    float("nan"),
+                    None,
+                ):
                     w = sstdevs[i]
-                elif n in sstdevs and sstdevs[n] not in (float('inf'), float('nan'), None):
+                elif n in sstdevs and sstdevs[n] not in (
+                    float("inf"),
+                    float("nan"),
+                    None,
+                ):
                     w = sstdevs[n]
                 else:
                     continue
             else:
                 w = 1
             pos = conf.GetAtomPosition(i)
-            lines.append(f'CoordinateConstraint {atom.GetPDBResidueInfo().GetName()} {ligand_res} ' + \
-                         f'{ref_atomname} {ref_res} ' + \
-                         f'{pos.x} {pos.y} {pos.z} HARMONIC 0 {w}\n')
-        self.coordinate_constraint += ''.join(lines)
+            lines.append(
+                f"CoordinateConstraint {atom.GetPDBResidueInfo().GetName()} {ligand_res} "
+                + f"{ref_atomname} {ref_res} "
+                + f"{pos.x} {pos.y} {pos.z} HARMONIC 0 {w}\n"
+            )
+        self.coordinate_constraint += "".join(lines)
         return self
 
     @classmethod  # /bound method!
-    def make_inverse_coordinate_constraints_by_neighbours(cls, mol,
-                                                          ligand_res,
-                                                          unfixed: List[str],
-                                                          ref_res,
-                                                          ref_atomname='CA',
-                                    ) -> Constraints:
+    def make_inverse_coordinate_constraints_by_neighbours(
+        cls,
+        mol,
+        ligand_res,
+        unfixed: List[str],
+        ref_res,
+        ref_atomname="CA",
+    ) -> Constraints:
         """
         Given a list of indices constraint their distant neighbours.
         This is basically for modify those atoms. E.g. given one structure, make a variant.
@@ -361,36 +410,43 @@ class Constraints:
         :param ref_atomname:
         :return:
         """
+
         def fill(atom, n):
             for natom in atom.GetNeighbors():
                 if natom.GetIdx() in stdevs:
                     return None
-                elif natom.GetSymbol() in ('*', 'H'):
+                elif natom.GetSymbol() in ("*", "H"):
                     return None
                 else:
                     stdevs[natom.GetIdx()] = n
-                    fill(natom, n/2)
+                    fill(natom, n / 2)
                     return None
 
         cls.nominalize(mol)
         stdevs = {}
         unfixed = [u.strip() for u in unfixed]
         for unname in unfixed:
-            a = [atom for atom in mol.GetAtoms() if atom.GetProp('_AtomName').strip() == unname.strip()]
+            a = [
+                atom
+                for atom in mol.GetAtoms()
+                if atom.GetProp("_AtomName").strip() == unname.strip()
+            ]
             if len(a) == 0:
-                raise ValueError(f'{unname} does not exist')
+                raise ValueError(f"{unname} does not exist")
             elif len(a) > 1:
-                raise ValueError(f'{unname} is present more than once??!')
+                raise ValueError(f"{unname} is present more than once??!")
             else:
                 unatom = a[0]
-                stdevs[unatom.GetIdx()] = float('inf')
+                stdevs[unatom.GetIdx()] = float("inf")
                 fill(unatom, 4)
         return cls.make_coordinate_constraints(mol, ligand_res, ref_res, ref_atomname, stdevs)
 
 
-if __name__ == '__main__':
-    c = Constraints(smiles=('*C(=N)', '*SC'),
-                    names=['*', 'CX', 'NY', '*', 'SG', 'CB'],
-                    ligand_res='1B',
-                    target_res='145A')
+if __name__ == "__main__":
+    c = Constraints(
+        smiles=("*C(=N)", "*SC"),
+        names=["*", "CX", "NY", "*", "SG", "CB"],
+        ligand_res="1B",
+        target_res="145A",
+    )
     print(c)

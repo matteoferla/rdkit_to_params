@@ -1,28 +1,23 @@
 ########################################################################################################################
-__doc__ = \
-    """
-The main class here is `Entries``, which is a fancy list. 
-It gets called for each uppercase attribute 
-in the initialisation of ``Params`` 
+__doc__ = """
+The main class here is `Entries``, which is a fancy list.
+It gets called for each uppercase attribute
+in the initialisation of ``Params``
 (which happens in ``_ParamsInitMixin`` __e.g.__ ``Entries.from_name('IO_STRING')``).
     """
 
-import warnings
-
-from .version import *
+import logging
+import re
+from collections import abc
+from dataclasses import dataclass
+from enum import Enum
 from typing import Optional, Union
 
 ########################################################################################################################
 
-from dataclasses import dataclass
-import re, logging
-from warnings import warn
-
-from collections import abc
-from enum import Enum
-
 
 # ======================================================================================================================
+
 
 class Singletony(Enum):
     """
@@ -32,13 +27,16 @@ class Singletony(Enum):
     0. a regular multientry affair (e.g. ``ATOM``)
     2. a singleton (e.g. ``PROPERTY``) which can accept multiple values
     """
+
     multiton = 0  # non-singleton
     singleton = 1
     list_singleton = 2
 
+
 # ----------------------------------------------------------------------------------------------------------------------
 
-def html_span(inner:Union[str, float], color: Optional[str]=None) -> str:
+
+def html_span(inner: Union[str, float], color: Optional[str] = None) -> str:
     """
     Simple span element for _repr_html_
 
@@ -50,14 +48,16 @@ def html_span(inner:Union[str, float], color: Optional[str]=None) -> str:
     if color is not None:
         pass
     elif isinstance(inner, str):
-        color = '#FA8072'
+        color = "#FA8072"
     elif isinstance(inner, float):
-        color = '#40e0d0'
+        color = "#40e0d0"
     else:
-        color = 'grey'
+        color = "grey"
     return f'<span style="color:{color}">{inner}</span>'
 
+
 # ----------------------------------------------------------------------------------------------------------------------
+
 
 class Entries(abc.MutableSequence):
     """
@@ -83,7 +83,7 @@ class Entries(abc.MutableSequence):
         self.entry_cls = entry_cls
         self.singleton = Singletony(singleton)
         if self.singleton != Singletony.multiton and isinstance(self.entry_cls, GenericListEntry):
-            raise TypeError(f'{type(self.entry_cls)} is incompatible with {self.singleton}')
+            raise TypeError(f"{type(self.entry_cls)} is incompatible with {self.singleton}")
         self.data = []
 
     @classmethod
@@ -92,7 +92,7 @@ class Entries(abc.MutableSequence):
             cc, singleton = cls.choices[name]
             return cls(entry_cls=cc, singleton=singleton)
         else:
-            raise KeyError(f'Name {name} is not one of {", ".join(cls.choices.keys())}')
+            raise KeyError(f"Name {name} is not one of {', '.join(cls.choices.keys())}")
 
     def __getitem__(self, index):
         return self.data[index]
@@ -107,7 +107,7 @@ class Entries(abc.MutableSequence):
         elif isinstance(value, dict):
             return self.entry_cls(**value)
         else:
-            raise ValueError(f'No idea what to do with {value}')
+            raise ValueError(f"No idea what to do with {value}")
 
     def __setitem__(self, index, value):
         if self.singleton == Singletony.multiton:
@@ -136,34 +136,36 @@ class Entries(abc.MutableSequence):
         lines = []
         for entry in self.data:
             lines.append(str(entry))
-        return '\n'.join(lines)
+        return "\n".join(lines)
 
     def _repr_html_(self):
         lines = []
         for entry in self.data:
             lines.append(entry._repr_html_())
-        return '<br/>'.join(lines)
+        return "<br/>".join(lines)
 
 
 #########################################################################################################
+
 
 class GenericEntry:
     """
     This is meant to be inherited. ``header`` is the entry type. body is a string.
     """
+
     log = logging.getLogger(__name__)
 
     def __init__(self, header: str, body: str):
         self.header = header.strip().upper()
         self.body = body.rstrip()
-        assert self.header, f'Type is empty'
-        assert self.body, f'Value is empty'
+        assert self.header, "Type is empty"
+        assert self.body, "Value is empty"
 
     def __str__(self) -> str:
-        return f'{self.header} {self.body}'
+        return f"{self.header} {self.body}"
 
     def _repr_html_(self):
-        return f'{html_span(self.header)}: {self.body}'
+        return f"{html_span(self.header)}: {self.body}"
 
     @classmethod
     def from_str(cls, text):
@@ -171,6 +173,7 @@ class GenericEntry:
 
 
 #########################################################################################################
+
 
 class GenericListEntry:
     """
@@ -182,12 +185,12 @@ class GenericListEntry:
         self.values = list(args)
 
     def __str__(self) -> str:
-        v = ' '.join(self.values)
-        return f'{self.header} {v}'
+        v = " ".join(self.values)
+        return f"{self.header} {v}"
 
     def _repr_html_(self):
-        v = ' '.join(self.values)
-        return f'{html_span(self.header)}: {v}'
+        v = " ".join(self.values)
+        return f"{html_span(self.header)}: {v}"
 
     @classmethod
     def from_str(cls, text):
@@ -196,43 +199,47 @@ class GenericListEntry:
 
 #########################################################################################################
 
+
 class NBR_ATOMEntry(GenericEntry):
     def __init__(self, body: str):
-        super().__init__(header='NBR_ATOM', body=body)
+        super().__init__(header="NBR_ATOM", body=body)
 
 
-Entries.choices['NBR_ATOM'] = (NBR_ATOMEntry, Singletony.singleton)
+Entries.choices["NBR_ATOM"] = (NBR_ATOMEntry, Singletony.singleton)
 
 
 #########################################################################################################
+
 
 class NBR_RADIUSEntry(GenericEntry):
     def __init__(self, body: str):
-        super().__init__(header='NBR_RADIUS', body=body)
+        super().__init__(header="NBR_RADIUS", body=body)
 
 
-Entries.choices['NBR_RADIUS'] = (NBR_RADIUSEntry, Singletony.singleton)
+Entries.choices["NBR_RADIUS"] = (NBR_RADIUSEntry, Singletony.singleton)
 
 
 #########################################################################################################
+
 
 class MAINCHAIN_ATOMS(GenericListEntry):
     def __init__(self, *args: str):
-        super().__init__('MAINCHAIN_ATOMS', *args)
+        super().__init__("MAINCHAIN_ATOMS", *args)
 
 
-Entries.choices['MAINCHAIN_ATOMS'] = (MAINCHAIN_ATOMS, Singletony.list_singleton)
+Entries.choices["MAINCHAIN_ATOMS"] = (MAINCHAIN_ATOMS, Singletony.list_singleton)
 
 
 #########################################################################################################
 
+
 class CommentEntry(GenericEntry):
     def __init__(self, body: str):
-        super().__init__(header='#', body=body)
+        super().__init__(header="#", body=body)
 
 
-Entries.choices['#'] = (CommentEntry, Singletony.multiton)
-Entries.choices['comment'] = (CommentEntry, Singletony.multiton)
+Entries.choices["#"] = (CommentEntry, Singletony.multiton)
+Entries.choices["comment"] = (CommentEntry, Singletony.multiton)
 
 
 #########################################################################################################
@@ -240,13 +247,14 @@ Entries.choices['comment'] = (CommentEntry, Singletony.multiton)
 
 class ATOM_ALIASEntry(GenericEntry):
     def __init__(self, body: str):
-        super().__init__(header='ATOM_ALIAS', body=body)
+        super().__init__(header="ATOM_ALIAS", body=body)
 
 
-Entries.choices['ATOM_ALIAS'] = (ATOM_ALIASEntry, Singletony.multiton)
+Entries.choices["ATOM_ALIAS"] = (ATOM_ALIASEntry, Singletony.multiton)
 
 
 #########################################################################################################
+
 
 @dataclass
 class IO_STRINGEntry:
@@ -256,28 +264,28 @@ class IO_STRINGEntry:
 
     These get checked for length.
     """
-    name3: str = 'LIG'
-    name1: str = 'Z'
+
+    name3: str = "LIG"
+    name1: str = "Z"
 
     def __post_init__(self):
-        assert len(self.name1) == 1, f'{self.name1} is not 1 char long'
+        assert len(self.name1) == 1, f"{self.name1} is not 1 char long"
         # ToDo figure out what the official standard is for non-three letter 3-letter codes
         if len(self.name3) == 3:
             return
         elif len(self.name3) == 2:
-            self.name3 += ' '
+            self.name3 += " "
         elif len(self.name3) == 1:
-            self.name3 += '  '
+            self.name3 += "  "
         else:
             # this will raise an error otherwise.
-            raise ValueError(f'{self.name3} is not 3 char long')
-
+            raise ValueError(f"{self.name3} is not 3 char long")
 
     def __str__(self) -> str:
-        return f'IO_STRING {self.name3} {self.name1}'
+        return f"IO_STRING {self.name3} {self.name1}"
 
     def _repr_html_(self):
-        return f'{html_span("IO_STRING")} {self.name3} {self.name1}'
+        return f"{html_span('IO_STRING')} {self.name3} {self.name1}"
 
     @classmethod
     def from_str(cls, text):
@@ -285,10 +293,11 @@ class IO_STRINGEntry:
         return cls(name3, name1)
 
 
-Entries.choices['IO_STRING'] = (IO_STRINGEntry, Singletony.singleton)
+Entries.choices["IO_STRING"] = (IO_STRINGEntry, Singletony.singleton)
 
 
 #########################################################################################################
+
 
 @dataclass
 class CONNECTEntry:
@@ -297,44 +306,47 @@ class CONNECTEntry:
     Deals with UPPER, LOWER and CONNECT.
 
     """
+
     atom_name: str
     index: int = 1
-    connect_type: str = ''  # | 'CONNECT' | 'UPPER_CONNECT' | 'LOWER_CONNECT'
-    connect_name: str = ''  # 'CONN1' | 'UPPER' | 'LOWER'
+    connect_type: str = ""  # | 'CONNECT' | 'UPPER_CONNECT' | 'LOWER_CONNECT'
+    connect_name: str = ""  # 'CONN1' | 'UPPER' | 'LOWER'
 
     def __post_init__(self):
         if self.connect_type and self.connect_name:
             pass
         elif not self.connect_type and not self.connect_name:
-            self.connect_type = 'CONNECT'
-            self.connect_name = f'CONN{self.index}'
-        elif not self.connect_type and 'CONN' not in self.connect_name:
-            self.connect_type = f'{self.connect_name}_CONNECT'
+            self.connect_type = "CONNECT"
+            self.connect_name = f"CONN{self.index}"
+        elif not self.connect_type and "CONN" not in self.connect_name:
+            self.connect_type = f"{self.connect_name}_CONNECT"
         elif not self.connect_type:
-            self.connect_type = 'CONNECT'
-        elif not self.connect_name and self.connect_type == 'CONNECT':
-            self.connect_name = f'CONN{self.index}'
+            self.connect_type = "CONNECT"
+        elif not self.connect_name and self.connect_type == "CONNECT":
+            self.connect_name = f"CONN{self.index}"
         elif not self.connect_name:
-            self.connect_name = self.connect_type.replace('_CONNECT', '')
+            self.connect_name = self.connect_type.replace("_CONNECT", "")
         else:
             raise ValueError(
-                f'I missed this case ({self.connect_name}, {self.connect_type}) in this badly written method')
+                f"I missed this case ({self.connect_name}, {self.connect_type}) in this badly written method"
+            )
 
     def __str__(self) -> str:
-        return f'{self.connect_type} {self.atom_name}'
+        return f"{self.connect_type} {self.atom_name}"
 
     def _repr_html_(self):
-        return f'{html_span(self.connect_type)} {self.atom_name}'
+        return f"{html_span(self.connect_type)} {self.atom_name}"
 
     @classmethod
     def from_str(cls, text):
         return cls(*text.split())
 
 
-Entries.choices['CONNECT'] = (CONNECTEntry, Singletony.multiton)
+Entries.choices["CONNECT"] = (CONNECTEntry, Singletony.multiton)
 
 
 #########################################################################################################
+
 
 @dataclass
 class CHIEntry:
@@ -348,22 +360,22 @@ class CHIEntry:
         self.fourth = self.fourth.ljust(4)
 
     def __str__(self) -> str:
-        return f'CHI {self.index} {self.first} {self.second} {self.third} {self.fourth}'
+        return f"CHI {self.index} {self.first} {self.second} {self.third} {self.fourth}"
 
     def _repr_html_(self):
-        return f'{html_span("CHI")} {html_span(self.index)} {self.first} {self.second} {self.third} {self.fourth}'
+        return f"{html_span('CHI')} {html_span(self.index)} {self.first} {self.second} {self.third} {self.fourth}"
 
     @classmethod
     def from_str(cls, text: str):
         # 1  C6   C5   C4   C3
-        rex = re.match('(\d+)\s+(\S{1,4})\s+(\S{1,4})\s+(\S{1,4})\s+(\S{1,4})', text)
+        rex = re.match(r"(\d+)\s+(\S{1,4})\s+(\S{1,4})\s+(\S{1,4})\s+(\S{1,4})", text)
         if rex is None:
             raise ValueError(f'CHI entry "{text}" is not formatted correctly')
-        data = dict(zip(('index', 'first', 'second', 'third', 'fourth'), rex.groups()))
+        data = dict(zip(("index", "first", "second", "third", "fourth"), rex.groups()))
         return cls(**data)
 
 
-Entries.choices['CHI'] = (CHIEntry, Singletony.multiton)
+Entries.choices["CHI"] = (CHIEntry, Singletony.multiton)
 
 
 #########################################################################################################
@@ -384,6 +396,7 @@ class ICOOR_INTERNALEntry:
     * angle atom (A2)
     * torsion atom (A4)
     """
+
     child: str
     phi: float
     theta: float
@@ -396,25 +409,31 @@ class ICOOR_INTERNALEntry:
         self.third_parent = self.third_parent.ljust(5)
 
     def __str__(self) -> str:
-        return f'ICOOR_INTERNAL  {self.child: <5} {self.phi: >11.6f} {self.theta: >11.6f} {self.distance: >11.6f} ' + \
-               f'{self.parent: <5} {self.second_parent: <5} {self.third_parent: <5}'
+        return (
+            f"ICOOR_INTERNAL  {self.child: <5} {self.phi: >11.6f} {self.theta: >11.6f} {self.distance: >11.6f} "
+            + f"{self.parent: <5} {self.second_parent: <5} {self.third_parent: <5}"
+        )
 
     def _repr_html_(self):
-        return f'{html_span("ICOOR_INTERNAL")} target:{self.child} '+\
-               f'&phi;:{html_span(self.phi)} '+\
-               f'&theta;:{html_span(self.theta)} '+\
-               f'distance:{html_span(self.distance)} ' + \
-               f'parent:{self.parent} ' + \
-               f'2nd parent:{self.second_parent} ' + \
-               f'3rd parent:{self.third_parent}'
-
+        return (
+            f"{html_span('ICOOR_INTERNAL')} target:{self.child} "
+            + f"&phi;:{html_span(self.phi)} "
+            + f"&theta;:{html_span(self.theta)} "
+            + f"distance:{html_span(self.distance)} "
+            + f"parent:{self.parent} "
+            + f"2nd parent:{self.second_parent} "
+            + f"3rd parent:{self.third_parent}"
+        )
 
     @classmethod
     def from_str(cls, text: str):
         # position based.
-        rex = re.match(' (.{5}) (.{11}) (.{11}) (.{11}) (.{5}) (.{5}) (.{1,5})$', text.rstrip())
+        rex = re.match(" (.{5}) (.{11}) (.{11}) (.{11}) (.{5}) (.{5}) (.{1,5})$", text.rstrip())
         # space based... bad.
-        rex2 = re.search('(\w+)\s+([-\d\.]+)\s+([-\d\.]+)\s+([-\d\.]+)\s+(\w+)\s+(\w+)\s+(\w+)$', text.rstrip())
+        rex2 = re.search(
+            r"(\w+)\s+([-\d\.]+)\s+([-\d\.]+)\s+([-\d\.]+)\s+(\w+)\s+(\w+)\s+(\w+)$",
+            text.rstrip(),
+        )
         if rex:
             data = list(rex.groups())
         elif rex2:
@@ -426,7 +445,7 @@ class ICOOR_INTERNALEntry:
         return cls(*data)
 
 
-Entries.choices['ICOOR_INTERNAL'] = (ICOOR_INTERNALEntry, Singletony.multiton)
+Entries.choices["ICOOR_INTERNAL"] = (ICOOR_INTERNALEntry, Singletony.multiton)
 
 
 #########################################################################################################
@@ -438,6 +457,7 @@ class BONDEntry:
     dataclass class for both BOND and BOND_ENTRY. The ``__str__`` method will know based on ``.order``.
     The hash is the two atom names sorted. So BOND records with the same names will be equal.
     """
+
     first: str
     second: str
     order: int = 1  # 2,3, 4|ARO
@@ -447,38 +467,38 @@ class BONDEntry:
 
     def __str__(self) -> str:
         if self.order == 1 or not self.order:
-            return f'BOND {self.first: >4} {self.second: >4}'
+            return f"BOND {self.first: >4} {self.second: >4}"
         else:
-            return f'BOND_TYPE {self.first: >4} {self.second: >4} {self.order}'
+            return f"BOND_TYPE {self.first: >4} {self.second: >4} {self.order}"
 
     def _repr_html_(self):
-        return f'{html_span("BOND")} {self.first} {self.second} {self.order}'
+        return f"{html_span('BOND')} {self.first} {self.second} {self.order}"
 
     def __hash__(self):
-        return hash('+'.join(sorted([self.first, self.second])))
+        return hash("+".join(sorted([self.first, self.second])))
 
     def __eq__(self, other):
         return hash(self) == hash(other)
 
     @classmethod
     def from_str(cls, text: str):
-        rex = re.match('(?P<first>.{1,4}) (?P<second>.{2,4})\s?(?P<order>.*)', text.rstrip())
+        rex = re.match(r"(?P<first>.{1,4}) (?P<second>.{2,4})\s?(?P<order>.*)", text.rstrip())
         if rex is None:
             raise ValueError(f'BOND entry "{text}" is not formatted correctly')
         data = rex.groupdict()
-        data['order'] = data['order'].strip()
-        if data['order'] == '':
-            data['order'] == 1
-        elif data['order'] in ('ARO', '4'):
-            data['order'] == 4  # ARO is also acceptable.
-        elif isinstance(data['order'], int):
+        data["order"] = data["order"].strip()
+        if data["order"] == "":
+            data["order"] = 1
+        elif data["order"] in ("ARO", "4"):
+            data["order"] = 4  # ARO is also acceptable.
+        elif isinstance(data["order"], int):
             pass
         else:
-            data['order'] = int(data['order'].strip())
+            data["order"] = int(data["order"].strip())
         return cls(**data)
 
 
-Entries.choices['BOND'] = (BONDEntry, Singletony.multiton)
+Entries.choices["BOND"] = (BONDEntry, Singletony.multiton)
 
 
 #########################################################################################################
@@ -489,17 +509,19 @@ class ATOMEntry:
     # PDB atom name, Rosetta AtomType, MM AtomType, and charge
     name: str
     rtype: str
-    mtype: str = 'X'
+    mtype: str = "X"
     partial: float = 0
 
     def __str__(self) -> str:
-        return f'ATOM {self.name: >4} {self.rtype: >4} {self.mtype: >4} {self.partial:.7f}'
+        return f"ATOM {self.name: >4} {self.rtype: >4} {self.mtype: >4} {self.partial:.7f}"
 
     def _repr_html_(self):
-        return f'{html_span("ATOM")} atom:{self.name} '+\
-               f'rosetta-type:{self.rtype} '+\
-               f'm-type:{self.mtype} '+\
-               f'Gasteiger:{html_span(self.partial)}'
+        return (
+            f"{html_span('ATOM')} atom:{self.name} "
+            + f"rosetta-type:{self.rtype} "
+            + f"m-type:{self.mtype} "
+            + f"Gasteiger:{html_span(self.partial)}"
+        )
 
     def __eq__(self, other):
         """
@@ -515,25 +537,29 @@ class ATOMEntry:
 
     @classmethod
     def from_str(cls, text: str):
-        rex = re.match('(?P<name>.{1,4})\s*(?P<rtype>.{1,4})\s*(?P<mtype>.{1,4})\s*(?P<partial>[-\d\.]+)',
-                 text.rstrip())
+        rex = re.match(
+            r"(?P<name>.{1,4})\s*(?P<rtype>.{1,4})\s*(?P<mtype>.{1,4})\s*(?P<partial>[-\d\.]+)",
+            text.rstrip(),
+        )
         if rex is None:
             raise ValueError(f'ATOM entry "{text}" is not formatted correctly')
         data = rex.groupdict()
-        data['partial'] = float(data['partial'])
+        data["partial"] = float(data["partial"])
         return cls(**data)
 
 
-Entries.choices['ATOM'] = (ATOMEntry, Singletony.multiton)
+Entries.choices["ATOM"] = (ATOMEntry, Singletony.multiton)
 
 
 #########################################################################################################
+
 
 @dataclass
 class CUT_BONDEntry:
     """
     No idea what CUT_BOND is for.
     """
+
     first: str
     second: str
 
@@ -541,52 +567,55 @@ class CUT_BONDEntry:
         self.second = self.second.ljust(4)
 
     def __str__(self) -> str:
-        return f'CUT_BOND {self.first: >4} {self.second: >4}'
+        return f"CUT_BOND {self.first: >4} {self.second: >4}"
 
     def _repr_html_(self):
-        return f'{html_span("CUT_BOND")} {self.first} {self.second}'
+        return f"{html_span('CUT_BOND')} {self.first} {self.second}"
 
     @classmethod
     def from_str(cls, text: str):
-        rex = re.match('\s?(?P<first>.{1,4})\s+(?P<second>.{1,4})', text.rstrip())
+        rex = re.match(r"\s?(?P<first>.{1,4})\s+(?P<second>.{1,4})", text.rstrip())
         if rex is None:
             raise ValueError(f'CUT_BOND entry "{text}" is not formatted correctly')
         data = rex.groupdict()
         return cls(**data)
 
 
-Entries.choices['CUT_BOND'] = (CUT_BONDEntry, Singletony.multiton)
+Entries.choices["CUT_BOND"] = (CUT_BONDEntry, Singletony.multiton)
 
 
 #########################################################################################################
+
 
 @dataclass
 class CHARGEEntry:
     """
     No idea if anything respects this.
     """
+
     atom: str
     charge: int
 
     def __str__(self) -> str:
-        return f'CHARGE {self.atom} FORMAL {self.charge}'
+        return f"CHARGE {self.atom} FORMAL {self.charge}"
 
     def _repr_html_(self):
-        return f'{html_span("CHARGE")} {self.atom} {html_span(self.charge)}'
+        return f"{html_span('CHARGE')} {self.atom} {html_span(self.charge)}"
 
     @classmethod
     def from_str(cls, text: str):
-        rex = re.match('(?P<atom>\S+) FORMAL (?P<charge>\-?\+?\d)', text.rstrip())
+        rex = re.match(r"(?P<atom>\S+) FORMAL (?P<charge>\-?\+?\d)", text.rstrip())
         if rex is None:
             raise ValueError(f'CHARGE entry "{text}" is not formatted correctly')
         data = rex.groupdict()
         return cls(**data)
 
 
-Entries.choices['CHARGE'] = (CHARGEEntry, Singletony.multiton)
+Entries.choices["CHARGE"] = (CHARGEEntry, Singletony.multiton)
 
 
 #########################################################################################################
+
 
 class PDB_ROTAMERSEntry(GenericEntry):
     """
@@ -594,139 +623,159 @@ class PDB_ROTAMERSEntry(GenericEntry):
     """
 
     def __init__(self, body: str):
-        super().__init__(header='PDB_ROTAMERS', body=body)
+        super().__init__(header="PDB_ROTAMERS", body=body)
 
 
-Entries.choices['PDB_ROTAMERS'] = (PDB_ROTAMERSEntry, Singletony.singleton)
+Entries.choices["PDB_ROTAMERS"] = (PDB_ROTAMERSEntry, Singletony.singleton)
 
 
 #########################################################################################################
+
 
 class ROTAMER_AAEntry(GenericEntry):
     def __init__(self, body: str):
-        super().__init__(header='ROTAMER_AA', body=body)
+        super().__init__(header="ROTAMER_AA", body=body)
 
 
-Entries.choices['ROTAMER_AA'] = (ROTAMER_AAEntry, Singletony.singleton)
+Entries.choices["ROTAMER_AA"] = (ROTAMER_AAEntry, Singletony.singleton)
 
 
 #########################################################################################################
+
 
 class AAEntry(GenericEntry):
-    def __init__(self, body: str = 'UNK'):
-        if body != 'UNK':
-            self.log.info('AA should be UNK... tolerating oddity.')
-        super().__init__(header='AA', body=body)
+    def __init__(self, body: str = "UNK"):
+        if body != "UNK":
+            self.log.info("AA should be UNK... tolerating oddity.")
+        super().__init__(header="AA", body=body)
 
 
-Entries.choices['AA'] = (AAEntry, Singletony.singleton)
+Entries.choices["AA"] = (AAEntry, Singletony.singleton)
 
 
 #########################################################################################################
+
 
 class TYPEEntry(GenericEntry):
     """
     LIGAND or POLYMER. No exceptions.
     """
 
-    def __init__(self, body: str = 'LIGAND'):
-        assert body in ('POLYMER', 'LIGAND'), f'residue TYPE {body} is neither POLYMER or LIGAND'
-        super().__init__(header='TYPE', body=body)
+    def __init__(self, body: str = "LIGAND"):
+        assert body in ("POLYMER", "LIGAND"), f"residue TYPE {body} is neither POLYMER or LIGAND"
+        super().__init__(header="TYPE", body=body)
 
 
-Entries.choices['TYPE'] = (TYPEEntry, Singletony.singleton)
+Entries.choices["TYPE"] = (TYPEEntry, Singletony.singleton)
 
 
 #########################################################################################################
+
 
 class ADD_RINGEntry(GenericEntry):
     ## To be fixed. Spacing drama...
     def __init__(self, body: str):
-        self.log.info('ADD_RING is sloppily coded. the values are stored as an unsplit string!')
-        super().__init__(header='ADD_RING', body=body)
+        self.log.info("ADD_RING is sloppily coded. the values are stored as an unsplit string!")
+        super().__init__(header="ADD_RING", body=body)
 
 
-Entries.choices['ADD_RING'] = (ADD_RINGEntry, Singletony.multiton)
+Entries.choices["ADD_RING"] = (ADD_RINGEntry, Singletony.multiton)
 
 
 #########################################################################################################
+
 
 class PROPERTIESEntry(GenericListEntry):
     # https://graylab.jhu.edu/PyRosetta.documentation/pyrosetta.rosetta.core.chemical.html#pyrosetta.rosetta.core.chemical.ResidueProperty
     def __init__(self, *args: str):
-        super().__init__('PROPERTIES', *args)
+        super().__init__("PROPERTIES", *args)
 
 
-Entries.choices['PROPERTIES'] = (PROPERTIESEntry, Singletony.list_singleton)
+Entries.choices["PROPERTIES"] = (PROPERTIESEntry, Singletony.list_singleton)
 
 
 #########################################################################################################
+
 
 class VARIANTEntry(GenericListEntry):
     # do multiple variant entries get the same line??
     def __init__(self, *args: str):
-        super().__init__('VARIANT', *args)
+        super().__init__("VARIANT", *args)
 
 
-Entries.choices['VARIANT'] = (VARIANTEntry, Singletony.list_singleton)
+Entries.choices["VARIANT"] = (VARIANTEntry, Singletony.list_singleton)
 
 
 #########################################################################################################
 
+
 class FIRST_SIDECHAIN_ATOMEntry(GenericEntry):
     def __init__(self, body: str):
-        super().__init__(header='FIRST_SIDECHAIN_ATOM', body=body)
+        super().__init__(header="FIRST_SIDECHAIN_ATOM", body=body)
 
 
-Entries.choices['FIRST_SIDECHAIN_ATOM'] = (FIRST_SIDECHAIN_ATOMEntry, Singletony.singleton)
+Entries.choices["FIRST_SIDECHAIN_ATOM"] = (
+    FIRST_SIDECHAIN_ATOMEntry,
+    Singletony.singleton,
+)
 
 
 class BACKBONE_AAEntry(GenericEntry):
     def __init__(self, body: str):
-        assert len(body) == 3, f'{body} is not 3 char long'
-        super().__init__(header='BACKBONE_AA', body=body.upper())
+        assert len(body) == 3, f"{body} is not 3 char long"
+        super().__init__(header="BACKBONE_AA", body=body.upper())
 
 
-Entries.choices['BACKBONE_AA'] = (BACKBONE_AAEntry, Singletony.singleton)
+Entries.choices["BACKBONE_AA"] = (BACKBONE_AAEntry, Singletony.singleton)
 
 
 #########################################################################################################
+
 
 class RAMA_PREPRO_FILENAMEEntry(GenericEntry):
     def __init__(self, body: str):
-        super().__init__(header='RAMA_PREPRO_FILENAME', body=body)
+        super().__init__(header="RAMA_PREPRO_FILENAME", body=body)
 
 
-Entries.choices['RAMA_PREPRO_FILENAME'] = (RAMA_PREPRO_FILENAMEEntry, Singletony.singleton)
+Entries.choices["RAMA_PREPRO_FILENAME"] = (
+    RAMA_PREPRO_FILENAMEEntry,
+    Singletony.singleton,
+)
 
 
 #########################################################################################################
+
 
 class METAL_BINDING_ATOMSEntry(GenericListEntry):
     def __init__(self, *args: str):
-        super().__init__('METAL_BINDING_ATOMS', *args)
+        super().__init__("METAL_BINDING_ATOMS", *args)
 
 
-Entries.choices['METAL_BINDING_ATOMS'] = (METAL_BINDING_ATOMSEntry, Singletony.singleton)
+Entries.choices["METAL_BINDING_ATOMS"] = (
+    METAL_BINDING_ATOMSEntry,
+    Singletony.singleton,
+)
 
 
 #########################################################################################################
+
 
 class ACT_COORD_ATOMSEntry(GenericListEntry):
     def __init__(self, *args: str):
-        super().__init__('ACT_COORD_ATOMS', *args)
+        super().__init__("ACT_COORD_ATOMS", *args)
 
 
-Entries.choices['ACT_COORD_ATOMS'] = (ACT_COORD_ATOMSEntry, Singletony.singleton)
+Entries.choices["ACT_COORD_ATOMS"] = (ACT_COORD_ATOMSEntry, Singletony.singleton)
 
 
 #########################################################################################################
+
 
 class UNKNOWNEntry(GenericEntry):
     @classmethod
     def from_str(cls, text):
-        return cls(**re.match('(?P<header>\w+) (?P<body>.*)^', text.rstrip()).groupdict())
+        return cls(**re.match(r"(?P<header>\w+) (?P<body>.*)^", text.rstrip()).groupdict())
 
 
-Entries.choices['<UNKNOWN>'] = (UNKNOWNEntry, Singletony.multiton)
+Entries.choices["<UNKNOWN>"] = (UNKNOWNEntry, Singletony.multiton)
 #########################################################################################################
