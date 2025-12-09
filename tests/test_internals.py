@@ -125,7 +125,7 @@ class TestCHIEntry:
         """Test parsing CHI entry from string."""
         text = "1  C6   C5   C4   C3"
         entry = CHIEntry.from_str(text)
-        assert entry.index == "1"
+        assert entry.index == 1  # index is int per dataclass definition
         assert entry.first.strip() == "C6"
         assert entry.second.strip() == "C5"
         assert entry.third.strip() == "C4"

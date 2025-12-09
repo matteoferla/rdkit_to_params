@@ -12,11 +12,15 @@ from typing import Dict, List, Optional
 
 from rdkit import Chem
 from rdkit.Chem import AllChem
+from rdkit.Chem.EnumerateStereoisomers import EnumerateStereoisomers
 
+from rdkit_to_params.entries import Entries
 from rdkit_to_params.rdkitside._rdkit_convert import _RDKitCovertMixin
 
 
 class _RDKitInitMixin(_RDKitCovertMixin):
+    CHI: Entries
+
     @classmethod
     def from_mol(
         cls,
@@ -45,8 +49,8 @@ class _RDKitInitMixin(_RDKitCovertMixin):
         else:
             self.rename(atomnames)
         self.polish_mol()
-        self.convert_mol(pcharge_prop_name=pcharge_prop_name)
-        return self
+        self.convert_mol(pcharge_prop_name=pcharge_prop_name)  # type: ignore[attr-defined]
+        return self  # type: ignore[return-value]
 
     @classmethod
     def from_smiles(
@@ -73,8 +77,8 @@ class _RDKitInitMixin(_RDKitCovertMixin):
         else:
             self.rename(atomnames)
             self.polish_mol()
-        self.convert_mol(pcharge_prop_name=pcharge_prop_name)
-        return self
+        self.convert_mol(pcharge_prop_name=pcharge_prop_name)  # type: ignore[attr-defined]
+        return self  # type: ignore[return-value]
 
     @classmethod
     def from_smiles_w_pdbblock(
@@ -138,30 +142,30 @@ class _RDKitInitMixin(_RDKitCovertMixin):
         pcharge_prop_name: str = "_GasteigerCharge",
     ) -> _RDKitInitMixin:
         dodgy = Chem.SplitMolByPDBResidues(pdb, whiteList=[name])[name]
-        AllChem.SanitizeMol(dodgy)
+        AllChem.SanitizeMol(dodgy)  # type: ignore[attr-defined]
         good = Chem.MolFromSmiles(smiles)  # TODO switch to DummyMasker
         good.SetProp("_Name", name)
-        dummies = []
+        dummies: List[int] = []
         for atom in good.GetAtoms():
             if atom.GetSymbol() == "*":
                 atom.SetAtomicNum(9)
                 dummies.append(atom.GetIdx())
         Chem.SanitizeMol(good)
-        good = AllChem.AddHs(good, addCoords=bool(good.GetNumConformers()))
-        AllChem.EmbedMolecule(good)
-        AllChem.ComputeGasteigerCharges(good)
-        AllChem.MMFFOptimizeMolecule(good)
+        good = AllChem.AddHs(good, addCoords=bool(good.GetNumConformers()))  # type: ignore[attr-defined]
+        AllChem.EmbedMolecule(good)  # type: ignore[attr-defined]
+        AllChem.ComputeGasteigerCharges(good)  # type: ignore[attr-defined]
+        AllChem.MMFFOptimizeMolecule(good)  # type: ignore[attr-defined]
         for d in dummies:
             good.GetAtomWithIdx(d).SetAtomicNum(0)
         self = cls.load_mol(good, generic=generic, name=name)
         self.move_aside()
         self.rename_from_template(dodgy)
         self.move_back()
-        self.convert_mol(pcharge_prop_name=pcharge_prop_name)
+        self.convert_mol(pcharge_prop_name=pcharge_prop_name)  # type: ignore[attr-defined]
         #####
         # warnings.warn('CHI DISABLED. - has issues with this mode')  # todo correct this issue!
-        self.CHI.data = []  # !!!!
-        return self
+        self.CHI.data = []  # type: ignore[attr-defined]
+        return self  # type: ignore[return-value]
 
     @staticmethod
     def split_stereoisomers(mol: Chem.Mol) -> Dict[str, List[Chem.Mol]]:
@@ -174,7 +178,7 @@ class _RDKitInitMixin(_RDKitCovertMixin):
         # prep
         levo = Chem.MolFromSmiles("C[C@@H](C(=O))N")
         dextro = Chem.MolFromSmiles("C[C@H](C(=O))N")
-        splits = {"levo": [], "dextro": [], "neither": [], "both": []}
+        splits: Dict[str, List[Chem.Mol]] = {"levo": [], "dextro": [], "neither": [], "both": []}
         for isomer in EnumerateStereoisomers(mol):
             is_levo = isomer.HasSubstructMatch(levo, useChirality=True)
             is_dextro = isomer.HasSubstructMatch(dextro, useChirality=True)

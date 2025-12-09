@@ -23,7 +23,19 @@ from rdkit_to_params.rdkitside.utilities import DummyMasker
 
 
 class _RDKitCovertMixin(_RDKitPrepMixin):
-    _Measure = namedtuple("Measure", ["distance", "angle", "torsion"])
+    _Measure = namedtuple("_Measure", ["distance", "angle", "torsion"])
+
+    # Type hints for attributes from other mixins
+    comments: Entries
+    ICOOR_INTERNAL: Entries
+    CONNECT: Entries
+    CHARGE: Entries
+    CHI: Entries
+    CUT_BOND: Entries
+    BOND: Entries
+    NBR_ATOM: Entries
+    NBR_RADIUS: Entries
+    PDB_ROTAMERS: Entries
 
     greekification = True  # controls whether to change the atom names to greek for amino acids for CB and beyond.
 
@@ -37,8 +49,8 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
             self.log.warning("The molecule passed has no conformers... Adding.")
             # add_conformer does also the gasteiger charges :/
             with DummyMasker(self.mol):
-                AllChem.EmbedMolecule(self.mol)
-                AllChem.MMFFOptimizeMolecule(self.mol)
+                AllChem.EmbedMolecule(self.mol)  # type: ignore[attr-defined]
+                AllChem.MMFFOptimizeMolecule(self.mol)  # type: ignore[attr-defined]
         # NAME
         if self.mol.HasProp("_Name"):
             title = self.mol.GetProp("_Name").strip()
@@ -97,7 +109,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
     def _parse_icoors(self) -> None:
         self.log.debug("Filling ICOOR")
         self._undescribed = deque(self.mol.GetAtoms())
-        self.ordered_atoms = []
+        self.ordered_atoms: List[Chem.Atom] = []
         self._rotation_count = 0
         if self.is_aminoacid():
             # you have to start with N.
@@ -148,7 +160,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         # not first three lines
         while self._undescribed:
             self._prevent_overcycling()
-            atom: Chem.Atom = self._undescribed[0]
+            atom = self._undescribed[0]
             d_idx = [d.GetIdx() for d in self.ordered_atoms]
             d_neighs = [
                 n for n in self._get_unseen_neighbors(atom, [], False) if n.GetIdx() in d_idx
@@ -158,7 +170,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
                 self._undescribed.rotate(-1)
                 self._rotation_count += 1
                 continue
-            parent_atom: Chem.Atom = d_neighs[0]
+            parent_atom = d_neighs[0]
             d_neighs = [
                 n for n in self._get_unseen_neighbors(parent_atom, [atom], False) if n.GetIdx() in d_idx
             ]
@@ -266,9 +278,9 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         angle = 0
         tor = 0
         try:
-            dist = Chem.rdMolTransforms.GetBondLength(conf, ai, bi)
-            angle = 180 - Chem.rdMolTransforms.GetAngleDeg(conf, ai, bi, ci)
-            tor = Chem.rdMolTransforms.GetDihedralDeg(conf, ai, bi, ci, di)
+            dist = Chem.rdMolTransforms.GetBondLength(conf, ai, bi)  # type: ignore[attr-defined]
+            angle = 180 - Chem.rdMolTransforms.GetAngleDeg(conf, ai, bi, ci)  # type: ignore[attr-defined]
+            tor = Chem.rdMolTransforms.GetDihedralDeg(conf, ai, bi, ci, di)  # type: ignore[attr-defined]
         except Exception:
             pass
         if str(tor) == "nan":  # quicker than isnan.
@@ -379,11 +391,11 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
     def _get_unseen_neighbors(
         self, atom: Chem.Atom, seen: List[Chem.Atom], nondummy: bool = True
     ) -> List[Chem.Atom]:
-        neighbors = atom.GetNeighbors()
+        neighbors_list = list(atom.GetNeighbors())
         if nondummy:
-            neighbors = [neighbor for neighbor in neighbors if neighbor.GetSymbol() != "*"]
+            neighbors_list = [neighbor for neighbor in neighbors_list if neighbor.GetSymbol() != "*"]
         seenIdx = {a.GetIdx() for a in seen}
-        return [neighbor for neighbor in neighbors if neighbor.GetIdx() not in seenIdx]
+        return [neighbor for neighbor in neighbors_list if neighbor.GetIdx() not in seenIdx]
 
     ## ============= Bond entries ======================================================================================
 
@@ -529,9 +541,9 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
             )
         # get the coords off the original (without vanadium "virtual" atoms)
         coordMap = {i: mol.GetConformer().GetAtomPosition(i) for i in range(self.mol.GetNumAtoms())}
-        AllChem.EmbedMolecule(mol, coordMap=coordMap)
+        AllChem.EmbedMolecule(mol, coordMap=coordMap)  # type: ignore[attr-defined]
         for i in range(virtuals):
-            AllChem.SetBondLength(mol.GetConformer(), anchor_idx, i + nonvirtuals, 0.1)
+            AllChem.SetBondLength(mol.GetConformer(), anchor_idx, i + nonvirtuals, 0.1)  # type: ignore[attr-defined]
         self.mol = mol.GetMol()
         self._undescribed = deque(self.mol.GetAtoms())
         self.ordered_atoms = []

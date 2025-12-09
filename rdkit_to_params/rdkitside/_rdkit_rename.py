@@ -1,9 +1,12 @@
 import logging
 import re
-from typing import Dict, List, Optional, Sequence, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Sequence, Union
 
 from rdkit import Chem
 from rdkit.Chem import AllChem, rdFMCS
+
+if TYPE_CHECKING:
+    from rdkit_to_params.entries import Entries
 
 ########################################################################################################################
 __doc__ = """
@@ -16,6 +19,27 @@ The main class here is ``_RDKitRenameMixin``, which adds the various atom renami
 
 class _RDKitRenameMixin:
     log = logging.getLogger(__name__)
+
+    # Type hints for attributes from other mixins - `mol` is non-None in RDKit context
+    mol: Chem.Mol  # Never None when using RDKit functionality
+    NAME: str
+    ATOM: "Entries"
+    TYPE: "Entries"
+
+    def polish_mol(self) -> None:
+        pass  # Implemented in _RDKitPrepMixin
+
+    def fix_mol(self) -> None:
+        pass  # Implemented in _RDKitPrepMixin
+
+    def is_aminoacid(self) -> bool:
+        return False  # Implemented in Params
+
+    def rename_atom(self, atom_or_atomname, newname: str, overwrite: bool = True):
+        pass  # Implemented in Params
+
+    def pad_name(self, name: str, atom=None) -> str:
+        return name  # Implemented in _RDKitPrepMixin
 
     # ============= overridden =========================================================================================
 
@@ -36,7 +60,7 @@ class _RDKitRenameMixin:
     def _get_PDBInfo_atomname(self, atom, throw=True) -> str:
         info = atom.GetPDBResidueInfo()
         if info is not None:
-            return info.GetName()
+            return str(info.GetName())
         elif throw:
             raise ValueError("Atoms changed but `fix_mol` was not called.")
         else:
@@ -177,7 +201,7 @@ class _RDKitRenameMixin:
 
         :return: None for now.
         """
-        AllChem.SanitizeMol(template)  # this is where half my issues come from.
+        AllChem.SanitizeMol(template)  # type: ignore[attr-defined]  # this is where half my issues come from.
         mcs = rdFMCS.FindMCS(
             [self.mol, template],
             atomCompare=rdFMCS.AtomCompare.CompareElements,
@@ -194,7 +218,7 @@ class _RDKitRenameMixin:
             if info:
                 self.rename_atom(a_atom, info.GetName(), overwrite=overwrite)
             else:
-                self.log.debug.info(f"No info in template for atom {d_atom.GetSymbol()} #{donor}")
+                self.log.debug(f"No info in template for atom {d_atom.GetSymbol()} #{donor}")
 
     def rename_from_dict(self, atomnames: Dict[int, str]):
         """
@@ -258,4 +282,4 @@ class _RDKitRenameMixin:
         self.TYPE.append("LIGAND")
         self.fix_mol()
         self.rename(atomnames)
-        return self.mol
+        return mol  # Return original reference, not self.mol which mypy doesn't know about

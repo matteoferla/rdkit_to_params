@@ -18,7 +18,7 @@ It does not rely on any ``Params`` entry stuff. So can be used by itself for tes
 import re
 import string
 from collections import defaultdict
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 from warnings import warn
 
 from rdkit import Chem
@@ -103,13 +103,19 @@ GENRTYPE_PATTERNS = [
 
 
 class _RDKitPrepMixin(_RDKitRenameMixin):
+    # Type hints for attributes from other mixins
+    PROPERTIES: Entries
+    FIRST_SIDECHAIN_ATOM: Entries
+    BACKBONE_AA: Entries
+    greekification: bool
+
     def __init__(self) -> None:  # noqa
         self.log.critical("This is init should not have been called! This exists for debugging")
         self.NAME = "LIG"
         self.TYPE = Entries.from_name("TYPE")
-        self.mol = None
+        self.mol: Chem.Mol = None  # type: ignore[assignment]  # Set by load_mol/load_smiles
         self.generic = False
-        self._rtype = []
+        self._rtype: List[Any] = []
 
     @classmethod
     def load_mol(
@@ -159,7 +165,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         mol = Chem.MolFromSmiles(smiles)
         if mol is None:
             raise ValueError("The SMILES string could not be converted")
-        mol.SetProp("_Name", name)
+        mol.SetProp("_Name", name if name else "LIG")
         mol = Chem.AddHs(mol, addCoords=bool(mol.GetNumConformers()))
         # cannot embed more than one dummy
         # Todo: why was this not switched to ``with DummyMasker(self.mol):``
@@ -169,9 +175,9 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
                 atom.SetAtomicNum(6)
                 atom.SetHybridization(Chem.HybridizationType.SP3)
                 changed.append(atom.GetIdx())
-        AllChem.EmbedMolecule(mol)
-        AllChem.MMFFOptimizeMolecule(mol)
-        AllChem.ComputeGasteigerCharges(mol)
+        AllChem.EmbedMolecule(mol)  # type: ignore[attr-defined]
+        AllChem.MMFFOptimizeMolecule(mol)  # type: ignore[attr-defined]
+        AllChem.ComputeGasteigerCharges(mol)  # type: ignore[attr-defined]
         for atomIdx in changed:
             mol.GetAtomWithIdx(atomIdx).SetAtomicNum(0)
         # operate upon!
@@ -237,9 +243,9 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
 
     def dumps_pdb(self, stripped: bool = True) -> str:
         if stripped:
-            Chem.MolToPDBBlock(self.dummyless)
+            return str(Chem.MolToPDBBlock(self.dummyless))
         else:
-            Chem.MolToPDBBlock(self.mol)
+            return str(Chem.MolToPDBBlock(self.mol))
 
     @property
     def dummyless(self) -> Chem.Mol:
@@ -260,14 +266,15 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
     def _apply_rtype_patterns(self) -> None:
         """Apply SMARTS patterns to identify functional groups."""
         for group in RTYPE_PATTERNS:
-            template = Chem.MolFromSmarts(group["SMARTS"])
+            smarts: str = group["SMARTS"]  # type: ignore[index]
+            template = Chem.MolFromSmarts(smarts)
             template = Chem.AddHs(
                 template, explicitOnly=True, addCoords=bool(template.GetNumConformers())
             )
-            types = group["types"]
+            types: List[Optional[str]] = group["types"]  # type: ignore[index]
             for match in self.mol.GetSubstructMatches(template):
                 for i, rtype in enumerate(types):
-                    j = match[i]
+                    j: int = match[i]
                     atom = self.mol.GetAtomWithIdx(j)
                     if rtype is not None and not (
                         atom.HasProp("_rType") and atom.GetProp("_rType").strip()
@@ -382,11 +389,12 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
     def _apply_genrtype_patterns(self) -> None:
         """Apply SMARTS patterns to identify functional groups for generic types."""
         for group in GENRTYPE_PATTERNS:
-            template = Chem.MolFromSmarts(group["SMARTS"])
-            types = group["types"]
+            smarts: str = group["SMARTS"]  # type: ignore[index]
+            template = Chem.MolFromSmarts(smarts)
+            types: List[Optional[str]] = group["types"]  # type: ignore[index]
             for match in self.mol.GetSubstructMatches(template):
                 for i, genrtype in enumerate(types):
-                    j = match[i]
+                    j: int = match[i]
                     atom = self.mol.GetAtomWithIdx(j)
                     if genrtype is not None and not (
                         atom.HasProp("_rType") and atom.GetProp("_rType").strip()
@@ -541,7 +549,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         else:
             atom.SetProp("_rType", symbol)
 
-    def _aminoacid_override(self, elemental: Dict[str, Union[str, None]]) -> None:
+    def _aminoacid_override(self, elemental: Dict[str, int]) -> None:
         aa = Chem.MolFromSmiles("*NCC(~O)*")
         if self.mol.HasSubstructMatch(aa):
             self.log.info("Ligand detected to be polymer!")
@@ -572,7 +580,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
             if self.greekification:
                 self.greekify()
             # add rtypes
-            self.retype_by_name(aa_map)
+            self.retype_by_name({k: v for k, v in aa_map.items() if v is not None})
             # change conn
             elemental["CONN"] = 2  # when LOWER and UPPER exist the CONN is CONN3.
             # add properties
@@ -628,7 +636,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
                 pass  # no renaming. This is insane corner case. A 36 HA AA is madness.
 
     def _fix_atom_names(self) -> None:
-        elemental = defaultdict(int)
+        elemental: Dict[str, int] = defaultdict(int)
         seen = []
         # Amino acid overwrite.
         self._aminoacid_override(elemental)
@@ -692,7 +700,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
                 atom.SetHybridization(Chem.HybridizationType.SP3)
                 changed.append(atom.GetIdx())
         Chem.SanitizeMol(self.mol)
-        AllChem.ComputeGasteigerCharges(self.mol, throwOnParamFailure=False)
+        AllChem.ComputeGasteigerCharges(self.mol, throwOnParamFailure=False)  # type: ignore[attr-defined]
         for i, atom in enumerate(self.mol.GetAtoms()):
             if i in changed:
                 atom.SetAtomicNum(0)
@@ -724,7 +732,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         infos = [atom.GetPDBResidueInfo() for atom in self.mol.GetAtoms()]
         names = [i.GetResidueName() for i in infos if i is not None]
         if names:
-            return names[0]
+            return str(names[0])
         else:
             return "LIG"
 
@@ -792,7 +800,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         """
         self.log.debug("Adding hydrogens")
         # add hydrogens w/ coords if there's a conformer
-        self.mol: Chem.Mol = AllChem.AddHs(self.mol, addCoords=self.mol.GetNumConformers() != 0)
+        self.mol = AllChem.AddHs(self.mol, addCoords=self.mol.GetNumConformers() != 0)  # type: ignore[attr-defined]
         if add_conformer:
             self.log.warning(
                 "*Depracation*: `Params(..).add_conformer` and `Params(..).add_Hs` are now split, "
@@ -805,9 +813,9 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         Chem.SanitizeMol(self.mol)
         self.mol.RemoveAllConformers()
         with DummyMasker(self.mol):
-            AllChem.EmbedMolecule(self.mol, useRandomCoords=True)
-            AllChem.MMFFOptimizeMolecule(self.mol)
-            AllChem.ComputeGasteigerCharges(self.mol, throwOnParamFailure=False)
+            AllChem.EmbedMolecule(self.mol, useRandomCoords=True)  # type: ignore[attr-defined]
+            AllChem.MMFFOptimizeMolecule(self.mol)  # type: ignore[attr-defined]
+            AllChem.ComputeGasteigerCharges(self.mol, throwOnParamFailure=False)  # type: ignore[attr-defined]
         self.fix_mol(pcharge_prop_name="_GasteigerCharge")
 
     def generate_conformers(self, num_confs: int = 100) -> int:
@@ -820,10 +828,11 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         :return: number of conformers generated.
         """
         with DummyMasker(self.mol):
-            AllChem.EmbedMultipleConfs(self.mol, numConfs=num_confs)
+            AllChem.EmbedMultipleConfs(self.mol, numConfs=num_confs)  # type: ignore[attr-defined]
             for conf_id in range(num_confs):
-                AllChem.MMFFOptimizeMolecule(self.mol, confId=conf_id)
+                AllChem.MMFFOptimizeMolecule(self.mol, confId=conf_id)  # type: ignore[attr-defined]
             first_atoms = (
                 [0, 1, 2] if self.mol.GetNumAtoms() >= 3 else list(range(self.mol.GetNumAtoms()))
             )
-            AllChem.AlignMolConformers(self.mol, atomIds=first_atoms)
+            AllChem.AlignMolConformers(self.mol, atomIds=first_atoms)  # type: ignore[attr-defined]
+        return self.mol.GetNumConformers()

@@ -7,7 +7,7 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 
 
-def neutralize(mol: Chem) -> Chem:
+def neutralize(mol: Chem.Mol) -> Chem.Mol:
     """
     Alters the protonation of tne molecule to be that at pH 7.
     Not great, but does the job.
@@ -43,7 +43,7 @@ def neutralize(mol: Chem) -> Chem:
         # benzoic acid pKa is low.
         atom.SetFormalCharge(-1)
         protons_removed += 1
-    AllChem.ComputeGasteigerCharges(mol)
+    AllChem.ComputeGasteigerCharges(mol)  # type: ignore[attr-defined]
     # return dict(protons_added=protons_added,
     #             protons_removed=protons_removed)
     return mol
@@ -79,7 +79,7 @@ class DummyMasker:
         self.is_masked = False
         self.zahl = int(placekeeper_zahl)
         self.blank_Gasteiger = bool(blank_Gasteiger)
-        self.dummies = list(mol.GetAtomsMatchingQuery(Chem.rdqueries.AtomNumEqualsQueryAtom(0)))
+        self.dummies = list(mol.GetAtomsMatchingQuery(Chem.rdqueries.AtomNumEqualsQueryAtom(0)))  # type: ignore[attr-defined]
 
     def mask(self):
         for dummy in self.dummies:
@@ -109,13 +109,14 @@ class DummyMasker:
     def make_masked_with_extra_protons(mol: Chem.Mol, placekeeper_zahl: int = 8) -> Chem.Mol:
         # rdkit_to_params.DummyMasker cannot be used due to explicit H
         # mask dummy atoms
-        dummies = list(mol.GetAtomsMatchingQuery(Chem.rdqueries.AtomNumEqualsQueryAtom(0)))
+        dummies = list(mol.GetAtomsMatchingQuery(Chem.rdqueries.AtomNumEqualsQueryAtom(0)))  # type: ignore[attr-defined]
         for dummy in dummies:
             dummy.SetAtomicNum(placekeeper_zahl)
             dummy.SetBoolProp("dummy", True)
             dummy.SetHybridization(Chem.HybridizationType.SP3)
             dummy.UpdatePropertyCache()
-        return AllChem.AddHs(mol, addCoords=True)
+        mol_with_hs: Chem.Mol = AllChem.AddHs(mol, addCoords=True)  # type: ignore[attr-defined]
+        return mol_with_hs
 
     @staticmethod
     def copy_missed_props(source: Chem.Mol, target: Chem.Mol):
@@ -161,6 +162,6 @@ class DummyMasker:
         for idx1, idx2 in to_remove_bonds:
             rwmol.RemoveBond(idx1, idx2)
         rwmol.CommitBatchEdit()
-        split = AllChem.GetMolFrags(rwmol.GetMol(), asMols=True, sanitizeFrags=False)[0]
+        split = AllChem.GetMolFrags(rwmol.GetMol(), asMols=True, sanitizeFrags=False)[0]  # type: ignore[attr-defined]
         cls.copy_missed_props(mol, split)
         return split

@@ -43,7 +43,7 @@ try:
 except ImportError as pyrosetta_error:
     warn(f"PyRosetta is required for the ``test`` method (ImportError: {pyrosetta_error})", category=ImportWarning)
 
-    class _PoserMixin:
+    class _PoserMixin:  # type: ignore[no-redef]
         pass
 
 
@@ -61,24 +61,24 @@ except ImportError as rdkit_error:
     # Store the error for use in nested classes/functions
     _rdkit_import_error = str(rdkit_error)
 
-    class Chem:
+    class Chem:  # type: ignore[no-redef]
         Atom = None
 
-    class DummyMasker:
+    class DummyMasker:  # type: ignore[no-redef]
         def __init__(self, *args, **kwargs):
             raise ImportError(f'RDkit is required for DummyMasker (ImportError: {_rdkit_import_error})')
 
-    class _RDKitMixin:
+    class _RDKitMixin:  # type: ignore[no-redef]
         pass
 
-    def neutralize(*args, **kargs):
+    def neutralize(*args, **kargs):  # type: ignore[misc]
         raise ImportError(f"RDkit is required for `neutralize` (pH 7 charge correction) (ImportError: {_rdkit_import_error})")
 
 
 #################### main class ########################################################################################
 
 
-class Params(_ParamsIoMixin, _RDKitMixin, _PoserMixin):
+class Params(_ParamsIoMixin, _RDKitMixin, _PoserMixin):  # type: ignore[misc]
     """
     ``Params`` creates and manipulates params files. It can handles several types of params operations,
     such as "atom name surgery" and ``rdkit.Chem.Mol`` to a params file.
@@ -190,7 +190,7 @@ class Params(_ParamsIoMixin, _RDKitMixin, _PoserMixin):
         else:
             for atom in self.ATOM:
                 if atom.name.strip() == name.strip():
-                    return atom.name
+                    return str(atom.name)
             else:
                 raise ValueError(
                     f"{name} is not a valid atom name (does not appear in the entries)"
@@ -241,9 +241,10 @@ class Params(_ParamsIoMixin, _RDKitMixin, _PoserMixin):
             if oldname:
                 return self.rename_atom_by_name(oldname, newname)  # alters entry & rdkit
             else:
-                return self._set_PDBInfo_atomname(
+                result = self._set_PDBInfo_atomname(
                     atom, newname, overwrite=overwrite
                 )  # alters rdkit
+                return str(result) if result else None
         else:
             raise TypeError(f"{type(atom_or_atomname)} is not a string or atom")
 

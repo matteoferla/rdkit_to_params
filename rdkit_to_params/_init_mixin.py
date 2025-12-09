@@ -68,11 +68,13 @@ class _ParamsInitMixin:
         self.PDB_ROTAMERS = Entries.from_name(
             "PDB_ROTAMERS"
         )  # TODO it would be nice to check this file exists.
+        self.ROTAMERS = Entries.from_name("ROTAMERS")
+        self.NET_FORMAL_CHARGE = Entries.from_name("NET_FORMAL_CHARGE")
         self.OTHERS = Entries.from_name("<UNKNOWN>")  # this is the dumpyard of unknown values.
         ## RDKit route specific
         self.mol = None
         self.generic = False
-        self._rtype = []
+        self._rtype: list = []
         # defaults
         self.AA.append("UNK")
         self.TYPE.append("LIGAND")

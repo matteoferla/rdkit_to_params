@@ -12,13 +12,24 @@ __doc__ = """
 ########################################################################################################################
 
 
-from typing import Optional
+import logging
+from typing import TYPE_CHECKING, Optional
 
 import pyrosetta
 import pyrosetta.rosetta.core as prc
 
+if TYPE_CHECKING:
+    from rdkit_to_params.entries import Entries
+
 
 class _PoserMixin:
+    # Type hints for attributes that come from other mixins
+    log: logging.Logger
+    NAME: str
+    ATOM: "Entries"
+
+    def dumps(self) -> str:
+        return ""  # Implemented in _ParamsIoMixin
     def test(self, outfile: Optional[str] = None) -> pyrosetta.Pose:
         """
         Makes a pose with the ligand to see if it works.

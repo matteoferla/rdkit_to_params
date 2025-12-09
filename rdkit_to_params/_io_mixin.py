@@ -15,10 +15,11 @@ from rdkit_to_params.entries import Entries
 class _ParamsIoMixin(_ParamsInitMixin):
     @classmethod
     def load(cls, filename: str, skip_unknown: bool = True) -> "_ParamsIoMixin":
+        self: _ParamsIoMixin
         if hasattr(cls, "__name__"):
             self = cls()
         else:
-            self = cls
+            self = cls  # type: ignore[assignment]
         with open(filename) as w:
             for line in w:
                 self._parse_line(line, skip_unknown)
@@ -26,10 +27,11 @@ class _ParamsIoMixin(_ParamsInitMixin):
 
     @classmethod
     def loads(cls, text: str, skip_unknown: bool = True) -> "_ParamsIoMixin":
+        self: _ParamsIoMixin
         if hasattr(cls, "__name__"):
             self = cls()
         else:
-            self = cls
+            self = cls  # type: ignore[assignment]
         for line in text.split("\n"):
             self._parse_line(line, skip_unknown)
         return self
@@ -39,12 +41,18 @@ class _ParamsIoMixin(_ParamsInitMixin):
         if not sline:
             return
         elif re.match("#", sline):
-            header, body = re.match(r"(#+)\s?(.*)", sline).groups()
+            match = re.match(r"(#+)\s?(.*)", sline)
+            assert match is not None
+            header, body = match.groups()
             self.comments.append(body)
         elif re.match("[A-Z]", sline):
-            header, body = re.match(r"([_\w]+) (.*)", sline).groups()
+            match = re.match(r"([_\w]+) (.*)", sline)
+            assert match is not None
+            header, body = match.groups()
             if "#" in body:
-                body, comment = re.match("(.*?) ?#(.*)", body).groups()
+                match2 = re.match("(.*?) ?#(.*)", body)
+                assert match2 is not None
+                body, comment = match2.groups()
                 self.comments.append(comment)
             if "CONNECT" in header:
                 self.CONNECT.append(
@@ -77,6 +85,8 @@ class _ParamsIoMixin(_ParamsInitMixin):
             self.TYPE,
             self.AA,
             self.ROTAMER_AA,
+            self.ROTAMERS,
+            self.NET_FORMAL_CHARGE,
             self.ATOM,
             self.ATOM_ALIAS,
             self.BOND,

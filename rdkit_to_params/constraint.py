@@ -205,19 +205,19 @@ class Constraints:
             w.write(str(self))
 
     @classmethod
-    def _get_new_index(self, mol: Chem.Mol, index: int) -> int:
+    def _get_new_index(cls, mol: Chem.Mol, index: int) -> int:
         for atom in mol.GetAtoms():
             if atom.GetDoubleProp("_originalIdx") == index:
-                return atom.GetIdx()
+                return int(atom.GetIdx())
+        raise ValueError(f"Atom with original index {index} not found")
 
-    def get_atom(self, mol: Chem.Mol, name: str) -> Chem.Atom:
+    def get_atom(self, mol: Chem.Mol, name: str):  # -> Chem.Atom
         for atom in mol.GetAtoms():
             if atom.HasProp("_AtomName") and name == atom.GetProp(
                 "_AtomName"
             ):  # Nonstandard. do not copy
                 return atom
-        else:
-            raise ValueError(f"Atom {name} not found")
+        raise ValueError(f"Atom {name} not found")
 
     # =================== utilities ====================================================================================
 
@@ -302,18 +302,17 @@ class Constraints:
         return cls.nominalize(*args, **kwargs)
 
     @classmethod
-    def get_conn(cls, mol: Chem.Mol) -> Chem.Atom:
+    def get_conn(cls, mol: Chem.Mol):  # -> Chem.Atom
         """
         Get connecting atom of mol.
         """
         for atom in mol.GetAtoms():
             if atom.GetAtomicNum() == 0:  # atom.GetSymbol() == '*':
                 return atom.GetNeighbors()[0]
-        else:
-            raise ValueError("Dummy atom not found")
+        raise ValueError("Dummy atom not found")
 
     @classmethod
-    def join_by_dummy(cls, a: Chem.Mol, b: Chem.Mol) -> Chem.Mol:
+    def join_by_dummy(cls, a: Chem.Mol, b: Chem.Mol):  # -> Chem.Mol
         # So I was worried that joining by the connect neighbour and then deleting the dummy
         # may cause issues of valence. So I did it this more convoluted way.
         # but did not check first... and this approach leads to sanitisation...
@@ -359,7 +358,9 @@ class Constraints:
         lines = []
         conf = mol.GetConformer()
         # issue of 4 char padded names.
-        sstdevs = {k.strip if isinstance(k, str) else k: v for k, v in stdevs.items()}
+        sstdevs: Dict[Union[str, int], float] = {}
+        if stdevs is not None:
+            sstdevs = {k.strip() if isinstance(k, str) else k: v for k, v in stdevs.items()}
         for i, atom in enumerate(mol.GetAtoms()):
             if atom.GetSymbol() == "*":
                 continue
@@ -388,9 +389,9 @@ class Constraints:
                 + f"{pos.x} {pos.y} {pos.z} HARMONIC 0 {w}\n"
             )
         self.coordinate_constraint += "".join(lines)
-        return self
+        return self  # type: ignore[return-value]
 
-    @classmethod  # /bound method!
+    @classmethod
     def make_inverse_coordinate_constraints_by_neighbours(
         cls,
         mol,
@@ -398,7 +399,7 @@ class Constraints:
         unfixed: List[str],
         ref_res,
         ref_atomname="CA",
-    ) -> Constraints:
+    ):  # type: ignore[return-value]
         """
         Given a list of indices constraint their distant neighbours.
         This is basically for modify those atoms. E.g. given one structure, make a variant.

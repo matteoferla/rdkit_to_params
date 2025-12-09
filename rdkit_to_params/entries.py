@@ -71,7 +71,7 @@ class Entries(abc.MutableSequence):
     ``Entries.from_name('BOND')``
     """
 
-    choices = {}  # this gets filled after each class is declared.
+    choices: dict[str, tuple] = {}  # this gets filled after each class is declared.
 
     def __init__(self, entry_cls, singleton: Singletony = Singletony.singleton):
         """
@@ -84,7 +84,7 @@ class Entries(abc.MutableSequence):
         self.singleton = Singletony(singleton)
         if self.singleton != Singletony.multiton and isinstance(self.entry_cls, GenericListEntry):
             raise TypeError(f"{type(self.entry_cls)} is incompatible with {self.singleton}")
-        self.data = []
+        self.data: list = []
 
     @classmethod
     def from_name(cls, name: str):
@@ -371,8 +371,8 @@ class CHIEntry:
         rex = re.match(r"(\d+)\s+(\S{1,4})\s+(\S{1,4})\s+(\S{1,4})\s+(\S{1,4})", text)
         if rex is None:
             raise ValueError(f'CHI entry "{text}" is not formatted correctly')
-        data = dict(zip(("index", "first", "second", "third", "fourth"), rex.groups()))
-        return cls(**data)
+        groups = rex.groups()
+        return cls(index=int(groups[0]), first=groups[1], second=groups[2], third=groups[3], fourth=groups[4])
 
 
 Entries.choices["CHI"] = (CHIEntry, Singletony.multiton)
@@ -435,14 +435,20 @@ class ICOOR_INTERNALEntry:
             text.rstrip(),
         )
         if rex:
-            data = list(rex.groups())
+            groups = rex.groups()
         elif rex2:
-            data = list(rex2.groups())
+            groups = rex2.groups()
         else:
             raise ValueError(f'ICOOR_INTERNAL Entry "{text}" is not formatted correctly')
-        for i in range(1, 4):
-            data[i] = float(data[i].strip())
-        return cls(*data)
+        return cls(
+            child=groups[0],
+            phi=float(groups[1].strip()),
+            theta=float(groups[2].strip()),
+            distance=float(groups[3].strip()),
+            parent=groups[4],
+            second_parent=groups[5],
+            third_parent=groups[6],
+        )
 
 
 Entries.choices["ICOOR_INTERNAL"] = (ICOOR_INTERNALEntry, Singletony.multiton)
@@ -486,16 +492,15 @@ class BONDEntry:
         if rex is None:
             raise ValueError(f'BOND entry "{text}" is not formatted correctly')
         data = rex.groupdict()
-        data["order"] = data["order"].strip()
-        if data["order"] == "":
-            data["order"] = 1
-        elif data["order"] in ("ARO", "4"):
-            data["order"] = 4  # ARO is also acceptable.
-        elif isinstance(data["order"], int):
-            pass
+        order_str = data["order"].strip()
+        order: int
+        if order_str == "":
+            order = 1
+        elif order_str in ("ARO", "4"):
+            order = 4  # ARO is also acceptable.
         else:
-            data["order"] = int(data["order"].strip())
-        return cls(**data)
+            order = int(order_str)
+        return cls(first=data["first"], second=data["second"], order=order)
 
 
 Entries.choices["BOND"] = (BONDEntry, Singletony.multiton)
@@ -544,8 +549,7 @@ class ATOMEntry:
         if rex is None:
             raise ValueError(f'ATOM entry "{text}" is not formatted correctly')
         data = rex.groupdict()
-        data["partial"] = float(data["partial"])
-        return cls(**data)
+        return cls(name=data["name"], rtype=data["rtype"], mtype=data["mtype"], partial=float(data["partial"]))
 
 
 Entries.choices["ATOM"] = (ATOMEntry, Singletony.multiton)
@@ -594,7 +598,7 @@ class CHARGEEntry:
     """
 
     atom: str
-    charge: int
+    charge: str  # e.g. "+1" or "-1"
 
     def __str__(self) -> str:
         return f"CHARGE {self.atom} FORMAL {self.charge}"
@@ -608,7 +612,7 @@ class CHARGEEntry:
         if rex is None:
             raise ValueError(f'CHARGE entry "{text}" is not formatted correctly')
         data = rex.groupdict()
-        return cls(**data)
+        return cls(atom=data["atom"], charge=data["charge"])
 
 
 Entries.choices["CHARGE"] = (CHARGEEntry, Singletony.multiton)
@@ -778,4 +782,62 @@ class UNKNOWNEntry(GenericEntry):
 
 
 Entries.choices["<UNKNOWN>"] = (UNKNOWNEntry, Singletony.multiton)
+
+
+#########################################################################################################
+
+
+@dataclass
+class NET_FORMAL_CHARGEEntry:
+    """
+    Net formal charge of the whole molecule (as opposed to CHARGE which is per-atom).
+    Value is an integer, e.g. +2 or -1.
+    """
+
+    charge: int
+
+    def __str__(self) -> str:
+        if self.charge >= 0:
+            return f"NET_FORMAL_CHARGE +{self.charge}"
+        else:
+            return f"NET_FORMAL_CHARGE {self.charge}"
+
+    def _repr_html_(self):
+        return f"{html_span('NET_FORMAL_CHARGE')} {html_span(self.charge)}"
+
+    @classmethod
+    def from_str(cls, text: str):
+        # Handle +2, -1, 2, etc.
+        charge_str = text.strip()
+        return cls(charge=int(charge_str))
+
+
+Entries.choices["NET_FORMAL_CHARGE"] = (NET_FORMAL_CHARGEEntry, Singletony.singleton)
+
+
+#########################################################################################################
+
+
+class ROTAMERSEntry(GenericEntry):
+    """
+    Rotamer library specification.
+    Valid values: BASIC (for ligands), DUNBRACK (for polymers), CENTR, NCAA, PDB, STORED.
+    Will warn (not error) if an unrecognized value is used.
+    """
+
+    VALID_SPECS = frozenset({"BASIC", "DUNBRACK", "CENTR", "NCAA", "PDB", "STORED"})
+
+    def __init__(self, body: str):
+        body = body.strip().upper()
+        if body not in self.VALID_SPECS:
+            self.log.warning(
+                f"ROTAMERS value '{body}' is not a recognized RotamerLibrarySpecification. "
+                f"Valid values are: {', '.join(sorted(self.VALID_SPECS))}"
+            )
+        super().__init__(header="ROTAMERS", body=body)
+
+
+Entries.choices["ROTAMERS"] = (ROTAMERSEntry, Singletony.singleton)
+
+
 #########################################################################################################
