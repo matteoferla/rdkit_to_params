@@ -102,6 +102,9 @@ class Entries(abc.MutableSequence):
             return value
         elif isinstance(value, str):
             return self.entry_cls.from_str(value)
+        elif isinstance(value, (int, float)):
+            # For entries like NET_FORMAL_CHARGE that accept numeric values
+            return self.entry_cls.from_str(str(value))
         elif isinstance(value, list):
             return self.entry_cls(*value)
         elif isinstance(value, dict):
@@ -838,6 +841,154 @@ class ROTAMERSEntry(GenericEntry):
 
 
 Entries.choices["ROTAMERS"] = (ROTAMERSEntry, Singletony.singleton)
+
+
+#########################################################################################################
+
+
+@dataclass
+class VIRTUAL_SHADOWEntry:
+    """
+    Maps a virtual atom to its shadow (real) atom.
+    E.g. VIRTUAL_SHADOW VO5 O5
+    """
+
+    virtual_atom: str
+    shadow_atom: str
+
+    def __str__(self) -> str:
+        return f"VIRTUAL_SHADOW {self.virtual_atom: >4} {self.shadow_atom: >4}"
+
+    def _repr_html_(self):
+        return f"{html_span('VIRTUAL_SHADOW')} virtual:{self.virtual_atom} shadow:{self.shadow_atom}"
+
+    @classmethod
+    def from_str(cls, text: str):
+        parts = text.split()
+        if len(parts) != 2:
+            raise ValueError(f'VIRTUAL_SHADOW entry "{text}" should have exactly 2 atom names')
+        return cls(virtual_atom=parts[0], shadow_atom=parts[1])
+
+
+Entries.choices["VIRTUAL_SHADOW"] = (VIRTUAL_SHADOWEntry, Singletony.multiton)
+
+
+#########################################################################################################
+
+
+@dataclass
+class CHI_ROTAMERSEntry:
+    """
+    Chi rotamer sampling specification.
+    E.g. CHI_ROTAMERS 3 60 0
+    """
+
+    chi_index: int
+    angle: int
+    standard_deviation: int
+
+    def __str__(self) -> str:
+        return f"CHI_ROTAMERS {self.chi_index} {self.angle} {self.standard_deviation}"
+
+    def _repr_html_(self):
+        return (
+            f"{html_span('CHI_ROTAMERS')} chi:{html_span(self.chi_index)} "
+            f"angle:{html_span(self.angle)} sd:{html_span(self.standard_deviation)}"
+        )
+
+    @classmethod
+    def from_str(cls, text: str):
+        parts = text.split()
+        if len(parts) != 3:
+            raise ValueError(f'CHI_ROTAMERS entry "{text}" should have exactly 3 integers')
+        return cls(chi_index=int(parts[0]), angle=int(parts[1]), standard_deviation=int(parts[2]))
+
+
+Entries.choices["CHI_ROTAMERS"] = (CHI_ROTAMERSEntry, Singletony.multiton)
+
+
+#########################################################################################################
+
+
+@dataclass
+class NUEntry:
+    """
+    Nu angle definition (like CHI but for nucleic acids or other ring systems).
+    E.g. NU 1 VO5 C1 C2 C3
+    """
+
+    index: int
+    first: str
+    second: str
+    third: str
+    fourth: str
+
+    def __post_init__(self):
+        self.fourth = self.fourth.ljust(4)
+
+    def __str__(self) -> str:
+        return f"NU {self.index} {self.first} {self.second} {self.third} {self.fourth}"
+
+    def _repr_html_(self):
+        return f"{html_span('NU')} {html_span(self.index)} {self.first} {self.second} {self.third} {self.fourth}"
+
+    @classmethod
+    def from_str(cls, text: str):
+        rex = re.match(r"(\d+)\s+(\S{1,4})\s+(\S{1,4})\s+(\S{1,4})\s+(\S{1,4})", text)
+        if rex is None:
+            raise ValueError(f'NU entry "{text}" is not formatted correctly')
+        groups = rex.groups()
+        return cls(index=int(groups[0]), first=groups[1], second=groups[2], third=groups[3], fourth=groups[4])
+
+
+Entries.choices["NU"] = (NUEntry, Singletony.multiton)
+
+
+#########################################################################################################
+
+
+@dataclass
+class LOWEST_RING_CONFORMEREntry:
+    """
+    Lowest energy ring conformer specification.
+    E.g. LOWEST_RING_CONFORMER 1 4C1
+    """
+
+    ring_index: int
+    conformer: str
+
+    def __str__(self) -> str:
+        return f"LOWEST_RING_CONFORMER {self.ring_index} {self.conformer}"
+
+    def _repr_html_(self):
+        return f"{html_span('LOWEST_RING_CONFORMER')} ring:{html_span(self.ring_index)} conformer:{self.conformer}"
+
+    @classmethod
+    def from_str(cls, text: str):
+        parts = text.split()
+        if len(parts) != 2:
+            raise ValueError(f'LOWEST_RING_CONFORMER entry "{text}" should have ring index and conformer name')
+        return cls(ring_index=int(parts[0]), conformer=parts[1])
+
+
+Entries.choices["LOWEST_RING_CONFORMER"] = (LOWEST_RING_CONFORMEREntry, Singletony.multiton)
+
+
+#########################################################################################################
+
+
+class LOW_RING_CONFORMERSEntry(GenericListEntry):
+    """
+    List of low energy ring conformers.
+    E.g. LOW_RING_CONFORMERS 1 O3B 3S1 B14 5S1 25B 2SO BO3 1S3 14B 1S5 OS2 1C4
+    First element is ring index, rest are conformer names.
+    """
+
+    def __init__(self, *args: str):
+        super().__init__("LOW_RING_CONFORMERS", *args)
+
+
+Entries.choices["LOW_RING_CONFORMERS"] = (LOW_RING_CONFORMERSEntry, Singletony.multiton)
 
 
 #########################################################################################################

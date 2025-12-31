@@ -42,12 +42,14 @@ class _ParamsIoMixin(_ParamsInitMixin):
             return
         elif re.match("#", sline):
             match = re.match(r"(#+)\s?(.*)", sline)
-            assert match is not None
+            if match is None:
+                # empty comment line
+                return
             header, body = match.groups()
             self.comments.append(body)
         elif re.match("[A-Z]", sline):
             match = re.match(r"([_\w]+) (.*)", sline)
-            assert match is not None
+            assert match is not None, f"Could not parse line: {sline}"
             header, body = match.groups()
             if "#" in body:
                 match2 = re.match("(.*?) ?#(.*)", body)
@@ -101,11 +103,16 @@ class _ParamsIoMixin(_ParamsInitMixin):
             self.RAMA_PREPRO_FILENAME,
             self.ACT_COORD_ATOMS,
             self.CHI,
+            self.CHI_ROTAMERS,
+            self.NU,
+            self.LOWEST_RING_CONFORMER,
+            self.LOW_RING_CONFORMERS,
             self.CONNECT,
             self.NBR_ATOM,
             self.NBR_RADIUS,
             self.MAINCHAIN_ATOMS,
             self.ICOOR_INTERNAL,
+            self.VIRTUAL_SHADOW,
             self.PDB_ROTAMERS,
             self.OTHERS,
         ):

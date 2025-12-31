@@ -268,9 +268,14 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         for group in RTYPE_PATTERNS:
             smarts: str = group["SMARTS"]  # type: ignore[index]
             template = Chem.MolFromSmarts(smarts)
-            template = Chem.AddHs(
-                template, explicitOnly=True, addCoords=bool(template.GetNumConformers())
-            )
+            # RDKit 2025.09+ requires sanitization before AddHs
+            try:
+                Chem.SanitizeMol(template)
+                template = Chem.AddHs(
+                    template, explicitOnly=True, addCoords=bool(template.GetNumConformers())
+                )
+            except Exception:
+                pass  # SMARTS query molecules may not be sanitizable
             types: List[Optional[str]] = group["types"]  # type: ignore[index]
             for match in self.mol.GetSubstructMatches(template):
                 for i, rtype in enumerate(types):

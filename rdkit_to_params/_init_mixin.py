@@ -70,6 +70,11 @@ class _ParamsInitMixin:
         )  # TODO it would be nice to check this file exists.
         self.ROTAMERS = Entries.from_name("ROTAMERS")
         self.NET_FORMAL_CHARGE = Entries.from_name("NET_FORMAL_CHARGE")
+        self.VIRTUAL_SHADOW = Entries.from_name("VIRTUAL_SHADOW")
+        self.CHI_ROTAMERS = Entries.from_name("CHI_ROTAMERS")
+        self.NU = Entries.from_name("NU")
+        self.LOWEST_RING_CONFORMER = Entries.from_name("LOWEST_RING_CONFORMER")
+        self.LOW_RING_CONFORMERS = Entries.from_name("LOW_RING_CONFORMERS")
         self.OTHERS = Entries.from_name("<UNKNOWN>")  # this is the dumpyard of unknown values.
         ## RDKit route specific
         self.mol = None

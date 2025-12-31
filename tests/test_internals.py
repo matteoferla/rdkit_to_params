@@ -542,5 +542,117 @@ class TestEdgeCases:
             Params.load("nonexistent_file.params")
 
 
+class TestBGCRoundtrip:
+    """Test roundtrip loading/dumping of BGC params file with advanced entries."""
+
+    @pytest.fixture
+    def bgc_params_file(self):
+        """Path to the BGC test params file."""
+        return Path(__file__).parent / "assets" / "BGC-do-not-copy.params"
+
+    def test_bgc_roundtrip(self, bgc_params_file):
+        """Test that BGC params file can be loaded and all non-comment entries are preserved."""
+        # Load the original file
+        params = Params.load(str(bgc_params_file))
+
+        # Dump and reload
+        dumped = params.dumps()
+        params2 = Params.loads(dumped)
+
+        # Check basic properties
+        assert params.NAME == params2.NAME == "BGC"
+        assert params.IO_STRING[0].name3 == params2.IO_STRING[0].name3
+        assert params.TYPE[0].body == params2.TYPE[0].body
+
+        # Check ATOM entries
+        assert len(params.ATOM) == len(params2.ATOM)
+        for a1, a2 in zip(params.ATOM, params2.ATOM):
+            assert a1.name.strip() == a2.name.strip()
+            assert a1.rtype.strip() == a2.rtype.strip()
+
+        # Check ATOM_ALIAS entries
+        assert len(params.ATOM_ALIAS) == len(params2.ATOM_ALIAS)
+
+        # Check BOND entries
+        assert len(params.BOND) == len(params2.BOND)
+
+        # Check CUT_BOND entries
+        assert len(params.CUT_BOND) == len(params2.CUT_BOND)
+
+        # Check CONNECT entries
+        assert len(params.CONNECT) == len(params2.CONNECT)
+
+        # Check VIRTUAL_SHADOW entries
+        assert len(params.VIRTUAL_SHADOW) == len(params2.VIRTUAL_SHADOW)
+        for vs1, vs2 in zip(params.VIRTUAL_SHADOW, params2.VIRTUAL_SHADOW):
+            assert vs1.virtual_atom.strip() == vs2.virtual_atom.strip()
+            assert vs1.shadow_atom.strip() == vs2.shadow_atom.strip()
+
+        # Check CHI entries
+        assert len(params.CHI) == len(params2.CHI)
+        for chi1, chi2 in zip(params.CHI, params2.CHI):
+            assert chi1.index == chi2.index
+
+        # Check CHI_ROTAMERS entries
+        assert len(params.CHI_ROTAMERS) == len(params2.CHI_ROTAMERS)
+        for cr1, cr2 in zip(params.CHI_ROTAMERS, params2.CHI_ROTAMERS):
+            assert cr1.chi_index == cr2.chi_index
+            assert cr1.angle == cr2.angle
+            assert cr1.standard_deviation == cr2.standard_deviation
+
+        # Check ADD_RING entries
+        assert len(params.ADD_RING) == len(params2.ADD_RING)
+
+        # Check NU entries
+        assert len(params.NU) == len(params2.NU)
+        for nu1, nu2 in zip(params.NU, params2.NU):
+            assert nu1.index == nu2.index
+            assert nu1.first.strip() == nu2.first.strip()
+
+        # Check LOWEST_RING_CONFORMER entries
+        assert len(params.LOWEST_RING_CONFORMER) == len(params2.LOWEST_RING_CONFORMER)
+        for lrc1, lrc2 in zip(params.LOWEST_RING_CONFORMER, params2.LOWEST_RING_CONFORMER):
+            assert lrc1.ring_index == lrc2.ring_index
+            assert lrc1.conformer == lrc2.conformer
+
+        # Check LOW_RING_CONFORMERS entries
+        assert len(params.LOW_RING_CONFORMERS) == len(params2.LOW_RING_CONFORMERS)
+
+        # Check PROPERTIES entries
+        assert len(params.PROPERTIES) == len(params2.PROPERTIES)
+
+        # Check NBR_ATOM and NBR_RADIUS
+        assert params.NBR_ATOM[0].body.strip() == params2.NBR_ATOM[0].body.strip()
+        assert params.NBR_RADIUS[0].body.strip() == params2.NBR_RADIUS[0].body.strip()
+
+        # Check MAINCHAIN_ATOMS
+        assert len(params.MAINCHAIN_ATOMS) == len(params2.MAINCHAIN_ATOMS)
+
+        # Check FIRST_SIDECHAIN_ATOM
+        assert len(params.FIRST_SIDECHAIN_ATOM) == len(params2.FIRST_SIDECHAIN_ATOM)
+
+        # Check ICOOR_INTERNAL entries
+        assert len(params.ICOOR_INTERNAL) == len(params2.ICOOR_INTERNAL)
+
+    def test_bgc_entry_counts(self, bgc_params_file):
+        """Test that BGC params file has expected entry counts."""
+        params = Params.load(str(bgc_params_file))
+
+        # Expected counts based on the file content
+        assert len(params.ATOM) == 26
+        assert len(params.ATOM_ALIAS) == 6
+        assert len(params.BOND) == 26
+        assert len(params.CUT_BOND) == 1
+        assert len(params.CONNECT) == 2
+        assert len(params.VIRTUAL_SHADOW) == 2
+        assert len(params.CHI) == 6
+        assert len(params.CHI_ROTAMERS) == 12
+        assert len(params.NU) == 5
+        assert len(params.LOWEST_RING_CONFORMER) == 1
+        assert len(params.LOW_RING_CONFORMERS) == 1
+        assert len(params.ADD_RING) == 1
+        assert len(params.ICOOR_INTERNAL) == 28
+
+
 # Run with: pytest tests/test_internals.py -v
 
