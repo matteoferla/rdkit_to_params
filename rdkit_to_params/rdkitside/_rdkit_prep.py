@@ -1,9 +1,19 @@
 from __future__ import annotations
 
 import os
+import re
+import string
 import warnings
+from collections import defaultdict
+from typing import Any
+from warnings import warn
+
+from rdkit import Chem
+from rdkit.Chem import AllChem
 
 from rdkit_to_params.entries import Entries
+from rdkit_to_params.rdkitside._rdkit_rename import _RDKitRenameMixin
+from rdkit_to_params.rdkitside.utilities import DummyMasker
 
 ########################################################################################################################
 __doc__ = """
@@ -11,21 +21,6 @@ The main class here is ``_RDKitPrepMixin``, which adds the various pre checks.
 It does not rely on any ``Params`` entry stuff. So can be used by itself for testing.
 
     """
-
-
-########################################################################################################################
-
-import re
-import string
-from collections import defaultdict
-from typing import Any, Dict, List, Optional
-from warnings import warn
-
-from rdkit import Chem
-from rdkit.Chem import AllChem
-
-from rdkit_to_params.rdkitside._rdkit_rename import _RDKitRenameMixin
-from rdkit_to_params.rdkitside.utilities import DummyMasker
 
 # Element to Rosetta type mapping for single-type elements
 ELEMENT_TO_RTYPE = {
@@ -115,14 +110,14 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         self.TYPE = Entries.from_name("TYPE")
         self.mol: Chem.Mol = None  # type: ignore[assignment]  # Set by load_mol/load_smiles
         self.generic = False
-        self._rtype: List[Any] = []
+        self._rtype: list[Any] = []
 
     @classmethod
     def load_mol(
         cls,
         mol: Chem.Mol,
         generic: bool = False,
-        name: Optional[str] = None,
+        name: str | None = None,
         pcharge_prop_name: str = "_GasteigerCharge",
     ) -> _RDKitPrepMixin:
         """
@@ -151,7 +146,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
 
     @classmethod
     def load_smiles(
-        cls, smiles: str, generic: bool = False, name: Optional[str] = None
+        cls, smiles: str, generic: bool = False, name: str | None = None
     ) -> _RDKitPrepMixin:
         """
         A SMILES with optional dummy atoms to be coverted into a Params object
@@ -276,7 +271,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
                 )
             except Exception:
                 pass  # SMARTS query molecules may not be sanitizable
-            types: List[Optional[str]] = group["types"]  # type: ignore[index]
+            types: list[str | None] = group["types"]  # type: ignore[index]
             for match in self.mol.GetSubstructMatches(template):
                 for i, rtype in enumerate(types):
                     j: int = match[i]
@@ -396,7 +391,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         for group in GENRTYPE_PATTERNS:
             smarts: str = group["SMARTS"]  # type: ignore[index]
             template = Chem.MolFromSmarts(smarts)
-            types: List[Optional[str]] = group["types"]  # type: ignore[index]
+            types: list[str | None] = group["types"]  # type: ignore[index]
             for match in self.mol.GetSubstructMatches(template):
                 for i, genrtype in enumerate(types):
                     j: int = match[i]
@@ -554,7 +549,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         else:
             atom.SetProp("_rType", symbol)
 
-    def _aminoacid_override(self, elemental: Dict[str, int]) -> None:
+    def _aminoacid_override(self, elemental: dict[str, int]) -> None:
         aa = Chem.MolFromSmiles("*NCC(~O)*")
         if self.mol.HasSubstructMatch(aa):
             self.log.info("Ligand detected to be polymer!")
@@ -641,7 +636,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
                 pass  # no renaming. This is insane corner case. A 36 HA AA is madness.
 
     def _fix_atom_names(self) -> None:
-        elemental: Dict[str, int] = defaultdict(int)
+        elemental: dict[str, int] = defaultdict(int)
         seen = []
         # Amino acid overwrite.
         self._aminoacid_override(elemental)
@@ -714,7 +709,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
                 atom.SetDoubleProp(pcharge_prop_name, 0.0)
 
     def set_partial_charges_from_list(
-        self, charges: List[float], pcharge_prop_name: str = "_GasteigerCharge"
+        self, charges: list[float], pcharge_prop_name: str = "_GasteigerCharge"
     ) -> None:
         """
         Sets the partial charges from a list.
@@ -742,7 +737,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
             return "LIG"
 
     @classmethod
-    def pad_name(cls, name: str, atom: Optional[Chem.Atom] = None) -> str:
+    def pad_name(cls, name: str, atom: Chem.Atom | None = None) -> str:
         if name in ("CONN1", "CONN2", "CONN3", "CONN4", "LOWER", "UPPER"):
             return name
         elif len(name) == 4:

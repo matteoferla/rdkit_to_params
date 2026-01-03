@@ -3,12 +3,13 @@ The main class here is ``Params``. All underscore base classes are not meant to 
 ``Entries`` is the class for a list of entries of the same kind.
 """
 
+from __future__ import annotations
+
 ########################################################################################################################
 
 import logging
 import os
 import re
-from typing import List, Optional, Union
 from warnings import warn
 
 #################### base classes ######################################################################################
@@ -197,8 +198,8 @@ class Params(_ParamsIoMixin, _RDKitMixin, _PoserMixin):  # type: ignore[misc]
                 )
 
     def rename_atom(
-        self, atom_or_atomname: Union[str, "Chem.Atom"], newname: str, overwrite=True
-    ) -> Union[str, None]:
+        self, atom_or_atomname: str | "Chem.Atom", newname: str, overwrite=True
+    ) -> str | None:
         """
         rename an atom by atomname or Chem.Atom (the former just calls ``rename_atom_by_name`` as is just for legacy)
 
@@ -399,7 +400,7 @@ class Params(_ParamsIoMixin, _RDKitMixin, _PoserMixin):  # type: ignore[misc]
     # ==== extras for cap
 
     def _prep_for_terminal(
-        self, mainchain_atoms: Optional[List[str]] = None, connection_idx: int = 1
+        self, mainchain_atoms: list[str] | None = None, connection_idx: int = 1
     ):
         """
         p = Params.from_smiles('*C(=O)[C@@]1NC(=O)CC1', name='CAP', atomnames=[None, 'C', 'O', 'CA', 'N'])

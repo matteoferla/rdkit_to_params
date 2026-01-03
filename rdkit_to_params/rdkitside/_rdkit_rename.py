@@ -1,11 +1,13 @@
 import logging
 import re
-from typing import TYPE_CHECKING, Dict, List, Optional, Sequence, Union
+from typing import TYPE_CHECKING
 
 from rdkit import Chem
 from rdkit.Chem import AllChem, rdFMCS
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from rdkit_to_params.entries import Entries
 
 ########################################################################################################################
@@ -98,7 +100,7 @@ class _RDKitRenameMixin:
 
     # ============= retype method ======================================================================================
 
-    def retype_by_name(self, mapping: Dict[str, str]):
+    def retype_by_name(self, mapping: dict[str, str]):
         """
         Renames the atom names in ``self.mol`` by changing key to value of the mapping dictionary.
 
@@ -122,7 +124,7 @@ class _RDKitRenameMixin:
 
     # ============= rename methods =====================================================================================
 
-    def rename(self, atomnames: Union[None, dict, list, str, Chem.Mol]) -> None:
+    def rename(self, atomnames: None | dict | list | str | Chem.Mol) -> None:
         """
         Rename options for atomnames:
 
@@ -151,7 +153,7 @@ class _RDKitRenameMixin:
                 f"atomnames is not None, dict, list, str or Chem.Mol but {type(atomnames)}"
             )
 
-    def rename_by_substructure(self, substructure: Chem.Mol, atomnames: Sequence[str]) -> List[str]:
+    def rename_by_substructure(self, substructure: Chem.Mol, atomnames: "Sequence[str]") -> list[str]:
         """
         Assigns to the atoms in self.mol the names based on the backbone template and the names variable.
         See ``_fix_atom_names`` for example usage.
@@ -220,7 +222,7 @@ class _RDKitRenameMixin:
             else:
                 self.log.debug(f"No info in template for atom {d_atom.GetSymbol()} #{donor}")
 
-    def rename_from_dict(self, atomnames: Dict[int, str]):
+    def rename_from_dict(self, atomnames: dict[int, str]):
         """
         Renames the ``self.mol`` atom names by a dict that has key atom idx and value name
 
@@ -239,7 +241,7 @@ class _RDKitRenameMixin:
             self._set_PDBInfo_atomname(self.mol.GetAtomWithIdx(k), v, overwrite=True)
         self.polish_mol()
 
-    def rename_from_list(self, atomnames: List[str]):
+    def rename_from_list(self, atomnames: list[str]):
         """
         Renames the ``self.mol`` atom names based on the order in list. If None it is skipped.
 
@@ -262,8 +264,8 @@ class _RDKitRenameMixin:
     def add_names(
         cls,
         mol: Chem.Mol,
-        atomnames: Union[None, dict, list, str, Chem.Mol],
-        name: Optional[str] = None,
+        atomnames: None | dict | list | str | Chem.Mol,
+        name: str | None = None,
     ) -> Chem.Mol:
         """
         Quick way to add atom names to a mol object --adds them the normal way.

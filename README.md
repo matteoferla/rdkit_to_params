@@ -218,7 +218,7 @@ p = Params.from_mol(mol, pcharge_prop_name=pcharge_prop_name, name='LIG')
 
 ## Constraints
 
-The selfstanding class `Constraints` is for generating constraint files, which are a must with covalent attachments
+The self-standing class `Constraints` is for generating constraint files, which are a must with covalent attachments
 in order to stop janky topologies.
 The class is instantiated with a pair of SMILES, each with at least a real atom and with one attachment point,
 the first is the ligand and the second is its peptide target. The names of the heavy atoms and the Rosetta residue "numbers".
@@ -302,6 +302,12 @@ In the amino acid case, the class attribute `greekification` changes the atomnam
 It is by default `True`. It is called during `fix_mol`, a step in `load_mol`/`load_smiles`,
 so should be safe for rename methods.
 
+### From RCSB PDB
+The PDB has ligand definitions (chemical components) that can be downloaded
+as a cif file.
+If Gemmi is installed the function `chemcomp_to_mol` in `rdkit_to_params.mol_from_compchem_block`
+can be used to download and convert a chemical component to an RDKit mol.
+Note that not all PDB chemical components definitions are perfect and some manual fixing may be required.
 
 ## Optionals
 Installing RDKit with conda is easy (`conda install rdkit`).

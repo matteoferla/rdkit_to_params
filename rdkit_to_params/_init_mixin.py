@@ -2,7 +2,6 @@
 __doc__ = """
 The main class here is ``_ParamsInitMixin``, which simply adds the __init__ method...
     """
-from typing import List
 
 from rdkit_to_params.entries import Entries
 
@@ -85,7 +84,7 @@ class _ParamsInitMixin:
         self.TYPE.append("LIGAND")
 
     @property
-    def fields(self) -> List[str]:
+    def fields(self) -> list[str]:
         """
         This operates under the assumption that the user may have added extra uppercase entries!
 

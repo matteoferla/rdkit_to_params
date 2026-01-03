@@ -13,7 +13,7 @@ __doc__ = """
 
 
 import logging
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 import pyrosetta
 import pyrosetta.rosetta.core as prc
@@ -30,7 +30,8 @@ class _PoserMixin:
 
     def dumps(self) -> str:
         return ""  # Implemented in _ParamsIoMixin
-    def test(self, outfile: Optional[str] = None) -> pyrosetta.Pose:
+
+    def test(self, outfile: str | None = None) -> pyrosetta.Pose:
         """
         Makes a pose with the ligand to see if it works.
 
@@ -60,7 +61,7 @@ class _PoserMixin:
         return pose
 
     def to_polymeric_pose(
-        self, relax: bool = False, sequence: Optional[str] = None
+        self, relax: bool = False, sequence: str | None = None
     ) -> pyrosetta.Pose:
         if sequence is None:
             sequence = f"AX[{self.NAME}]A"
@@ -74,8 +75,8 @@ class _PoserMixin:
     def _relax(
         self,
         pose: "pyrosetta.Pose",
-        scorefxn: Optional["pyrosetta.ScoreFunction"] = None,
-        cycles: Optional[int] = 15,
+        scorefxn: "pyrosetta.ScoreFunction | None" = None,
+        cycles: int | None = 15,
     ) -> None:
         if scorefxn is None:
             scorefxn = pyrosetta.get_fa_scorefxn()

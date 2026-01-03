@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 ########################################################################################################################
 __doc__ = """
     THis the core conversion. the method ``convert_mol`` does something you'd never have guessed.
@@ -11,7 +9,7 @@ __doc__ = """
 
 import random
 from collections import deque, namedtuple
-from typing import Any, Dict, List, Set, Union
+from typing import Any
 
 import numpy as np
 from rdkit import Chem
@@ -109,7 +107,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
     def _parse_icoors(self) -> None:
         self.log.debug("Filling ICOOR")
         self._undescribed = deque(self.mol.GetAtoms())
-        self.ordered_atoms: List[Chem.Atom] = []
+        self.ordered_atoms: list[Chem.Atom] = []
         self._rotation_count = 0
         if self.is_aminoacid():
             # you have to start with N.
@@ -198,7 +196,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
             self._add_icoor(atoms)
             self._rotation_count -= 1
 
-    def _add_icoor(self, atoms: List[Chem.Atom]) -> None:
+    def _add_icoor(self, atoms: list[Chem.Atom]) -> None:
         # due to madness the same atom objects differ.
         self._undescribed.remove(
             [this for this in self._undescribed if atoms[0].GetIdx() == this.GetIdx()][0]
@@ -389,8 +387,8 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
                                 )
 
     def _get_unseen_neighbors(
-        self, atom: Chem.Atom, seen: List[Chem.Atom], nondummy: bool = True
-    ) -> List[Chem.Atom]:
+        self, atom: Chem.Atom, seen: list[Chem.Atom], nondummy: bool = True
+    ) -> list[Chem.Atom]:
         neighbors_list = list(atom.GetNeighbors())
         if nondummy:
             neighbors_list = [neighbor for neighbor in neighbors_list if neighbor.GetSymbol() != "*"]
@@ -430,7 +428,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
 
     def _get_atom_descriptors(
         self, atom: Chem.Atom, pcharge_prop_name: str
-    ) -> Dict[str, Union[str, float]]:
+    ) -> dict[str, str | float]:
         return {
             "name": self._get_PDBInfo_atomname(atom),
             "rtype": atom.GetProp("_rType"),
@@ -438,7 +436,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
             "partial": atom.GetDoubleProp(pcharge_prop_name),
         }
 
-    def _get_nondummy_neighbors(self, atom: Chem.Atom) -> List[str]:
+    def _get_nondummy_neighbors(self, atom: Chem.Atom) -> list[str]:
         # returns list of names!
         return [
             self._get_PDBInfo_atomname(neighbor)
@@ -484,8 +482,8 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         self.rename_repeated_atoms()
 
     def rename_repeated_atoms(self) -> None:
-        dejavu: Set[str] = {""}  # set of already seen stripped names plus the illegal '' name
-        to_be_renamed: List[Chem.Atom] = []
+        dejavu: set[str] = {""}  # set of already seen stripped names plus the illegal '' name
+        to_be_renamed: list[Chem.Atom] = []
         # partial repetition of ``_fix_atom_names``
         for atom in self.mol.GetAtoms():
             name: str = atom.GetPDBResidueInfo().GetName()

@@ -8,8 +8,6 @@ __doc__ = """
 
 ########################################################################################################################
 
-from typing import Dict, List, Optional
-
 from rdkit import Chem
 from rdkit.Chem import AllChem
 from rdkit.Chem.EnumerateStereoisomers import EnumerateStereoisomers
@@ -25,9 +23,9 @@ class _RDKitInitMixin(_RDKitCovertMixin):
     def from_mol(
         cls,
         mol: Chem.Mol,
-        name: Optional[str] = None,
+        name: str | None = None,
         generic: bool = False,
-        atomnames: Optional[Dict[int, str]] = None,
+        atomnames: dict[int, str] | None = None,
         pcharge_prop_name: str = "_GasteigerCharge",
     ) -> _RDKitInitMixin:
         """
@@ -58,7 +56,7 @@ class _RDKitInitMixin(_RDKitCovertMixin):
         smiles: str,
         name: str = "LIG",
         generic: bool = False,
-        atomnames: Optional[Dict[int, str]] = None,
+        atomnames: dict[int, str] | None = None,
         pcharge_prop_name: str = "_GasteigerCharge",
     ) -> _RDKitInitMixin:
         """
@@ -145,7 +143,7 @@ class _RDKitInitMixin(_RDKitCovertMixin):
         AllChem.SanitizeMol(dodgy)  # type: ignore[attr-defined]
         good = Chem.MolFromSmiles(smiles)  # TODO switch to DummyMasker
         good.SetProp("_Name", name)
-        dummies: List[int] = []
+        dummies: list[int] = []
         for atom in good.GetAtoms():
             if atom.GetSymbol() == "*":
                 atom.SetAtomicNum(9)
@@ -168,7 +166,7 @@ class _RDKitInitMixin(_RDKitCovertMixin):
         return self  # type: ignore[return-value]
 
     @staticmethod
-    def split_stereoisomers(mol: Chem.Mol) -> Dict[str, List[Chem.Mol]]:
+    def split_stereoisomers(mol: Chem.Mol) -> dict[str, list[Chem.Mol]]:
         """
         Utility to split stereoisomers of amino acids into L/D
 
@@ -178,7 +176,7 @@ class _RDKitInitMixin(_RDKitCovertMixin):
         # prep
         levo = Chem.MolFromSmiles("C[C@@H](C(=O))N")
         dextro = Chem.MolFromSmiles("C[C@H](C(=O))N")
-        splits: Dict[str, List[Chem.Mol]] = {"levo": [], "dextro": [], "neither": [], "both": []}
+        splits: dict[str, list[Chem.Mol]] = {"levo": [], "dextro": [], "neither": [], "both": []}
         for isomer in EnumerateStereoisomers(mol):
             is_levo = isomer.HasSubstructMatch(levo, useChirality=True)
             is_dextro = isomer.HasSubstructMatch(dextro, useChirality=True)

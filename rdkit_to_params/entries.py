@@ -11,7 +11,6 @@ import re
 from collections import abc
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional, Union
 
 ########################################################################################################################
 
@@ -36,7 +35,7 @@ class Singletony(Enum):
 # ----------------------------------------------------------------------------------------------------------------------
 
 
-def html_span(inner: Union[str, float], color: Optional[str] = None) -> str:
+def html_span(inner: str | float, color: str | None = None) -> str:
     """
     Simple span element for _repr_html_
 
@@ -491,11 +490,21 @@ class BONDEntry:
 
     @classmethod
     def from_str(cls, text: str):
-        rex = re.match(r"(?P<first>.{1,4}) (?P<second>.{2,4})\s?(?P<order>.*)", text.rstrip())
-        if rex is None:
-            raise ValueError(f'BOND entry "{text}" is not formatted correctly')
-        data = rex.groupdict()
-        order_str = data["order"].strip()
+        # Try standard 4-char padded format first (requires space separator)
+        rex = re.match(r"(?P<first>.{4}) (?P<second>.{2,4})\s*(?P<order>.*)", text.rstrip())
+        if rex is not None:
+            data = rex.groupdict()
+            first = data["first"]
+            second = data["second"]
+            order_str = data["order"].strip()
+        else:
+            # Fallback to flexible whitespace-delimited format
+            parts = text.split()
+            if len(parts) < 2:
+                raise ValueError(f'BOND entry "{text}" is not formatted correctly')
+            first = parts[0]
+            second = parts[1]
+            order_str = parts[2] if len(parts) > 2 else ""
         order: int
         if order_str == "":
             order = 1
@@ -503,7 +512,7 @@ class BONDEntry:
             order = 4  # ARO is also acceptable.
         else:
             order = int(order_str)
-        return cls(first=data["first"], second=data["second"], order=order)
+        return cls(first=first, second=second, order=order)
 
 
 Entries.choices["BOND"] = (BONDEntry, Singletony.multiton)

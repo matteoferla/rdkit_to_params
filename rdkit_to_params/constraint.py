@@ -9,7 +9,6 @@ It is not integral to the conversion, it's just a utility.
 
 import json
 import warnings
-from typing import Dict, List, Optional, Tuple, Union
 
 from rdkit import Chem
 from rdkit.Chem import AllChem
@@ -20,10 +19,10 @@ from rdkit.Chem import AllChem
 class Constraints:
     def __init__(
         self,
-        smiles: Tuple[str, str],
-        names: List[str],
-        ligand_res: Union[str, int],
-        target_res: Union[str, int],
+        smiles: tuple[str, str],
+        names: list[str],
+        ligand_res: str | int,
+        target_res: str | int,
     ):
         """
         Generate the required constraints for a covalent bond as CONN1 does not deal with distance and torsions.
@@ -253,7 +252,7 @@ class Constraints:
         return self
 
     @classmethod
-    def assign_names(cls, mol: Chem.Mol, names: List[str]) -> None:
+    def assign_names(cls, mol: Chem.Mol, names: list[str]) -> None:
         """
         Stores names of atoms as given in the list.
         totally non-standard way. PDBInfo is correct way. But too much effort.
@@ -335,7 +334,7 @@ class Constraints:
         ligand_res,
         ref_res,
         ref_atomname="CA",
-        stdevs: Optional[Dict[Union[str, int], float]] = None,
+        stdevs: dict[str | int, float] | None = None,
     ) -> Constraints:
         """
         Returns an instance (or the same instance if called as a bound method) with added ``.coordinate_constraint``.
@@ -358,7 +357,7 @@ class Constraints:
         lines = []
         conf = mol.GetConformer()
         # issue of 4 char padded names.
-        sstdevs: Dict[Union[str, int], float] = {}
+        sstdevs: dict[str | int, float] = {}
         if stdevs is not None:
             sstdevs = {k.strip() if isinstance(k, str) else k: v for k, v in stdevs.items()}
         for i, atom in enumerate(mol.GetAtoms()):
@@ -396,7 +395,7 @@ class Constraints:
         cls,
         mol,
         ligand_res,
-        unfixed: List[str],
+        unfixed: list[str],
         ref_res,
         ref_atomname="CA",
     ):  # type: ignore[return-value]
