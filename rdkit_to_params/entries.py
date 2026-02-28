@@ -374,7 +374,13 @@ class CHIEntry:
         if rex is None:
             raise ValueError(f'CHI entry "{text}" is not formatted correctly')
         groups = rex.groups()
-        return cls(index=int(groups[0]), first=groups[1], second=groups[2], third=groups[3], fourth=groups[4])
+        return cls(
+            index=int(groups[0]),
+            first=groups[1],
+            second=groups[2],
+            third=groups[3],
+            fourth=groups[4],
+        )
 
 
 Entries.choices["CHI"] = (CHIEntry, Singletony.multiton)
@@ -561,7 +567,12 @@ class ATOMEntry:
         if rex is None:
             raise ValueError(f'ATOM entry "{text}" is not formatted correctly')
         data = rex.groupdict()
-        return cls(name=data["name"], rtype=data["rtype"], mtype=data["mtype"], partial=float(data["partial"]))
+        return cls(
+            name=data["name"],
+            rtype=data["rtype"],
+            mtype=data["mtype"],
+            partial=float(data["partial"]),
+        )
 
 
 Entries.choices["ATOM"] = (ATOMEntry, Singletony.multiton)
@@ -869,7 +880,9 @@ class VIRTUAL_SHADOWEntry:
         return f"VIRTUAL_SHADOW {self.virtual_atom: >4} {self.shadow_atom: >4}"
 
     def _repr_html_(self):
-        return f"{html_span('VIRTUAL_SHADOW')} virtual:{self.virtual_atom} shadow:{self.shadow_atom}"
+        return (
+            f"{html_span('VIRTUAL_SHADOW')} virtual:{self.virtual_atom} shadow:{self.shadow_atom}"
+        )
 
     @classmethod
     def from_str(cls, text: str):
@@ -947,7 +960,13 @@ class NUEntry:
         if rex is None:
             raise ValueError(f'NU entry "{text}" is not formatted correctly')
         groups = rex.groups()
-        return cls(index=int(groups[0]), first=groups[1], second=groups[2], third=groups[3], fourth=groups[4])
+        return cls(
+            index=int(groups[0]),
+            first=groups[1],
+            second=groups[2],
+            third=groups[3],
+            fourth=groups[4],
+        )
 
 
 Entries.choices["NU"] = (NUEntry, Singletony.multiton)
@@ -976,7 +995,9 @@ class LOWEST_RING_CONFORMEREntry:
     def from_str(cls, text: str):
         parts = text.split()
         if len(parts) != 2:
-            raise ValueError(f'LOWEST_RING_CONFORMER entry "{text}" should have ring index and conformer name')
+            raise ValueError(
+                f'LOWEST_RING_CONFORMER entry "{text}" should have ring index and conformer name'
+            )
         return cls(ring_index=int(parts[0]), conformer=parts[1])
 
 

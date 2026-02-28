@@ -8,7 +8,7 @@ __doc__ = """
 ########################################################################################################################
 
 import random
-from collections import deque, namedtuple
+from collections import defaultdict, deque, namedtuple
 from typing import Any
 
 import numpy as np
@@ -34,6 +34,11 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
     NBR_ATOM: Entries
     NBR_RADIUS: Entries
     PDB_ROTAMERS: Entries
+    ATOM: Entries
+    VIRTUAL_SHADOW: Entries
+    NU: Entries
+    ADD_RING: Entries
+    PROPERTIES: Entries
 
     greekification = True  # controls whether to change the atom names to greek for amino acids for CB and beyond.
 
@@ -101,6 +106,9 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         self._parse_bonds()
         # NBR
         self._find_centroid()
+        # VIRTUAL SHADOW ATOMS for ring systems
+        if self.mol.GetRingInfo().NumRings() > 0:
+            self.add_ring_virtual_shadows()
 
     ## ============= internal coordinates ==============================================================================
 
@@ -170,7 +178,9 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
                 continue
             parent_atom = d_neighs[0]
             d_neighs = [
-                n for n in self._get_unseen_neighbors(parent_atom, [atom], False) if n.GetIdx() in d_idx
+                n
+                for n in self._get_unseen_neighbors(parent_atom, [atom], False)
+                if n.GetIdx() in d_idx
             ]
             if len(d_neighs) == 0:
                 self._undescribed.rotate(-1)
@@ -236,9 +246,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
                 root = self.ordered_atoms[0]
 
                 def distance_penaltifier(atom):
-                    return len(
-                        Chem.GetShortestPath(self.mol, root.GetIdx(), atom.GetIdx())
-                    )
+                    return len(Chem.GetShortestPath(self.mol, root.GetIdx(), atom.GetIdx()))
             else:
                 self.log.debug("Ordering atoms by being not hydrogen or dummy")
 
@@ -391,7 +399,9 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
     ) -> list[Chem.Atom]:
         neighbors_list = list(atom.GetNeighbors())
         if nondummy:
-            neighbors_list = [neighbor for neighbor in neighbors_list if neighbor.GetSymbol() != "*"]
+            neighbors_list = [
+                neighbor for neighbor in neighbors_list if neighbor.GetSymbol() != "*"
+            ]
         seenIdx = {a.GetIdx() for a in seen}
         return [neighbor for neighbor in neighbors_list if neighbor.GetIdx() not in seenIdx]
 
@@ -451,6 +461,234 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         s = np.max(a, axis=0)[i]
         self.NBR_ATOM.append(self.mol.GetAtomWithIdx(i).GetPDBResidueInfo().GetName())
         self.NBR_RADIUS.append(str(s))
+
+    # ============ Virtual Shadow Atoms for Rings ========================================================================
+
+    def add_ring_virtual_shadows(self, aromatic: bool = False) -> None:
+        """Add virtual shadow atoms, NU angles, and ADD_RING entries for ring systems.
+
+        Virtual shadow atoms are VIRT-type atoms bonded across the CUT_BOND gap.
+        They track the real atoms via the ``ring_close`` score term (harmonic, sigma=0.1A).
+        Without them, both dihedral and Cartesian relaxation produce ring distortions.
+
+        Called automatically from ``convert_mol()`` for non-aromatic rings.
+
+        :param aromatic: if True, also process fully aromatic rings (default: skip them)
+        """
+        rings = self._get_ring_atom_names()
+        for ring_idx, ring_atoms in enumerate(rings):
+            # ← skip if this ring already has virtual shadows (idempotency)
+            existing_vs_atoms = {vs.shadow_atom.strip() for vs in self.VIRTUAL_SHADOW}
+            cut_first, cut_last = ring_atoms[0], ring_atoms[-1]
+            if cut_first in existing_vs_atoms or cut_last in existing_vs_atoms:
+                continue
+            # ← skip fully aromatic rings unless forced
+            if not aromatic and self.mol is not None and self._ring_is_aromatic(ring_atoms):
+                continue
+            self._add_virtual_shadow_for_ring(ring_idx + 1, ring_atoms)
+        # ← add CYCLIC property if any ring was processed
+        if len(self.VIRTUAL_SHADOW) > 0:
+            if len(self.PROPERTIES) == 0:
+                self.PROPERTIES.append("CYCLIC")
+            elif "CYCLIC" not in self.PROPERTIES[0].values:
+                self.PROPERTIES[0].values.append("CYCLIC")
+
+    def _ring_is_aromatic(self, ring_atom_names: list[str]) -> bool:
+        """Check whether ALL bonds in a ring are aromatic using the RDKit mol."""
+        if self.mol is None:
+            return False
+        name_to_idx: dict[str, int] = {}
+        for atom in self.mol.GetAtoms():
+            info = atom.GetPDBResidueInfo()
+            if info is not None:
+                name_to_idx[info.GetName().strip()] = atom.GetIdx()
+        for i in range(len(ring_atom_names)):
+            a_name = ring_atom_names[i].strip()
+            b_name = ring_atom_names[(i + 1) % len(ring_atom_names)].strip()
+            a_idx = name_to_idx.get(a_name)
+            b_idx = name_to_idx.get(b_name)
+            if a_idx is None or b_idx is None:
+                return False
+            bond = self.mol.GetBondBetweenAtoms(a_idx, b_idx)
+            if bond is None or not bond.GetIsAromatic():
+                return False
+        return True
+
+    def _get_ring_atom_names(self) -> list[list[str]]:
+        """Get ring atom names, ordered so that CUT_BOND is at [0]--[-1].
+
+        Uses RDKit ring info when mol is available, otherwise reconstructs
+        from BOND + CUT_BOND entries (for file-loaded params without mol).
+        """
+        if self.mol is not None:
+            return self._get_ring_atom_names_from_mol()
+        return self._get_ring_atom_names_from_entries()
+
+    def _get_ring_atom_names_from_mol(self) -> list[list[str]]:
+        """Extract ring atom names from RDKit mol, ordered per AtomRings()."""
+        rings: list[list[str]] = []
+        for ring_set in self.mol.GetRingInfo().AtomRings():
+            names = [
+                self._get_PDBInfo_atomname(self.mol.GetAtomWithIdx(idx)).strip() for idx in ring_set
+            ]
+            rings.append(names)
+        return rings
+
+    def _get_ring_atom_names_from_entries(self) -> list[list[str]]:
+        """Reconstruct ring atom names from BOND + CUT_BOND entries (no mol)."""
+        # ← build adjacency from BOND entries
+        adj: dict[str, set[str]] = defaultdict(set)
+        for bond in self.BOND:
+            a, b = bond.first.strip(), bond.second.strip()
+            adj[a].add(b)
+            adj[b].add(a)
+        rings: list[list[str]] = []
+        for cut in self.CUT_BOND:
+            start, end = cut.first.strip(), cut.second.strip()
+            path = self._find_ring_path(adj, start, end)
+            if path:
+                rings.append(path)
+        return rings
+
+    def _find_ring_path(self, adj: dict[str, set[str]], start: str, end: str) -> list[str]:
+        """BFS to find a path from start to end through BOND adjacency, excluding the direct edge."""
+        queue: deque[list[str]] = deque([[start]])
+        visited: set[str] = {start}
+        while queue:
+            path = queue.popleft()
+            current = path[-1]
+            for neighbour in adj.get(current, set()):
+                # ← skip the direct cut-bond edge
+                if current == start and neighbour == end:
+                    continue
+                if current == end and neighbour == start:
+                    continue
+                if neighbour == end:
+                    return path + [end]
+                if neighbour not in visited:
+                    visited.add(neighbour)
+                    queue.append(path + [neighbour])
+        return []
+
+    def _add_virtual_shadow_for_ring(self, ring_idx: int, ring_atoms: list[str]) -> None:
+        """Assemble all virtual shadow entries for one ring.
+
+        For ring [a0, a1, ..., a(N-1)] with CUT_BOND at a(N-1)--a0:
+        - V_last shadows a(N-1), bonded to a0
+        - V_first shadows a0, bonded to a(N-1)
+        """
+        n = len(ring_atoms)
+        first_atom = ring_atoms[0]  # ← a0 — one end of the cut
+        last_atom = ring_atoms[-1]  # ← a(N-1) — other end of the cut
+        v_last = self._make_virtual_name(last_atom)  # shadows last, bonded to first
+        v_first = self._make_virtual_name(first_atom)  # shadows first, bonded to last
+        # ← handle name collisions between the two virtuals
+        if v_last.strip() == v_first.strip():
+            v_first = self._make_virtual_name(first_atom, suffix="2")
+        # ### ATOM entries — VIRT type, zero charge
+        self.ATOM.append(dict(name=v_last, rtype="VIRT", mtype="VIRT", partial=0.0))
+        self.ATOM.append(dict(name=v_first, rtype="VIRT", mtype="VIRT", partial=0.0))
+        # ### BOND entries — virtual bonded to real atom across the cut
+        self.BOND.append([first_atom, v_last, 1])  # a0 -- V_last
+        self.BOND.append([last_atom, v_first, 1])  # a(N-1) -- V_first
+        # ### VIRTUAL_SHADOW entries
+        self.VIRTUAL_SHADOW.append(dict(virtual_atom=v_last, shadow_atom=last_atom))
+        self.VIRTUAL_SHADOW.append(dict(virtual_atom=v_first, shadow_atom=first_atom))
+        # ### NU angles — N-1 torsions spanning the ring
+        # NU 1:   V_last, a0,   a1,   a2
+        # NU k:   a(k-2), a(k-1), a(k), a(k+1)   for k=2..N-2
+        # NU N-1: a(N-3), a(N-2), a(N-1), V_first
+        extended = [v_last] + ring_atoms + [v_first]
+        for i in range(n - 1):
+            self.NU.append(
+                dict(
+                    index=i + 1,
+                    first=extended[i],
+                    second=extended[i + 1],
+                    third=extended[i + 2],
+                    fourth=extended[i + 3],
+                )
+            )
+        # ### ADD_RING entry
+        ring_body = f"{ring_idx} " + " ".join(ring_atoms)
+        self.ADD_RING.append(ring_body)
+        # ### ICOOR_INTERNAL for virtual atoms
+        self._add_virtual_icoor(
+            v_last, last_atom, first_atom, ring_atoms[1], ring_atoms[2] if n > 2 else ring_atoms[0]
+        )
+        self._add_virtual_icoor(
+            v_first,
+            first_atom,
+            last_atom,
+            ring_atoms[-2],
+            ring_atoms[-3] if n > 2 else ring_atoms[-1],
+        )
+        self.log.info(
+            f"Ring {ring_idx}: added virtual shadows {v_last.strip()}/{v_first.strip()}. "
+            "LOWEST_RING_CONFORMER and LOW_RING_CONFORMERS not auto-set "
+            "(requires Cremer-Pople analysis) — set manually if needed."
+        )
+
+    def _make_virtual_name(self, real_name: str, suffix: str = "") -> str:
+        """Generate a virtual atom name from a real atom name.
+
+        Prepends 'V' to the stripped real name and pads to 4 chars.
+        Raises ValueError if the result exceeds 4 characters.
+        """
+        stripped = real_name.strip()
+        vname = f"V{stripped}{suffix}"
+        if len(vname) > 4:
+            raise ValueError(
+                f"Virtual name '{vname}' is too long (>4 chars) for real atom '{stripped}'"
+            )
+        return vname.ljust(4)
+
+    def _add_virtual_icoor(
+        self, virt_name: str, shadow_name: str, bonded_to: str, ref2: str, ref3: str
+    ) -> None:
+        """Add an ICOOR_INTERNAL entry for a virtual atom.
+
+        Uses 3D coordinates from the mol when available, otherwise sensible defaults
+        matching typical ring geometry (phi=60, theta=70, distance=1.44).
+        """
+        phi, theta, distance = 60.0, 70.0, 1.44
+        if self.mol is not None:
+            try:
+                conf = self.mol.GetConformer()
+                # ← find indices for the atoms
+                name_to_idx: dict[str, int] = {}
+                for atom in self.mol.GetAtoms():
+                    info = atom.GetPDBResidueInfo()
+                    if info is not None:
+                        name_to_idx[info.GetName().strip()] = atom.GetIdx()
+                shadow_idx = name_to_idx.get(shadow_name.strip())
+                bonded_idx = name_to_idx.get(bonded_to.strip())
+                ref2_idx = name_to_idx.get(ref2.strip())
+                ref3_idx = name_to_idx.get(ref3.strip())
+                if all(idx is not None for idx in (shadow_idx, bonded_idx, ref2_idx, ref3_idx)):
+                    distance = Chem.rdMolTransforms.GetBondLength(conf, shadow_idx, bonded_idx)
+                    angle_raw = Chem.rdMolTransforms.GetAngleDeg(
+                        conf, shadow_idx, bonded_idx, ref2_idx
+                    )
+                    theta = 180 - angle_raw
+                    tor = Chem.rdMolTransforms.GetDihedralDeg(
+                        conf, shadow_idx, bonded_idx, ref2_idx, ref3_idx
+                    )
+                    if str(tor) != "nan":
+                        phi = tor
+            except Exception:
+                pass  # ← fall back to defaults
+        self.ICOOR_INTERNAL.append(
+            dict(
+                child=virt_name,
+                phi=phi,
+                theta=theta,
+                distance=distance,
+                parent=bonded_to,
+                second_parent=ref2,
+                third_parent=ref3,
+            )
+        )
 
     def polish_mol(self, resi: int = 1, chain: str = "X") -> None:
         """

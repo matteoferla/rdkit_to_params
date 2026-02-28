@@ -51,8 +51,8 @@ class _RDKitRenameMixin:
         self.mol = Chem.Mol()
         self.NAME = ""
         self.is_aminoacid = lambda: True  # main class
-        self.polish = (
-            lambda: None
+        self.polish = lambda: (
+            None
         )  # covert class. makes sure all atoms have the same rdkit residue info
         self.rename_atom = lambda oldname, newname, overwrite=False: None
         self.pad_name = lambda name: name
@@ -153,7 +153,9 @@ class _RDKitRenameMixin:
                 f"atomnames is not None, dict, list, str or Chem.Mol but {type(atomnames)}"
             )
 
-    def rename_by_substructure(self, substructure: Chem.Mol, atomnames: "Sequence[str]") -> list[str]:
+    def rename_by_substructure(
+        self, substructure: Chem.Mol, atomnames: "Sequence[str]"
+    ) -> list[str]:
         """
         Assigns to the atoms in self.mol the names based on the backbone template and the names variable.
         See ``_fix_atom_names`` for example usage.

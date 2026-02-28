@@ -42,7 +42,10 @@ __all__ = [
 try:
     from rdkit_to_params._pyrosetta_mixin import _PoserMixin
 except ImportError as pyrosetta_error:
-    warn(f"PyRosetta is required for the ``test`` method (ImportError: {pyrosetta_error})", category=ImportWarning)
+    warn(
+        f"PyRosetta is required for the ``test`` method (ImportError: {pyrosetta_error})",
+        category=ImportWarning,
+    )
 
     class _PoserMixin:  # type: ignore[no-redef]
         pass
@@ -67,13 +70,17 @@ except ImportError as rdkit_error:
 
     class DummyMasker:  # type: ignore[no-redef]
         def __init__(self, *args, **kwargs):
-            raise ImportError(f'RDkit is required for DummyMasker (ImportError: {_rdkit_import_error})')
+            raise ImportError(
+                f"RDkit is required for DummyMasker (ImportError: {_rdkit_import_error})"
+            )
 
     class _RDKitMixin:  # type: ignore[no-redef]
         pass
 
     def neutralize(*args, **kargs):  # type: ignore[misc]
-        raise ImportError(f"RDkit is required for `neutralize` (pH 7 charge correction) (ImportError: {_rdkit_import_error})")
+        raise ImportError(
+            f"RDkit is required for `neutralize` (pH 7 charge correction) (ImportError: {_rdkit_import_error})"
+        )
 
 
 #################### main class ########################################################################################
@@ -324,6 +331,7 @@ class Params(_ParamsIoMixin, _RDKitMixin, _PoserMixin):  # type: ignore[misc]
         self._update_connect_entries(oldname, newname)
         self._update_generic_entries(oldname, newname)
         self._update_generic_list_entries(oldname, newname)
+        self._update_virtual_shadow_entries(oldname, newname)
 
     def _validate_and_format_newname(self, newname: str) -> str:
         """Validate new name length and format it."""
@@ -345,8 +353,8 @@ class Params(_ParamsIoMixin, _RDKitMixin, _PoserMixin):  # type: ignore[misc]
                 break
 
     def _update_bond_like_entries(self, oldname: str, newname: str) -> None:
-        """Update atom name in BOND, CHI, CUT_BOND, CHARGE entries."""
-        entry_types = ("BOND", "CHARGE", "CHI", "CUT_BOND")
+        """Update atom name in BOND, CHI, NU, CUT_BOND, CHARGE entries."""
+        entry_types = ("BOND", "CHARGE", "CHI", "CUT_BOND", "NU")
         atom_keys = ("first", "second", "third", "fourth", "atom")
 
         for entry_type in entry_types:
@@ -393,15 +401,20 @@ class Params(_ParamsIoMixin, _RDKitMixin, _PoserMixin):  # type: ignore[misc]
         for entry_type in entry_types:
             for entry in getattr(self, entry_type):
                 entry.values = [
-                    newname if v.strip() == oldname.strip() else v
-                    for v in entry.values
+                    newname if v.strip() == oldname.strip() else v for v in entry.values
                 ]
+
+    def _update_virtual_shadow_entries(self, oldname: str, newname: str) -> None:
+        """Update atom name in VIRTUAL_SHADOW entries."""
+        for entry in self.VIRTUAL_SHADOW:
+            if entry.virtual_atom.strip() == oldname.strip():
+                entry.virtual_atom = newname
+            if entry.shadow_atom.strip() == oldname.strip():
+                entry.shadow_atom = newname
 
     # ==== extras for cap
 
-    def _prep_for_terminal(
-        self, mainchain_atoms: list[str] | None = None, connection_idx: int = 1
-    ):
+    def _prep_for_terminal(self, mainchain_atoms: list[str] | None = None, connection_idx: int = 1):
         """
         p = Params.from_smiles('*C(=O)[C@@]1NC(=O)CC1', name='CAP', atomnames=[None, 'C', 'O', 'CA', 'N'])
         p.make_N_terminal_cap(mainchain_atoms=['C', 'O', 'CA', 'N'])

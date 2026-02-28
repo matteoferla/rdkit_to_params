@@ -24,25 +24,102 @@ It does not rely on any ``Params`` entry stuff. So can be used by itself for tes
 
 # Element to Rosetta type mapping for single-type elements
 ELEMENT_TO_RTYPE = {
-    "B": "Bsp2", "F": "F", "CL": "Cl", "BR": "Br", "I": "I",
-    "ZN": "Zn2p", "CO": "Co2p", "CU": "Cu2p", "MG": "Mg2p", "CA": "Ca2p",
-    "Si": "Si", "NA": "Na1p", "K": "K1p", "HE": "He", "LI": "Li",
-    "BE": "Be", "NE": "Ne", "AL": "Al", "AR": "Ar", "SC": "Sc",
-    "TI": "Ti", "V": "V", "CR": "Cr", "MN": "Mn", "NI": "Ni",
-    "GA": "Ga", "GE": "Ge", "AS": "As", "SE": "Se", "KR": "Kr",
-    "RB": "Rb", "SR": "Sr", "Y": "Y", "ZR": "Zr", "NB": "Nb",
-    "MO": "Mo", "TC": "Tc", "RU": "Ru", "RH": "Rh", "PD": "Pd",
-    "AG": "Ag", "CD": "Cd", "IN": "In", "SN": "Sn", "SB": "Sb",
-    "TE": "Te", "XE": "Xe", "CS": "Cs", "BA": "Ba", "LA": "La",
-    "CE": "Ce", "PR": "Pr", "ND": "Nd", "PM": "Pm", "SM": "Sm",
-    "EU": "Eu", "GD": "Gd", "TB": "Tb", "DY": "Dy", "HO": "Ho",
-    "ER": "Er", "TM": "Tm", "YB": "Yb", "LU": "Lu", "HF": "Hf",
-    "TA": "Ta", "W": "W", "RE": "Re", "OS": "Os", "IR": "Ir",
-    "PT": "Pt", "AU": "Au", "HG": "Hg", "TL": "Tl", "PB": "Pb",
-    "BI": "Bi", "PO": "Po", "AT": "At", "RN": "Rn", "FR": "Fr",
-    "RA": "Ra", "AC": "Ac", "TH": "Th", "PA": "Pa", "U": "U",
-    "NP": "Np", "PU": "Pu", "AM": "Am", "CM": "Cm", "BK": "Bk",
-    "CF": "Cf", "ES": "Es", "FM": "Fm", "MD": "Md", "NO": "No", "LR": "Lr",
+    "B": "Bsp2",
+    "F": "F",
+    "CL": "Cl",
+    "BR": "Br",
+    "I": "I",
+    "ZN": "Zn2p",
+    "CO": "Co2p",
+    "CU": "Cu2p",
+    "MG": "Mg2p",
+    "CA": "Ca2p",
+    "Si": "Si",
+    "NA": "Na1p",
+    "K": "K1p",
+    "HE": "He",
+    "LI": "Li",
+    "BE": "Be",
+    "NE": "Ne",
+    "AL": "Al",
+    "AR": "Ar",
+    "SC": "Sc",
+    "TI": "Ti",
+    "V": "V",
+    "CR": "Cr",
+    "MN": "Mn",
+    "NI": "Ni",
+    "GA": "Ga",
+    "GE": "Ge",
+    "AS": "As",
+    "SE": "Se",
+    "KR": "Kr",
+    "RB": "Rb",
+    "SR": "Sr",
+    "Y": "Y",
+    "ZR": "Zr",
+    "NB": "Nb",
+    "MO": "Mo",
+    "TC": "Tc",
+    "RU": "Ru",
+    "RH": "Rh",
+    "PD": "Pd",
+    "AG": "Ag",
+    "CD": "Cd",
+    "IN": "In",
+    "SN": "Sn",
+    "SB": "Sb",
+    "TE": "Te",
+    "XE": "Xe",
+    "CS": "Cs",
+    "BA": "Ba",
+    "LA": "La",
+    "CE": "Ce",
+    "PR": "Pr",
+    "ND": "Nd",
+    "PM": "Pm",
+    "SM": "Sm",
+    "EU": "Eu",
+    "GD": "Gd",
+    "TB": "Tb",
+    "DY": "Dy",
+    "HO": "Ho",
+    "ER": "Er",
+    "TM": "Tm",
+    "YB": "Yb",
+    "LU": "Lu",
+    "HF": "Hf",
+    "TA": "Ta",
+    "W": "W",
+    "RE": "Re",
+    "OS": "Os",
+    "IR": "Ir",
+    "PT": "Pt",
+    "AU": "Au",
+    "HG": "Hg",
+    "TL": "Tl",
+    "PB": "Pb",
+    "BI": "Bi",
+    "PO": "Po",
+    "AT": "At",
+    "RN": "Rn",
+    "FR": "Fr",
+    "RA": "Ra",
+    "AC": "Ac",
+    "TH": "Th",
+    "PA": "Pa",
+    "U": "U",
+    "NP": "Np",
+    "PU": "Pu",
+    "AM": "Am",
+    "CM": "Cm",
+    "BK": "Bk",
+    "CF": "Cf",
+    "ES": "Es",
+    "FM": "Fm",
+    "MD": "Md",
+    "NO": "No",
+    "LR": "Lr",
 }
 
 # SMARTS patterns for functional group recognition (rtypes)
@@ -373,7 +450,6 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         else:
             atom.SetProp("_rType", "S")
 
-
     def _add_genrtypes(self) -> None:
         """Add Rosetta generic Atom types to each atom. Refactored for lower complexity."""
         # Apply SMARTS pattern matching for functional groups
@@ -426,9 +502,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         elif symbol in ("F", "Cl", "Br", "I"):
             self._assign_halogen_genrtype(atom)
         else:
-            raise ValueError(
-                f"No idea what this {atom.GetSymbol()} {atom.GetHybridization()} is"
-            )
+            raise ValueError(f"No idea what this {atom.GetSymbol()} {atom.GetHybridization()} is")
 
     def _assign_carbon_genrtype(self, atom: Chem.Atom) -> None:
         """Assign generic rtype for carbon atoms."""
@@ -516,8 +590,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         elif len(Hs) == 0:
             atom.SetProp("_rType", "Ssl")
         elif (
-            atom.GetHybridization() == Chem.HybridizationType.SP3
-            and atom.GetExplicitValence() == 6
+            atom.GetHybridization() == Chem.HybridizationType.SP3 and atom.GetExplicitValence() == 6
         ):
             atom.SetProp("_rType", "SG5")
         elif atom.GetHybridization() == Chem.HybridizationType.SP3:
@@ -529,10 +602,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
 
     def _assign_phosphorus_genrtype(self, atom: Chem.Atom) -> None:
         """Assign generic rtype for phosphorus atoms."""
-        if (
-            atom.GetHybridization() == Chem.HybridizationType.SP3
-            and atom.GetExplicitValence() == 6
-        ):
+        if atom.GetHybridization() == Chem.HybridizationType.SP3 and atom.GetExplicitValence() == 6:
             atom.SetProp("_rType", "PG5")
         elif atom.GetHybridization() == Chem.HybridizationType.SP3:
             atom.SetProp("_rType", "PG3")

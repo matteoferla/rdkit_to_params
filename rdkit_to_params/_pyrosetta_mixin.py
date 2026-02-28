@@ -60,9 +60,7 @@ class _PoserMixin:
             self._relax(pose)
         return pose
 
-    def to_polymeric_pose(
-        self, relax: bool = False, sequence: str | None = None
-    ) -> pyrosetta.Pose:
+    def to_polymeric_pose(self, relax: bool = False, sequence: str | None = None) -> pyrosetta.Pose:
         if sequence is None:
             sequence = f"AX[{self.NAME}]A"
         pose = pyrosetta.Pose()
