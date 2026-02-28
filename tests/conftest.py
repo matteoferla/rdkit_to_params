@@ -1,8 +1,9 @@
 """Pytest configuration and fixtures for rdkit_to_params tests."""
-import pytest
 from pathlib import Path
+
 import _pytest.config
 import pyrosetta
+import pytest
 
 PytestConfig = _pytest.config.Config
 

@@ -3,7 +3,6 @@ import pytest
 from rdkit import Chem
 
 from rdkit_to_params import Params
-from rdkit_to_params.entries import ATOMEntry, BONDEntry, CHIEntry, ICOOR_INTERNALEntry
 
 
 class TestRenameAtomInEntries:

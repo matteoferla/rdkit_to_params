@@ -1,9 +1,11 @@
-from rdkit_to_params import Params, DummyMasker
-from rdkit import Chem
-from rdkit.Chem import AllChem
 import pyrosetta
 import pyrosetta.rosetta.protocols as prp
 from pyrosetta.rosetta.std import ostringstream
+from rdkit import Chem
+from rdkit.Chem import AllChem
+
+from rdkit_to_params import DummyMasker, Params
+
 
 def test_covalent():
 

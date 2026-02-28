@@ -1,9 +1,11 @@
 """Test suite for rdkit_to_params package."""
 from pathlib import Path
+
 import pyrosetta
-from rdkit_to_params import Params, DummyMasker
 from rdkit import Chem
 from rdkit.Chem import AllChem
+
+from rdkit_to_params import DummyMasker, Params
 
 # Fixtures are defined in conftest.py
 

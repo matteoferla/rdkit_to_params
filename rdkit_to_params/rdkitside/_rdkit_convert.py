@@ -477,42 +477,52 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         """
         rings = self._get_ring_atom_names()
         for ring_idx, ring_atoms in enumerate(rings):
-            # ← skip if this ring already has virtual shadows (idempotency)
-            existing_vs_atoms = {vs.shadow_atom.strip() for vs in self.VIRTUAL_SHADOW}
-            cut_first, cut_last = ring_atoms[0], ring_atoms[-1]
-            if cut_first in existing_vs_atoms or cut_last in existing_vs_atoms:
-                continue
-            # ← skip fully aromatic rings unless forced
-            if not aromatic and self.mol is not None and self._ring_is_aromatic(ring_atoms):
+            if self._should_skip_ring(ring_atoms, aromatic):
                 continue
             self._add_virtual_shadow_for_ring(ring_idx + 1, ring_atoms)
-        # ← add CYCLIC property if any ring was processed
-        if len(self.VIRTUAL_SHADOW) > 0:
-            if len(self.PROPERTIES) == 0:
-                self.PROPERTIES.append("CYCLIC")
-            elif "CYCLIC" not in self.PROPERTIES[0].values:
-                self.PROPERTIES[0].values.append("CYCLIC")
+        self._ensure_cyclic_property()
+
+    def _should_skip_ring(self, ring_atoms: list[str], aromatic: bool) -> bool:
+        """Return True if ring already has virtual shadows or is aromatic and unwanted."""
+        existing = {vs.shadow_atom.strip() for vs in self.VIRTUAL_SHADOW}
+        if ring_atoms[0] in existing or ring_atoms[-1] in existing:
+            return True
+        if not aromatic and self.mol is not None and self._ring_is_aromatic(ring_atoms):
+            return True
+        return False
+
+    def _ensure_cyclic_property(self) -> None:
+        """Add CYCLIC to PROPERTIES if virtual shadows were generated."""
+        if len(self.VIRTUAL_SHADOW) == 0:
+            return
+        if len(self.PROPERTIES) == 0:
+            self.PROPERTIES.append("CYCLIC")
+        elif "CYCLIC" not in self.PROPERTIES[0].values:
+            self.PROPERTIES[0].values.append("CYCLIC")
 
     def _ring_is_aromatic(self, ring_atom_names: list[str]) -> bool:
         """Check whether ALL bonds in a ring are aromatic using the RDKit mol."""
         if self.mol is None:
             return False
-        name_to_idx: dict[str, int] = {}
-        for atom in self.mol.GetAtoms():
-            info = atom.GetPDBResidueInfo()
-            if info is not None:
-                name_to_idx[info.GetName().strip()] = atom.GetIdx()
+        name_to_idx = self._build_name_to_idx_map()
         for i in range(len(ring_atom_names)):
-            a_name = ring_atom_names[i].strip()
-            b_name = ring_atom_names[(i + 1) % len(ring_atom_names)].strip()
-            a_idx = name_to_idx.get(a_name)
-            b_idx = name_to_idx.get(b_name)
+            a_idx = name_to_idx.get(ring_atom_names[i].strip())
+            b_idx = name_to_idx.get(ring_atom_names[(i + 1) % len(ring_atom_names)].strip())
             if a_idx is None or b_idx is None:
                 return False
             bond = self.mol.GetBondBetweenAtoms(a_idx, b_idx)
             if bond is None or not bond.GetIsAromatic():
                 return False
         return True
+
+    def _build_name_to_idx_map(self) -> dict[str, int]:
+        """Build a mapping from stripped PDB atom names to RDKit atom indices."""
+        result: dict[str, int] = {}
+        for atom in self.mol.GetAtoms():
+            info = atom.GetPDBResidueInfo()
+            if info is not None:
+                result[info.GetName().strip()] = atom.GetIdx()
+        return result
 
     def _get_ring_atom_names(self) -> list[list[str]]:
         """Get ring atom names, ordered so that CUT_BOND is at [0]--[-1].
@@ -651,33 +661,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         Uses 3D coordinates from the mol when available, otherwise sensible defaults
         matching typical ring geometry (phi=60, theta=70, distance=1.44).
         """
-        phi, theta, distance = 60.0, 70.0, 1.44
-        if self.mol is not None:
-            try:
-                conf = self.mol.GetConformer()
-                # ← find indices for the atoms
-                name_to_idx: dict[str, int] = {}
-                for atom in self.mol.GetAtoms():
-                    info = atom.GetPDBResidueInfo()
-                    if info is not None:
-                        name_to_idx[info.GetName().strip()] = atom.GetIdx()
-                shadow_idx = name_to_idx.get(shadow_name.strip())
-                bonded_idx = name_to_idx.get(bonded_to.strip())
-                ref2_idx = name_to_idx.get(ref2.strip())
-                ref3_idx = name_to_idx.get(ref3.strip())
-                if all(idx is not None for idx in (shadow_idx, bonded_idx, ref2_idx, ref3_idx)):
-                    distance = Chem.rdMolTransforms.GetBondLength(conf, shadow_idx, bonded_idx)
-                    angle_raw = Chem.rdMolTransforms.GetAngleDeg(
-                        conf, shadow_idx, bonded_idx, ref2_idx
-                    )
-                    theta = 180 - angle_raw
-                    tor = Chem.rdMolTransforms.GetDihedralDeg(
-                        conf, shadow_idx, bonded_idx, ref2_idx, ref3_idx
-                    )
-                    if str(tor) != "nan":
-                        phi = tor
-            except Exception:
-                pass  # ← fall back to defaults
+        phi, theta, distance = self._measure_virtual_icoor(shadow_name, bonded_to, ref2, ref3)
         self.ICOOR_INTERNAL.append(
             dict(
                 child=virt_name,
@@ -689,6 +673,28 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
                 third_parent=ref3,
             )
         )
+
+    def _measure_virtual_icoor(
+        self, shadow_name: str, bonded_to: str, ref2: str, ref3: str
+    ) -> tuple[float, float, float]:
+        """Compute (phi, theta, distance) from mol 3D coords, or return defaults."""
+        defaults = (60.0, 70.0, 1.44)
+        if self.mol is None:
+            return defaults
+        try:
+            name_to_idx = self._build_name_to_idx_map()
+            indices = [name_to_idx.get(n.strip()) for n in (shadow_name, bonded_to, ref2, ref3)]
+            if any(idx is None for idx in indices):
+                return defaults
+            si, bi, r2i, r3i = indices  # type: ignore[misc]
+            conf = self.mol.GetConformer()
+            distance = Chem.rdMolTransforms.GetBondLength(conf, si, bi)
+            theta = 180 - Chem.rdMolTransforms.GetAngleDeg(conf, si, bi, r2i)
+            tor = Chem.rdMolTransforms.GetDihedralDeg(conf, si, bi, r2i, r3i)
+            phi = tor if str(tor) != "nan" else 60.0
+            return (phi, theta, distance)
+        except Exception:
+            return defaults
 
     def polish_mol(self, resi: int = 1, chain: str = "X") -> None:
         """

@@ -22,7 +22,6 @@ except ImportError as err:
     pd = None  # type: ignore[assignment]
 
 from rdkit import Chem
-from rdkit.Chem import AllChem
 
 BONDTYPES = {
     "SING": Chem.BondType.SINGLE,

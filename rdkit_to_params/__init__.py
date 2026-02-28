@@ -6,7 +6,6 @@ The main class here is ``Params``. All underscore base classes are not meant to 
 from __future__ import annotations
 
 ########################################################################################################################
-
 import logging
 import os
 import re
@@ -205,7 +204,7 @@ class Params(_ParamsIoMixin, _RDKitMixin, _PoserMixin):  # type: ignore[misc]
                 )
 
     def rename_atom(
-        self, atom_or_atomname: str | "Chem.Atom", newname: str, overwrite=True
+        self, atom_or_atomname: str | Chem.Atom, newname: str, overwrite=True
     ) -> str | None:
         """
         rename an atom by atomname or Chem.Atom (the former just calls ``rename_atom_by_name`` as is just for legacy)
