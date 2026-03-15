@@ -427,7 +427,7 @@ class Params(_ParamsIoMixin, _RDKitMixin, _PoserMixin):  # type: ignore[misc]
         """
         if self.mol is None:
             raise ValueError("Cannot estimate ref energy without an RDKit mol (self.mol is None)")
-        from rdkit.Chem import Descriptors, Crippen, rdMolDescriptors
+        from rdkit.Chem import Crippen, rdMolDescriptors
         heavy = self.mol.GetNumHeavyAtoms()
         if heavy == 0:
             raise ValueError("Molecule has no heavy atoms")

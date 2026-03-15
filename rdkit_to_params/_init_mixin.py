@@ -52,6 +52,7 @@ class _ParamsInitMixin:
         self.CHARGE = Entries.from_name("CHARGE")
         self.CONNECT = Entries.from_name("CONNECT")
         self.CHI = Entries.from_name("CHI")
+        self.PROTON_CHI = Entries.from_name("PROTON_CHI")
         self.NBR_ATOM = Entries.from_name("NBR_ATOM")
         self.NBR_RADIUS = Entries.from_name("NBR_RADIUS")
         self.ICOOR_INTERNAL = Entries.from_name("ICOOR_INTERNAL")

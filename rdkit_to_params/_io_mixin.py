@@ -105,6 +105,7 @@ class _ParamsIoMixin(_ParamsInitMixin):
             self.RAMA_PREPRO_FILENAME,
             self.ACT_COORD_ATOMS,
             self.CHI,
+            self.PROTON_CHI,
             self.CHI_ROTAMERS,
             self.NU,
             self.LOWEST_RING_CONFORMER,

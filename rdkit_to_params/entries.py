@@ -390,6 +390,48 @@ Entries.choices["CHI"] = (CHIEntry, Singletony.multiton)
 
 
 @dataclass
+class PROTON_CHIEntry:
+    """
+    Proton chi sampling specification for polar hydrogens (hydroxyl, thiol, amine).
+    E.g. ``PROTON_CHI 3 SAMPLES 18 0 20 40 60 80 100 120 140 160 180 200 220 240 260 280 300 320 340 EXTRA 0``
+    """
+    chi_index: int
+    samples: list[int]
+    extra: list[int]
+
+    def __str__(self) -> str:
+        angles = " ".join(str(s) for s in self.samples)
+        extras = " ".join(str(e) for e in self.extra)
+        return f"PROTON_CHI {self.chi_index} SAMPLES {len(self.samples)} {angles} EXTRA {extras}"
+
+    def _repr_html_(self):
+        return (
+            f"{html_span('PROTON_CHI')} chi:{html_span(self.chi_index)} "
+            f"samples:{html_span(len(self.samples))} extra:{self.extra}"
+        )
+
+    @classmethod
+    def from_str(cls, text: str):
+        # <idx> SAMPLES <n> <vals...> EXTRA <vals...>
+        rex = re.match(r"(\d+)\s+SAMPLES\s+(\d+)\s+(.*?)\s+EXTRA\s+(.*)", text.strip())
+        if rex is None:
+            raise ValueError(f'PROTON_CHI entry "{text}" is not formatted correctly')
+        chi_index = int(rex.group(1))
+        n_samples = int(rex.group(2))
+        samples = [int(x) for x in rex.group(3).split()]
+        if len(samples) != n_samples:
+            raise ValueError(f'PROTON_CHI expected {n_samples} samples, got {len(samples)}')
+        extra = [int(x) for x in rex.group(4).split()]
+        return cls(chi_index=chi_index, samples=samples, extra=extra)
+
+
+Entries.choices["PROTON_CHI"] = (PROTON_CHIEntry, Singletony.multiton)
+
+
+#########################################################################################################
+
+
+@dataclass
 class ICOOR_INTERNALEntry:
     """
     Lines stolen from Rosetta documentation

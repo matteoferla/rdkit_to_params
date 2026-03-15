@@ -29,6 +29,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
     CONNECT: Entries
     CHARGE: Entries
     CHI: Entries
+    PROTON_CHI: Entries
     CUT_BOND: Entries
     BOND: Entries
     NBR_ATOM: Entries
@@ -41,78 +42,72 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
     PROPERTIES: Entries
 
     greekification = True  # controls whether to change the atom names to greek for amino acids for CB and beyond.
-    auto_ref = False  # auto-add NUMERIC_PROPERTY REFERENCE for ncAAs
+    auto_ref = True  # auto-add NUMERIC_PROPERTY REFERENCE for ncAAs
+
+    _CONVERT_SKIP = frozenset({
+        "#", "TYPE", "comment", "IO_STRING", "ROTAMER_AA",
+        "AA", "PROPERTIES", "VARIANT", "<UNKNOWN>",
+    })
 
     def convert_mol(self, pcharge_prop_name: str = "_GasteigerCharge") -> None:
-        """
-        This method does the actual conversion to params entries
+        """Convert the RDKit mol into Rosetta params entries."""
+        self._ensure_conformer()
+        title = self._resolve_name()
+        self.log.debug(f"{title} is being converted (`.convert_mol`)")
+        self._handle_fragments(title)
+        self.comments.append(Chem.MolToSmiles(self.mol))
+        if len(self.TYPE) == 0:
+            self.TYPE.append("LIGAND")
+        self._clear_regenerated_entries()
+        self._build_topology(pcharge_prop_name)
+        self._find_centroid()
+        if self.mol.GetRingInfo().NumRings() > 0:
+            self.add_ring_virtual_shadows()
+        if self.auto_ref and self.mol is not None and self.is_aminoacid():
+            self.add_ref_energy()
 
-        :return:
-        """
-        if not self.mol.GetConformers():
-            self.log.warning("The molecule passed has no conformers... Adding.")
-            # add_conformer does also the gasteiger charges :/
-            with DummyMasker(self.mol):
-                AllChem.EmbedMolecule(self.mol)  # type: ignore[attr-defined]
-                AllChem.MMFFOptimizeMolecule(self.mol)  # type: ignore[attr-defined]
-        # NAME
-        if self.mol.HasProp("_Name"):
-            title = self.mol.GetProp("_Name").strip()
-        else:
-            title = "Unnamed molecule"
+    def _ensure_conformer(self) -> None:
+        """Embed + optimise if the mol has no conformers."""
+        if self.mol.GetConformers():
+            return
+        self.log.warning("The molecule passed has no conformers... Adding.")
+        with DummyMasker(self.mol):
+            AllChem.EmbedMolecule(self.mol)  # type: ignore[attr-defined]
+            AllChem.MMFFOptimizeMolecule(self.mol)  # type: ignore[attr-defined]
+
+    def _resolve_name(self) -> str:
+        """Set self.NAME from mol _Name prop or PDBInfo; return the title."""
+        title = self.mol.GetProp("_Name").strip() if self.mol.HasProp("_Name") else "Unnamed molecule"
         if len(title) == 3:
             self.NAME = title
         else:
             self.comments.append(title)
             self.NAME = self._get_resn_from_PDBInfo()
-        self.log.debug(f"{title} is being converted (`.convert_mol`)")
+        return title
+
+    def _handle_fragments(self, title: str) -> None:
+        """Keep only the largest fragment if the mol is fragmented."""
         if len(Chem.GetMolFrags(self.mol)) > 1:
             self.log.warning(f"{title} is split in {len(Chem.GetMolFrags(self.mol))}")
             self.mol = Chem.GetMolFrags(self.mol, asMols=True)[0]
-        # SMILES
-        self.comments.append(Chem.MolToSmiles(self.mol))
-        if len(self.TYPE) == 0:
-            self.TYPE.append("LIGAND")
-        # remove all previous entries.
+
+    def _clear_regenerated_entries(self) -> None:
+        """Clear all entries that will be regenerated, preserving metadata entries."""
         for attr_name in Entries.choices:
-            # do not blank these:
-            if attr_name in [
-                "#",
-                "TYPE",
-                "comment",
-                "IO_STRING",
-                "ROTAMER_AA",
-                "AA",
-                "PROPERTIES",
-                "VARIANT",
-                "<UNKNOWN>",
-            ]:
+            if attr_name in self._CONVERT_SKIP or not hasattr(self, attr_name):
                 continue
-            elif not hasattr(self, attr_name):
-                continue
-            else:
-                getattr(self, attr_name).clear()
-        # correct for ions
+            getattr(self, attr_name).clear()
+
+    def _build_topology(self, pcharge_prop_name: str) -> None:
+        """Build ICOOR, ATOM, CONNECT, CHI, and BOND entries."""
         if self.mol.GetNumAtoms() >= 3:
-            # ICOOR
-            self._parse_icoors()  # fills self.ordered_atoms
-            # ATOM & CONNECT
+            self._parse_icoors()
             self._parse_atoms(pcharge_prop_name)
-            # CHI
             self._parse_rotatables()
         else:
-            self._parse_w_virtuals()  # adds virt atom to the mol
+            self._parse_w_virtuals()
             self._parse_atoms(pcharge_prop_name)
-        # BOND
         self._parse_bonds()
-        # NBR
-        self._find_centroid()
-        # VIRTUAL SHADOW ATOMS for ring systems
-        if self.mol.GetRingInfo().NumRings() > 0:
-            self.add_ring_virtual_shadows()
-        # auto-estimate reference energy for ncAAs
-        if self.auto_ref and self.mol is not None:
-            self.add_ref_energy()
 
     ## ============= internal coordinates ==============================================================================
 
@@ -122,93 +117,92 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         self.ordered_atoms: list[Chem.Atom] = []
         self._rotation_count = 0
         if self.is_aminoacid():
-            # you have to start with N.
-            N_atom: Chem.Atom = self.get_atom_by_name("N")
-            CA_atom: Chem.Atom = self.get_atom_by_name("CA")
-            C_atom: Chem.Atom = self.get_atom_by_name("C")
-            O_atom: Chem.Atom = self.get_atom_by_name("O")
-            UPPER_atom: Chem.Atom = self.get_atom_by_name("UPPER")
-            LOWER_atom: Chem.Atom = self.get_atom_by_name("LOWER")
-            self._add_icoor([N_atom, N_atom, CA_atom, C_atom])
-            self._add_icoor([CA_atom, N_atom, CA_atom, C_atom])
-            self._add_icoor([C_atom, CA_atom, N_atom, C_atom])
-            self._add_icoor([UPPER_atom, C_atom, CA_atom, N_atom])
-            self._add_icoor([O_atom, C_atom, CA_atom, UPPER_atom])
-            self._add_icoor([LOWER_atom, N_atom, CA_atom, C_atom])
+            self._icoor_aminoacid_bootstrap()
         else:
-            # cycle through until a good root is found!
-            while self._undescribed:
-                self._prevent_overcycling()
-                atom: Chem.Atom = self._undescribed[0]
-                if atom.GetSymbol() == "*" or atom.GetProp("_rType") == "VIRT":
-                    self.log.debug("Dummy or Virtual not allowed in first three lines...")
-                    self._undescribed.rotate(-1)
-                    self._rotation_count += 1
-                    continue  # This cannot be in the first three lines, whereas the R group is first in a canonical SMILES.
-                else:
-                    # I assume in some cases Virtual atoms are called for... but for now, no!
-                    for parent_atom in self._get_unseen_neighbors(atom, [], True):
-                        siblings_atoms = self._get_unseen_neighbors(parent_atom, [atom], True)
-                        if len(siblings_atoms) != 0:
-                            break
-                    else:
-                        self.log.debug(
-                            f"First row: No siblings for {self._get_PDBInfo_atomname(atom)}!"
-                        )
-                        self._undescribed.rotate(-1)
-                        self._rotation_count += 1
-                        continue
-                    grandparent_atom: Chem.Atom = siblings_atoms[0]
-                    # first line
-                    self._add_icoor([atom, atom, parent_atom, grandparent_atom])
-                    # Second line
-                    self._add_icoor([parent_atom, atom, parent_atom, grandparent_atom])
-                    # Third line
-                    self._add_icoor([grandparent_atom, parent_atom, atom, grandparent_atom])
-                    break
+            self._icoor_ligand_bootstrap()
         self.log.debug("Parsing forth line onwards")
-        # not first three lines
+        self._icoor_remaining_atoms()
+
+    def _icoor_aminoacid_bootstrap(self) -> None:
+        """Emit the first 6 ICOOR lines for an amino acid (N, CA, C, UPPER, O, LOWER)."""
+        N = self.get_atom_by_name("N")
+        CA = self.get_atom_by_name("CA")
+        C = self.get_atom_by_name("C")
+        self._add_icoor([N, N, CA, C])
+        self._add_icoor([CA, N, CA, C])
+        self._add_icoor([C, CA, N, C])
+        self._add_icoor([self.get_atom_by_name("UPPER"), C, CA, N])
+        self._add_icoor([self.get_atom_by_name("O"), C, CA, self.get_atom_by_name("UPPER")])
+        self._add_icoor([self.get_atom_by_name("LOWER"), N, CA, C])
+
+    def _icoor_ligand_bootstrap(self) -> None:
+        """Find a valid root triplet and emit the first 3 ICOOR lines for a ligand."""
         while self._undescribed:
             self._prevent_overcycling()
             atom = self._undescribed[0]
-            d_idx = [d.GetIdx() for d in self.ordered_atoms]
-            d_neighs = [
-                n for n in self._get_unseen_neighbors(atom, [], False) if n.GetIdx() in d_idx
-            ]
-            if len(d_neighs) == 0:
-                self.log.debug(f"Other row: No parent for {self._get_PDBInfo_atomname(atom)}!")
+            if atom.GetSymbol() == "*" or atom.GetProp("_rType") == "VIRT":
+                self.log.debug("Dummy or Virtual not allowed in first three lines...")
                 self._undescribed.rotate(-1)
                 self._rotation_count += 1
                 continue
-            parent_atom = d_neighs[0]
-            d_neighs = [
-                n
-                for n in self._get_unseen_neighbors(parent_atom, [atom], False)
-                if n.GetIdx() in d_idx
-            ]
-            if len(d_neighs) == 0:
+            triplet = self._find_root_triplet(atom)
+            if triplet is None:
                 self._undescribed.rotate(-1)
-                self.log.debug(f"Other row: No siblings for  {self._get_PDBInfo_atomname(atom)}!")
                 self._rotation_count += 1
                 continue
-            elif len(d_neighs) == 1:
-                sibling_atom: Chem.Atom = d_neighs[0]
-                d_neighs = [
-                    n
-                    for n in self._get_unseen_neighbors(sibling_atom, [parent_atom, atom], False)
-                    if n.GetIdx() in d_idx
-                ]
-                if len(d_neighs) == 0:
-                    self._undescribed.rotate(-1)
-                    self.log.debug(f"Other row: No cousins for  {self._get_PDBInfo_atomname(atom)}")
-                    self._rotation_count += 1
-                    continue
-                else:
-                    atoms = [atom, parent_atom, sibling_atom, d_neighs[0]]
-            else:
-                atoms = [atom, parent_atom, d_neighs[0], d_neighs[1]]
-            self._add_icoor(atoms)
+            root, parent, grandparent = triplet
+            self._add_icoor([root, root, parent, grandparent])
+            self._add_icoor([parent, root, parent, grandparent])
+            self._add_icoor([grandparent, parent, root, grandparent])
+            break
+
+    def _find_root_triplet(self, atom: Chem.Atom) -> tuple[Chem.Atom, Chem.Atom, Chem.Atom] | None:
+        """Find a root-parent-grandparent triplet for ICOOR bootstrap, or None."""
+        for parent_atom in self._get_unseen_neighbors(atom, [], True):
+            siblings = self._get_unseen_neighbors(parent_atom, [atom], True)
+            if siblings:
+                return (atom, parent_atom, siblings[0])
+        self.log.debug(f"First row: No siblings for {self._get_PDBInfo_atomname(atom)}!")
+        return None
+
+    def _icoor_remaining_atoms(self) -> None:
+        """BFS-walk remaining undescribed atoms and emit ICOOR entries."""
+        while self._undescribed:
+            self._prevent_overcycling()
+            atom = self._undescribed[0]
+            quadruplet = self._find_icoor_quadruplet(atom)
+            if quadruplet is None:
+                self._undescribed.rotate(-1)
+                self._rotation_count += 1
+                continue
+            self._add_icoor(quadruplet)
             self._rotation_count -= 1
+
+    def _described_neighbors(self, atom: Chem.Atom, seen: list[Chem.Atom]) -> list[Chem.Atom]:
+        """Return neighbours of ``atom`` that are already in ``ordered_atoms``."""
+        described_idx = {d.GetIdx() for d in self.ordered_atoms}
+        return [n for n in self._get_unseen_neighbors(atom, seen, False)
+                if n.GetIdx() in described_idx]
+
+    def _find_icoor_quadruplet(self, atom: Chem.Atom) -> list[Chem.Atom] | None:
+        """Find [child, parent, sibling, ref] for an ICOOR entry, or None if not yet possible."""
+        parents = self._described_neighbors(atom, [])
+        if not parents:
+            self.log.debug(f"Other row: No parent for {self._get_PDBInfo_atomname(atom)}!")
+            return None
+        parent = parents[0]
+        siblings = self._described_neighbors(parent, [atom])
+        if not siblings:
+            self.log.debug(f"Other row: No siblings for  {self._get_PDBInfo_atomname(atom)}!")
+            return None
+        if len(siblings) >= 2:
+            return [atom, parent, siblings[0], siblings[1]]
+        # only 1 sibling — need a cousin
+        cousins = self._described_neighbors(siblings[0], [parent, atom])
+        if not cousins:
+            self.log.debug(f"Other row: No cousins for  {self._get_PDBInfo_atomname(atom)}")
+            return None
+        return [atom, parent, siblings[0], cousins[0]]
 
     def _add_icoor(self, atoms: list[Chem.Atom]) -> None:
         # due to madness the same atom objects differ.
@@ -332,71 +326,209 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
     ## ============= Chi entries =======================================================================================
 
     def _parse_rotatables(self) -> None:
-        """
-        I am not sure if this is right...
-        I do not know if a C(=O)-C=O is rotatable (cis-trans).
+        """Bond-centric CHI generation with PROTON_CHI support.
 
-        :return:
+        Iterates mol bonds to find rotatable single bonds between non-ring,
+        non-dummy heavy atoms. For each, builds a 4-atom CHI quadruplet.
+        Polar H neighbours get an additional CHI + PROTON_CHI entry.
+        For CHI a-b-c-d, Rosetta requires atom_base(c)==b in the ICOOR tree.
         """
         self.log.debug("Filling CHI")
+        ring_idxs = self._collect_ring_atom_indices()
+        icoor_parent = self._build_icoor_parent_map()
+        rotatable_bonds = self._find_rotatable_bonds(ring_idxs, icoor_parent)
+        for b_atom, c_atom in rotatable_bonds:
+            self._emit_chi(b_atom, c_atom, ring_idxs, icoor_parent)
 
-        def is_single(a, b):
-            bond = self.mol.GetBondBetweenAtoms(a.GetIdx(), b.GetIdx())
-            return bond.GetBondType() == Chem.BondType.SINGLE
+    def _build_icoor_parent_map(self) -> dict[int, int]:
+        """Build atom_idx → parent_idx map from ICOOR_INTERNAL entries.
 
-        cuts = [
-            tuple(sorted([ring_set[0], ring_set[-1]]))
-            for ring_set in self.mol.GetRingInfo().AtomRings()
-        ]
+        For CHI a-b-c-d, Rosetta requires atom_base(c)==b, i.e. the ICOOR parent
+        of atom c must be atom b. This map lets us orient bonds correctly.
+        """
+        name_to_idx: dict[str, int] = {}
+        for atom in self.mol.GetAtoms():
+            info = atom.GetPDBResidueInfo()
+            if info is not None:
+                name_to_idx[info.GetName().strip()] = atom.GetIdx()
+        parent_map: dict[int, int] = {}
+        for ic in self.ICOOR_INTERNAL:
+            child_name = ic.child.strip()
+            parent_name = ic.parent.strip()
+            if child_name == parent_name:
+                continue  # ↑ skip self-referential root line
+            child_idx = name_to_idx.get(child_name)
+            parent_idx = name_to_idx.get(parent_name)
+            if child_idx is not None and parent_idx is not None:
+                parent_map[child_idx] = parent_idx
+        return parent_map
 
-        def is_cut(a, b):
-            pair = tuple(sorted([a.GetIdx(), b.GetIdx()]))
-            return pair in cuts
-
-        ordered_indices = [a.GetIdx() for a in self.ordered_atoms]
-
-        def get_place(atom):
-            return ordered_indices.index(atom.GetIdx())
-
-        # mark ring atoms.
+    def _collect_ring_atom_indices(self) -> set[int]:
+        """Return set of atom indices that belong to any ring."""
+        ring_idxs: set[int] = set()
         for ring_set in self.mol.GetRingInfo().AtomRings():
-            for i in ring_set:
-                self.mol.GetAtomWithIdx(i).SetBoolProp("_isRing", True)
-        for atom in self.ordered_atoms:
-            if atom.HasProp("_isRing"):
+            ring_idxs.update(ring_set)
+        return ring_idxs
+
+    def _is_chi_eligible_bond(self, bond: Chem.Bond, ring_idxs: set[int],
+                              ordered_set: set[int]) -> bool:
+        """Return True if bond is a rotatable single bond between non-ring heavy atoms."""
+        if bond.GetBondType() != Chem.BondType.SINGLE:
+            return False
+        ai, bi = bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()
+        if ai in ring_idxs or bi in ring_idxs:
+            return False
+        a_num = bond.GetBeginAtom().GetAtomicNum()
+        b_num = bond.GetEndAtom().GetAtomicNum()
+        if a_num in (0, 1) or b_num in (0, 1):
+            return False
+        return ai in ordered_set and bi in ordered_set
+
+    def _orient_bond_by_icoor(self, bond: Chem.Bond,
+                              icoor_parent: dict[int, int]) -> tuple[Chem.Atom, Chem.Atom] | None:
+        """Orient a bond (b, c) so icoor_parent[c]==b. Returns None if impossible."""
+        ai, bi = bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()
+        if icoor_parent.get(bi) == ai:
+            return bond.GetBeginAtom(), bond.GetEndAtom()
+        elif icoor_parent.get(ai) == bi:
+            return bond.GetEndAtom(), bond.GetBeginAtom()
+        return None
+
+    def _find_rotatable_bonds(self, ring_idxs: set[int],
+                              icoor_parent: dict[int, int]) -> list[tuple[Chem.Atom, Chem.Atom]]:
+        """Return rotatable single bonds as (b, c) pairs sorted by ICOOR tree position.
+
+        Oriented so that icoor_parent[c] == b — satisfying Rosetta's atom_base constraint.
+        """
+        ordered_indices = [a.GetIdx() for a in self.ordered_atoms]
+        ordered_set = set(ordered_indices)
+        seen: set[tuple[int, int]] = set()
+        results: list[tuple[int, Chem.Atom, Chem.Atom]] = []
+        for bond in self.mol.GetBonds():
+            if not self._is_chi_eligible_bond(bond, ring_idxs, ordered_set):
                 continue
-            elif atom.GetSymbol() == "H":
-                continue  # PROTON_CHI 3 SAMPLES 2 0 180 EXTRA 1 20 thing...
-            elif atom.GetSymbol() == "*":
+            pair = (min(bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()),
+                    max(bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()))
+            if pair in seen:
                 continue
-            # should there be a `is_single` case?
-            for neighbor in self._get_unseen_neighbors(atom, []):
-                if neighbor.HasProp("_isRing"):
-                    continue
-                elif get_place(atom) > get_place(neighbor):
-                    continue
-                elif is_cut(atom, neighbor):  # redundant as _isRing in effect.
-                    continue  # dont cross a cut!
-                elif is_single(atom, neighbor):
-                    for grandneighbor in self._get_unseen_neighbors(neighbor, [atom]):
-                        if grandneighbor.HasProp("_isRing"):
-                            continue
-                        elif is_cut(neighbor, grandneighbor):
-                            continue
-                        elif is_single(grandneighbor, neighbor):
-                            ggneighbors = self._get_unseen_neighbors(
-                                grandneighbor, [atom, neighbor]
-                            )
-                            if ggneighbors:  # 3-4 bond does not need to be single, nor does it matter which is the 4th atom
-                                self.CHI.append(
-                                    dict(
-                                        index=len(self.CHI) + 1,
-                                        first=self._get_PDBInfo_atomname(atom),
-                                        second=self._get_PDBInfo_atomname(neighbor),
-                                        third=self._get_PDBInfo_atomname(grandneighbor),
-                                        fourth=self._get_PDBInfo_atomname(ggneighbors[0]),
-                                    )
-                                )
+            seen.add(pair)
+            oriented = self._orient_bond_by_icoor(bond, icoor_parent)
+            if oriented is None:
+                continue
+            b_out, c_out = oriented
+            results.append((ordered_indices.index(b_out.GetIdx()), b_out, c_out))
+        results.sort(key=lambda t: t[0])
+        return [(b, c) for _, b, c in results]
+
+    def _emit_chi(self, b_atom: Chem.Atom, c_atom: Chem.Atom,
+                  ring_idxs: set[int], icoor_parent: dict[int, int]) -> None:
+        """Build CHI quadruplet a-b-c-d and append. Also emits PROTON_CHI if applicable.
+
+        For atom d, prefer a child of c in the ICOOR tree (so atom_base(d)==c).
+        PROTON_CHI references the emitted CHI — no extra CHI entry needed.
+        Follows the canonical pattern: SER ``CA CB OG HG`` + ``PROTON_CHI 2``,
+        LYS ``CG CD CE NZ`` + ``PROTON_CHI 4``.
+        """
+        a_atom = self._pick_flanking_atom(
+            b_atom, exclude={c_atom.GetIdx()}, ring_idxs=ring_idxs,
+            prefer_heavy=True, icoor_parent=icoor_parent, want_child_of=None,
+        )
+        if a_atom is None:
+            return
+        # ↓ for d, prefer an ICOOR child of c (atom_base(d)==c) and heavy
+        d_atom = self._pick_flanking_atom(
+            c_atom, exclude={b_atom.GetIdx()}, ring_idxs=ring_idxs,
+            prefer_heavy=True, icoor_parent=icoor_parent, want_child_of=c_atom.GetIdx(),
+        )
+        if d_atom is None:
+            d_atom = self._pick_flanking_atom(
+                c_atom, exclude={b_atom.GetIdx()}, ring_idxs=ring_idxs,
+                prefer_heavy=False, icoor_parent=icoor_parent, want_child_of=c_atom.GetIdx(),
+            )
+        if d_atom is None:
+            return
+        chi_idx = len(self.CHI) + 1
+        self.CHI.append(dict(
+            index=chi_idx,
+            first=self._get_PDBInfo_atomname(a_atom),
+            second=self._get_PDBInfo_atomname(b_atom),
+            third=self._get_PDBInfo_atomname(c_atom),
+            fourth=self._get_PDBInfo_atomname(d_atom),
+        ))
+        # ↓ PROTON_CHI: reference this CHI if it involves a polar atom with H
+        self._maybe_add_proton_chi(chi_idx, c_atom, d_atom, ring_idxs)
+
+    @staticmethod
+    def _count_h_neighbors(atom: Chem.Atom, ring_idxs: set[int]) -> int:
+        """Count non-ring hydrogen neighbours of an atom."""
+        return sum(1 for n in atom.GetNeighbors()
+                   if n.GetAtomicNum() == 1 and n.GetIdx() not in ring_idxs)
+
+    _POLAR_ATOMIC_NUMS = frozenset({7, 8, 16})  # N, O, S
+
+    def _maybe_add_proton_chi(self, chi_idx: int, c_atom: Chem.Atom,
+                              d_atom: Chem.Atom, ring_idxs: set[int]) -> None:
+        """Emit PROTON_CHI if the CHI involves a polar atom bearing hydrogens.
+
+        Two canonical patterns:
+        - d is H and c is polar (e.g. SER: CA-CB-OG-HG)
+        - d is polar with H children (e.g. LYS: CG-CD-CE-NZ)
+        """
+        # pattern 1: terminal polar-H
+        if d_atom.GetAtomicNum() == 1 and c_atom.GetAtomicNum() in self._POLAR_ATOMIC_NUMS:
+            self._add_proton_chi(chi_idx, c_atom, self._count_h_neighbors(c_atom, ring_idxs))
+            return
+        # pattern 2: CHI ends at polar atom with H
+        if d_atom.GetAtomicNum() not in self._POLAR_ATOMIC_NUMS:
+            return
+        n_h = self._count_h_neighbors(d_atom, ring_idxs)
+        if n_h > 0:
+            self._add_proton_chi(chi_idx, d_atom, n_h)
+
+    @staticmethod
+    def _score_flanking_candidate(atom: Chem.Atom, ring_idxs: set[int],
+                                  icoor_parent: dict[int, int] | None,
+                                  want_child_of: int | None) -> tuple[int, int]:
+        """Scoring key for flanking atom selection: (ICOOR-child-priority, ring-priority)."""
+        is_child = (0 if (want_child_of is not None and icoor_parent is not None
+                          and icoor_parent.get(atom.GetIdx()) == want_child_of) else 1)
+        is_ring = 0 if atom.GetIdx() not in ring_idxs else 1
+        return (is_child, is_ring)
+
+    def _pick_flanking_atom(self, center: Chem.Atom, exclude: set[int],
+                            ring_idxs: set[int], prefer_heavy: bool,
+                            icoor_parent: dict[int, int] | None = None,
+                            want_child_of: int | None = None) -> Chem.Atom | None:
+        """Choose the best flanking atom for a CHI quadruplet.
+
+        Prefers ICOOR children of ``want_child_of``, then non-ring atoms.
+        """
+        candidates = [n for n in center.GetNeighbors()
+                      if n.GetIdx() not in exclude and n.GetAtomicNum() != 0]
+        if prefer_heavy:
+            candidates = [c for c in candidates if c.GetAtomicNum() != 1]
+        if not candidates:
+            return None
+        candidates.sort(key=lambda c: self._score_flanking_candidate(
+            c, ring_idxs, icoor_parent, want_child_of))
+        return candidates[0]
+
+    def _add_proton_chi(self, chi_index: int, polar_atom: Chem.Atom, n_hydrogens: int) -> None:
+        """Append a PROTON_CHI entry with sampling appropriate to the polar atom type."""
+        symbol = polar_atom.GetSymbol()
+        if symbol in ("O", "S"):
+            # hydroxyl / thiol: 18 samples every 20°
+            samples = list(range(0, 360, 20))
+            extra = [0]
+        elif symbol == "N" and n_hydrogens >= 3:
+            # NH3+ (e.g. lysine): 6 samples
+            samples = [60, -60, 180, 0, 120, -120]
+            extra = [1, 20]
+        else:
+            # amine with 1-2 H
+            samples = [0, 180]
+            extra = [1, 20]
+        self.PROTON_CHI.append(dict(chi_index=chi_index, samples=samples, extra=extra))
 
     def _get_unseen_neighbors(
         self, atom: Chem.Atom, seen: list[Chem.Atom], nondummy: bool = True
