@@ -63,7 +63,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         self._find_centroid()
         if self.mol.GetRingInfo().NumRings() > 0:
             self.add_ring_virtual_shadows()
-        if self.auto_ref and self.mol is not None and self.is_aminoacid():
+        if self.auto_ref and self.is_aminoacid():
             self.add_ref_energy()
 
     def _ensure_conformer(self) -> None:

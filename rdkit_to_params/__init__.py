@@ -427,13 +427,13 @@ class Params(_ParamsIoMixin, _RDKitMixin, _PoserMixin):  # type: ignore[misc]
         """
         if self.mol is None:
             raise ValueError("Cannot estimate ref energy without an RDKit mol (self.mol is None)")
-        from rdkit.Chem import Crippen, rdMolDescriptors
+        from rdkit.Chem import Crippen, Descriptors, rdMolDescriptors
         heavy = self.mol.GetNumHeavyAtoms()
         if heavy == 0:
             raise ValueError("Molecule has no heavy atoms")
         mr = Crippen.MolMR(self.mol)
         mr_per_heavy = mr / heavy
-        no_count = rdMolDescriptors.CalcNumHeteroatoms(self.mol)
+        no_count = Descriptors.NOCount(self.mol)  # Lipinski N+O count, not all heteroatoms
         num_hbd = rdMolDescriptors.CalcNumHBD(self.mol)
         formal_charge = abs(Chem.GetFormalCharge(self.mol))
         num_ali_rings = rdMolDescriptors.CalcNumAliphaticRings(self.mol)
