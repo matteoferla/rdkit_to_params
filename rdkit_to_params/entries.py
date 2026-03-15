@@ -1022,3 +1022,60 @@ Entries.choices["LOW_RING_CONFORMERS"] = (LOW_RING_CONFORMERSEntry, Singletony.m
 
 
 #########################################################################################################
+
+
+@dataclass
+class NUMERIC_PROPERTYEntry:
+    """
+    Numeric property for a residue type, e.g. ``NUMERIC_PROPERTY REFERENCE -1.5``.
+    Used by Rosetta score terms like ``ref_nc`` to assign reference energies to ncAAs.
+    """
+    tag: str
+    value: float
+
+    def __str__(self) -> str:
+        return f"NUMERIC_PROPERTY {self.tag} {self.value}"
+
+    def _repr_html_(self):
+        return f"{html_span('NUMERIC_PROPERTY')} {self.tag} {html_span(self.value)}"
+
+    @classmethod
+    def from_str(cls, text: str):
+        parts = text.split(None, 1)
+        if len(parts) != 2:
+            raise ValueError(f'NUMERIC_PROPERTY entry "{text}" should have a tag and a numeric value')
+        return cls(tag=parts[0], value=float(parts[1]))
+
+
+Entries.choices["NUMERIC_PROPERTY"] = (NUMERIC_PROPERTYEntry, Singletony.multiton)
+
+
+#########################################################################################################
+
+
+@dataclass
+class STRING_PROPERTYEntry:
+    """
+    String property for a residue type, e.g. ``STRING_PROPERTY SOME_TAG some_value``.
+    """
+    tag: str
+    value: str
+
+    def __str__(self) -> str:
+        return f"STRING_PROPERTY {self.tag} {self.value}"
+
+    def _repr_html_(self):
+        return f"{html_span('STRING_PROPERTY')} {self.tag} {html_span(self.value, color='#FA8072')}"
+
+    @classmethod
+    def from_str(cls, text: str):
+        parts = text.split(None, 1)
+        if len(parts) != 2:
+            raise ValueError(f'STRING_PROPERTY entry "{text}" should have a tag and a value')
+        return cls(tag=parts[0], value=parts[1])
+
+
+Entries.choices["STRING_PROPERTY"] = (STRING_PROPERTYEntry, Singletony.multiton)
+
+
+#########################################################################################################

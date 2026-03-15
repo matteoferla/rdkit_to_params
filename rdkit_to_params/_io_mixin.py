@@ -96,6 +96,8 @@ class _ParamsIoMixin(_ParamsInitMixin):
             self.CHARGE,
             self.ADD_RING,
             self.PROPERTIES,
+            self.NUMERIC_PROPERTY,
+            self.STRING_PROPERTY,
             self.VARIANT,
             self.METAL_BINDING_ATOMS,
             self.FIRST_SIDECHAIN_ATOM,

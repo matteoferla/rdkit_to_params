@@ -41,6 +41,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
     PROPERTIES: Entries
 
     greekification = True  # controls whether to change the atom names to greek for amino acids for CB and beyond.
+    auto_ref = False  # auto-add NUMERIC_PROPERTY REFERENCE for ncAAs
 
     def convert_mol(self, pcharge_prop_name: str = "_GasteigerCharge") -> None:
         """
@@ -109,6 +110,9 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         # VIRTUAL SHADOW ATOMS for ring systems
         if self.mol.GetRingInfo().NumRings() > 0:
             self.add_ring_virtual_shadows()
+        # auto-estimate reference energy for ncAAs
+        if self.auto_ref and self.mol is not None:
+            self.add_ref_energy()
 
     ## ============= internal coordinates ==============================================================================
 

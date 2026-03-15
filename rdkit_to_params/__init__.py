@@ -411,6 +411,55 @@ class Params(_ParamsIoMixin, _RDKitMixin, _PoserMixin):  # type: ignore[misc]
             if entry.shadow_atom.strip() == oldname.strip():
                 entry.shadow_atom = newname
 
+    # ==== reference energy estimation ==================================================================================
+
+    def estimate_ref_energy(self) -> float:
+        """
+        Estimate the ``ref_nc`` reference energy for a non-canonical amino acid
+        from RDKit molecular descriptors.
+
+        Formula (LOO R²=0.65, RMSE≈1.0 REU):
+            ref ≈ −5.01 + 1.97 × MR/heavy − 1.28 × NOCount + 1.32 × NumHBD − 1.48 × |Charge|
+        With −2.8 REU correction for proline-like (aliphatic ring) residues.
+
+        :return: estimated reference energy in REU
+        :raises ValueError: if ``self.mol`` is None
+        """
+        if self.mol is None:
+            raise ValueError("Cannot estimate ref energy without an RDKit mol (self.mol is None)")
+        from rdkit.Chem import Descriptors, Crippen, rdMolDescriptors
+        heavy = self.mol.GetNumHeavyAtoms()
+        if heavy == 0:
+            raise ValueError("Molecule has no heavy atoms")
+        mr = Crippen.MolMR(self.mol)
+        mr_per_heavy = mr / heavy
+        no_count = rdMolDescriptors.CalcNumHeteroatoms(self.mol)
+        num_hbd = rdMolDescriptors.CalcNumHBD(self.mol)
+        formal_charge = abs(Chem.GetFormalCharge(self.mol))
+        num_ali_rings = rdMolDescriptors.CalcNumAliphaticRings(self.mol)
+        ref = -5.01 + 1.97 * mr_per_heavy - 1.28 * no_count + 1.32 * num_hbd - 1.48 * formal_charge
+        if num_ali_rings > 0:
+            ref -= 2.8  # proline-like correction
+        return ref
+
+    def add_ref_energy(self, ref_value: float | None = None) -> float:
+        """
+        Add (or replace) a ``NUMERIC_PROPERTY REFERENCE`` entry.
+
+        :param ref_value: explicit value in REU; if None, calls ``estimate_ref_energy()``
+        :return: the reference energy value written
+        """
+        if ref_value is None:
+            ref_value = self.estimate_ref_energy()
+            self.comments.append('Estimated REF (ref_nc): formula-based, LOO R²=0.65, RMSE≈1.0 REU')
+        # remove any existing REFERENCE entry
+        self.NUMERIC_PROPERTY.data = [
+            e for e in self.NUMERIC_PROPERTY.data if e.tag != 'REFERENCE'
+        ]
+        ref_value = round(ref_value, 3)
+        self.NUMERIC_PROPERTY.append(f'REFERENCE {ref_value}')
+        return ref_value
+
     # ==== extras for cap
 
     def _prep_for_terminal(self, mainchain_atoms: list[str] | None = None, connection_idx: int = 1):

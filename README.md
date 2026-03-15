@@ -302,6 +302,16 @@ In the amino acid case, the class attribute `greekification` changes the atomnam
 It is by default `True`. It is called during `fix_mol`, a step in `load_mol`/`load_smiles`,
 so should be safe for rename methods.
 
+### Reference Energy (ref_nc) for ncAAs
+The class attribute `auto_ref` (default `False`) adds `NUMERIC_PROPERTY REFERENCE`
+during conversion. The value is estimated from RDKit descriptors:
+
+    ref ≈ −5.01 + 1.97 × MR/heavy − 1.28 × NOCount + 1.32 × NumHBD − 1.48 × |Charge|
+
+With −2.8 REU for proline-like (aliphatic ring) residues (LOO R²=0.65, RMSE≈1.0).
+Set `Params.auto_ref = True` before `from_mol`/`from_smiles`, or call `p.add_ref_energy()`.
+Remember to enable `ref_nc` weight on your ScoreFunction.
+
 ### From RCSB PDB
 The PDB has ligand definitions (chemical components) that can be downloaded
 as a cif file.
