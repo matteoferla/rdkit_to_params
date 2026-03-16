@@ -390,6 +390,48 @@ Entries.choices["CHI"] = (CHIEntry, Singletony.multiton)
 
 
 @dataclass
+class PROTON_CHIEntry:
+    """
+    Proton chi sampling specification for polar hydrogens (hydroxyl, thiol, amine).
+    E.g. ``PROTON_CHI 3 SAMPLES 18 0 20 40 60 80 100 120 140 160 180 200 220 240 260 280 300 320 340 EXTRA 0``
+    """
+    chi_index: int
+    samples: list[int]
+    extra: list[int]
+
+    def __str__(self) -> str:
+        angles = " ".join(str(s) for s in self.samples)
+        extras = " ".join(str(e) for e in self.extra)
+        return f"PROTON_CHI {self.chi_index} SAMPLES {len(self.samples)} {angles} EXTRA {extras}"
+
+    def _repr_html_(self):
+        return (
+            f"{html_span('PROTON_CHI')} chi:{html_span(self.chi_index)} "
+            f"samples:{html_span(len(self.samples))} extra:{self.extra}"
+        )
+
+    @classmethod
+    def from_str(cls, text: str):
+        # <idx> SAMPLES <n> <vals...> EXTRA <vals...>
+        rex = re.match(r"(\d+)\s+SAMPLES\s+(\d+)\s+(.*?)\s+EXTRA\s+(.*)", text.strip())
+        if rex is None:
+            raise ValueError(f'PROTON_CHI entry "{text}" is not formatted correctly')
+        chi_index = int(rex.group(1))
+        n_samples = int(rex.group(2))
+        samples = [int(x) for x in rex.group(3).split()]
+        if len(samples) != n_samples:
+            raise ValueError(f'PROTON_CHI expected {n_samples} samples, got {len(samples)}')
+        extra = [int(x) for x in rex.group(4).split()]
+        return cls(chi_index=chi_index, samples=samples, extra=extra)
+
+
+Entries.choices["PROTON_CHI"] = (PROTON_CHIEntry, Singletony.multiton)
+
+
+#########################################################################################################
+
+
+@dataclass
 class ICOOR_INTERNALEntry:
     """
     Lines stolen from Rosetta documentation
@@ -1019,6 +1061,63 @@ class LOW_RING_CONFORMERSEntry(GenericListEntry):
 
 
 Entries.choices["LOW_RING_CONFORMERS"] = (LOW_RING_CONFORMERSEntry, Singletony.multiton)
+
+
+#########################################################################################################
+
+
+@dataclass
+class NUMERIC_PROPERTYEntry:
+    """
+    Numeric property for a residue type, e.g. ``NUMERIC_PROPERTY REFERENCE -1.5``.
+    Used by Rosetta score terms like ``ref_nc`` to assign reference energies to ncAAs.
+    """
+    tag: str
+    value: float
+
+    def __str__(self) -> str:
+        return f"NUMERIC_PROPERTY {self.tag} {self.value}"
+
+    def _repr_html_(self):
+        return f"{html_span('NUMERIC_PROPERTY')} {self.tag} {html_span(self.value)}"
+
+    @classmethod
+    def from_str(cls, text: str):
+        parts = text.split(None, 1)
+        if len(parts) != 2:
+            raise ValueError(f'NUMERIC_PROPERTY entry "{text}" should have a tag and a numeric value')
+        return cls(tag=parts[0], value=float(parts[1]))
+
+
+Entries.choices["NUMERIC_PROPERTY"] = (NUMERIC_PROPERTYEntry, Singletony.multiton)
+
+
+#########################################################################################################
+
+
+@dataclass
+class STRING_PROPERTYEntry:
+    """
+    String property for a residue type, e.g. ``STRING_PROPERTY SOME_TAG some_value``.
+    """
+    tag: str
+    value: str
+
+    def __str__(self) -> str:
+        return f"STRING_PROPERTY {self.tag} {self.value}"
+
+    def _repr_html_(self):
+        return f"{html_span('STRING_PROPERTY')} {self.tag} {html_span(self.value, color='#FA8072')}"
+
+    @classmethod
+    def from_str(cls, text: str):
+        parts = text.split(None, 1)
+        if len(parts) != 2:
+            raise ValueError(f'STRING_PROPERTY entry "{text}" should have a tag and a value')
+        return cls(tag=parts[0], value=parts[1])
+
+
+Entries.choices["STRING_PROPERTY"] = (STRING_PROPERTYEntry, Singletony.multiton)
 
 
 #########################################################################################################

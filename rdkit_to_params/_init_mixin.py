@@ -52,6 +52,7 @@ class _ParamsInitMixin:
         self.CHARGE = Entries.from_name("CHARGE")
         self.CONNECT = Entries.from_name("CONNECT")
         self.CHI = Entries.from_name("CHI")
+        self.PROTON_CHI = Entries.from_name("PROTON_CHI")
         self.NBR_ATOM = Entries.from_name("NBR_ATOM")
         self.NBR_RADIUS = Entries.from_name("NBR_RADIUS")
         self.ICOOR_INTERNAL = Entries.from_name("ICOOR_INTERNAL")
@@ -74,6 +75,8 @@ class _ParamsInitMixin:
         self.NU = Entries.from_name("NU")
         self.LOWEST_RING_CONFORMER = Entries.from_name("LOWEST_RING_CONFORMER")
         self.LOW_RING_CONFORMERS = Entries.from_name("LOW_RING_CONFORMERS")
+        self.NUMERIC_PROPERTY = Entries.from_name("NUMERIC_PROPERTY")
+        self.STRING_PROPERTY = Entries.from_name("STRING_PROPERTY")
         self.OTHERS = Entries.from_name("<UNKNOWN>")  # this is the dumpyard of unknown values.
         ## RDKit route specific
         self.mol = None

@@ -302,6 +302,17 @@ In the amino acid case, the class attribute `greekification` changes the atomnam
 It is by default `True`. It is called during `fix_mol`, a step in `load_mol`/`load_smiles`,
 so should be safe for rename methods.
 
+### Reference Energy (ref_nc) for ncAAs
+The class attribute `auto_ref` (default `True`, like `greekification`) adds
+`NUMERIC_PROPERTY REFERENCE` during conversion for ncAAs. The value is estimated
+from RDKit descriptors:
+
+    ref ≈ −5.01 + 1.97 × MR/heavy − 1.28 × NOCount + 1.32 × NumHBD − 1.48 × |Charge|
+
+With −2.8 REU for proline-like (aliphatic ring) residues (LOO R²=0.65, RMSE≈1.0).
+Set `Params.auto_ref = False` to disable, or call `p.add_ref_energy()` manually.
+Remember to enable `ref_nc` weight on your ScoreFunction.
+
 ### From RCSB PDB
 The PDB has ligand definitions (chemical components) that can be downloaded
 as a cif file.
@@ -361,12 +372,66 @@ even when undeclared, so is likely redudant.
 * `ADD_RING` is not implemented in the `from_mol` conversion as I think it's an old command.
 * Does a cis-trans tautomer bond (say `C(=O)-C=O`) gets a `CHI` entry? I am assuming no, but not sure.
 
+### ICOOR atom tree
+
+Rosetta represents each residue's geometry as an **internal-coordinate tree** (ICOOR).
+Every atom has exactly one parent; the tree is rooted at the first heavy atom.
+Each ICOOR line declares one atom via four reference atoms:
+
+```
+ICOOR_INTERNAL  <child>  <phi>  <theta>  <distance>  <parent>  <angle_ref>  <torsion_ref>
+```
+
+* **child** — the atom being placed (A4)
+* **parent** — atom it is bonded to in the tree (A3); `atom_base(child) == parent`
+* **angle_ref** (A2) — defines the bond angle A4-A3-A2
+* **torsion_ref** (A1) — defines the dihedral A4-A3-A2-A1
+
+The first three lines are special (bootstrap):
+
+1. Root atom: self-referential (`child == parent`)
+2. First neighbour: placed relative to root
+3. Second neighbour: completes the initial coordinate frame
+
+For **amino acids** the root is always N, giving a fixed bootstrap:
+N → CA → C → UPPER → O → LOWER.
+
+For **ligands** the code searches for a valid heavy-atom triplet (root, parent, grandparent)
+by rotating through the atom deque until one is found where each atom has at least one
+unseen non-dummy neighbour. After the bootstrap, remaining atoms are added by BFS:
+for each undescribed atom, find a described parent, then a described sibling of that parent,
+then (if only one sibling) a described cousin. This guarantees the tree grows outward.
+
+### CHI dihedrals
+
+**CHI entries** define rotatable-bond dihedrals as four-atom quadruplets `a-b-c-d`.
+Rosetta requires that `atom_base(c) == b` in the ICOOR tree — i.e. atom c's tree-parent
+must be atom b. Likewise `atom_base(d) == c` is preferred.
+
+The generation is **bond-centric**: iterate all mol bonds, keep those that are single bonds
+between non-ring, non-dummy heavy atoms, then orient each bond `(b, c)` so that
+`icoor_parent[c] == b`. Flanking atoms `a` and `d` are chosen preferring ICOOR children
+and non-ring atoms. Bonds where neither orientation satisfies the constraint are skipped.
+
+### PROTON_CHI
+
+**PROTON_CHI** entries tell the packer to sample discrete rotamers for polar hydrogens
+(hydroxyl, thiol, amine). Without them, OH/SH/NH torsions are never explored during
+side-chain packing. A PROTON_CHI references an existing CHI by index — either one ending
+in H (e.g. SER: `CA CB OG HG`) or one ending at the polar atom itself (e.g. LYS:
+`CG CD CE NZ`). The sampling rules follow canonical Rosetta params:
+
+| Group | Samples | Extra |
+|-------|---------|-------|
+| O-H / S-H | 18 × 20° | EXTRA 0 |
+| N-H (1–2 H) | 0°, 180° | EXTRA 1 20 |
+| N-H₃⁺ (≥3 H) | 60°, −60°, 180°, 0°, 120°, −120° | EXTRA 1 20 |
+
 ### Notes
 
 There are some other things to pay attention to:
 
 * Atom names are 4-letters. It is always safer to add the spaces yourself if assigning them.
-* CHI struggles with rings, so currently `C1CCCCC1CCC` has only one CHI (C7, C8, C9, H10), even if (C6, C7, C8, C9) most probably counts.
 
 ## To Do
 
