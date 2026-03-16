@@ -63,6 +63,7 @@ class _ParamsInitMixin:
         self.BACKBONE_AA = Entries.from_name("BACKBONE_AA")
         self.MAINCHAIN_ATOMS = Entries.from_name("MAINCHAIN_ATOMS")
         self.RAMA_PREPRO_FILENAME = Entries.from_name("RAMA_PREPRO_FILENAME")
+        self.RAMA_PREPRO_RESNAME = Entries.from_name("RAMA_PREPRO_RESNAME")
         self.METAL_BINDING_ATOMS = Entries.from_name("METAL_BINDING_ATOMS")
         self.ACT_COORD_ATOMS = Entries.from_name("ACT_COORD_ATOMS")
         self.PDB_ROTAMERS = Entries.from_name(

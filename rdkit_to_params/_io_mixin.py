@@ -103,6 +103,7 @@ class _ParamsIoMixin(_ParamsInitMixin):
             self.FIRST_SIDECHAIN_ATOM,
             self.BACKBONE_AA,
             self.RAMA_PREPRO_FILENAME,
+            self.RAMA_PREPRO_RESNAME,
             self.ACT_COORD_ATOMS,
             self.CHI,
             self.PROTON_CHI,

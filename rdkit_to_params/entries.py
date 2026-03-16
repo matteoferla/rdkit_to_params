@@ -801,13 +801,56 @@ Entries.choices["BACKBONE_AA"] = (BACKBONE_AAEntry, Singletony.singleton)
 #########################################################################################################
 
 
-class RAMA_PREPRO_FILENAMEEntry(GenericEntry):
-    def __init__(self, body: str):
-        super().__init__(header="RAMA_PREPRO_FILENAME", body=body)
+@dataclass
+class RAMA_PREPRO_FILENAMEEntry:
+    """Ramachandran table paths for non-canonical amino acids.
+
+    Two database-relative paths: the general table and the pre-proline table.
+    E.g. ``RAMA_PREPRO_FILENAME scoring/…/AIB_general.rama scoring/…/AIB_prepro.rama``
+    """
+    general: str
+    prepro: str
+
+    def __str__(self) -> str:
+        return f"RAMA_PREPRO_FILENAME {self.general} {self.prepro}"
+
+    def _repr_html_(self):
+        return (
+            f"{html_span('RAMA_PREPRO_FILENAME')} general:{self.general} prepro:{self.prepro}"
+        )
+
+    @classmethod
+    def from_str(cls, text: str):
+        parts = text.split()
+        if len(parts) == 2:
+            return cls(general=parts[0], prepro=parts[1])
+        elif len(parts) == 1:
+            return cls(general=parts[0], prepro=parts[0])
+        raise ValueError(
+            f'RAMA_PREPRO_FILENAME entry "{text}" should have 2 paths (general + prepro)'
+        )
 
 
 Entries.choices["RAMA_PREPRO_FILENAME"] = (
     RAMA_PREPRO_FILENAMEEntry,
+    Singletony.singleton,
+)
+
+
+#########################################################################################################
+
+
+class RAMA_PREPRO_RESNAMEEntry(GenericEntry):
+    """Lookup key within the rama table file, if different from residue NAME.
+
+    E.g. ``RAMA_PREPRO_RESNAME GENERIC_ALPHA_AMINOISOBUTYRIC_AA``
+    """
+    def __init__(self, body: str):
+        super().__init__(header="RAMA_PREPRO_RESNAME", body=body)
+
+
+Entries.choices["RAMA_PREPRO_RESNAME"] = (
+    RAMA_PREPRO_RESNAMEEntry,
     Singletony.singleton,
 )
 

@@ -47,6 +47,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
     _CONVERT_SKIP = frozenset({
         "#", "TYPE", "comment", "IO_STRING", "ROTAMER_AA",
         "AA", "PROPERTIES", "VARIANT", "<UNKNOWN>",
+        "RAMA_PREPRO_FILENAME", "RAMA_PREPRO_RESNAME",
     })
     # ↓ backbone atoms that should never appear in CHI entries for amino acids
     _BACKBONE_ATOMS = frozenset({"N", "CA", "C", "O", "H", "HA", "UPPER", "LOWER", "OXT"})
