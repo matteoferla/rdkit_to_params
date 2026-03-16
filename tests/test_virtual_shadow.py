@@ -22,21 +22,21 @@ BENZENE_SMILES = "c1ccccc1"  # ← fully aromatic — should be skipped
 def glucose_params() -> Params:
     """Glucose params with virtual shadow atoms."""
     p = Params.from_smiles(GLUCOSE_SMILES, name="GLC")
-    return p
+    return p  # type: ignore[return-value]  # ← from_smiles returns mixin type
 
 
 @pytest.fixture
 def thf_params() -> Params:
     """Tetrahydrofuran params with virtual shadow atoms."""
     p = Params.from_smiles(THF_SMILES, name="THF")
-    return p
+    return p  # type: ignore[return-value]
 
 
 @pytest.fixture
 def benzene_params() -> Params:
     """Benzene params — aromatic ring, should NOT get virtual shadows by default."""
     p = Params.from_smiles(BENZENE_SMILES, name="BNZ")
-    return p
+    return p  # type: ignore[return-value]
 
 
 # ### TestMakeVirtualName ##############################################################
@@ -238,6 +238,6 @@ class TestFromFileReconstruction:
         reloaded = Params.loads(text)
         assert reloaded.mol is None
         # The ring info is already present from the original, so check it persisted
-        ring_atoms = reloaded._get_ring_atom_names()
+        ring_atoms = reloaded._get_ring_atom_names()  # type: ignore[attr-defined]
         assert len(ring_atoms) >= 1
         assert len(ring_atoms[0]) >= 5  # at least 5 atoms in the ring

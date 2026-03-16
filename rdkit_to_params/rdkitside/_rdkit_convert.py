@@ -67,7 +67,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         if self.mol.GetRingInfo().NumRings() > 0:
             self.add_ring_virtual_shadows()
         if self.auto_ref and self.is_aminoacid():
-            self.add_ref_energy()
+            self.add_ref_energy()  # type: ignore[attr-defined]  # ← mixin on Params
 
     def _ensure_conformer(self) -> None:
         """Embed + optimise if the mol has no conformers."""
@@ -536,7 +536,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
             return None
         candidates.sort(key=lambda c: self._score_flanking_candidate(
             c, ring_idxs, icoor_parent, want_child_of))
-        return candidates[0]
+        return candidates[0]  # type: ignore[no-any-return]  # ← RDKit Atom stubs incomplete
 
     def _add_proton_chi(self, chi_index: int, polar_atom: Chem.Atom, n_hydrogens: int) -> None:
         """Append a PROTON_CHI entry with sampling appropriate to the polar atom type."""
@@ -849,9 +849,9 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
                 return defaults
             si, bi, r2i, r3i = indices  # type: ignore[misc]
             conf = self.mol.GetConformer()
-            distance = Chem.rdMolTransforms.GetBondLength(conf, si, bi)
-            theta = 180 - Chem.rdMolTransforms.GetAngleDeg(conf, si, bi, r2i)
-            tor = Chem.rdMolTransforms.GetDihedralDeg(conf, si, bi, r2i, r3i)
+            distance = Chem.rdMolTransforms.GetBondLength(conf, si, bi)  # type: ignore[attr-defined]
+            theta = 180 - Chem.rdMolTransforms.GetAngleDeg(conf, si, bi, r2i)  # type: ignore[attr-defined]
+            tor = Chem.rdMolTransforms.GetDihedralDeg(conf, si, bi, r2i, r3i)  # type: ignore[attr-defined]
             phi = tor if str(tor) != "nan" else 60.0
             return (phi, theta, distance)
         except Exception:
