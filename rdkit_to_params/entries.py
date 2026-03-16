@@ -811,6 +811,15 @@ class RAMA_PREPRO_FILENAMEEntry:
     general: str
     prepro: str
 
+    @property
+    def header(self) -> str:
+        return "RAMA_PREPRO_FILENAME"
+
+    @property
+    def body(self) -> str:
+        """Backwards-compatible string form of the two paths."""
+        return f"{self.general} {self.prepro}"
+
     def __str__(self) -> str:
         return f"RAMA_PREPRO_FILENAME {self.general} {self.prepro}"
 
@@ -827,7 +836,7 @@ class RAMA_PREPRO_FILENAMEEntry:
         elif len(parts) == 1:
             return cls(general=parts[0], prepro=parts[0])
         raise ValueError(
-            f'RAMA_PREPRO_FILENAME entry "{text}" should have 2 paths (general + prepro)'
+            f'RAMA_PREPRO_FILENAME entry "{text}" should have 1 or 2 paths, got {len(parts)}'
         )
 
 

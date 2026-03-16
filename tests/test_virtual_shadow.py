@@ -7,6 +7,8 @@ relaxation.
 Reference: GTS params at ``PROTDES-421/glucosidase/GTS_proto.params``
 """
 
+from typing import cast
+
 import pytest
 
 from rdkit_to_params import Params
@@ -21,22 +23,19 @@ BENZENE_SMILES = "c1ccccc1"  # ← fully aromatic — should be skipped
 @pytest.fixture
 def glucose_params() -> Params:
     """Glucose params with virtual shadow atoms."""
-    p = Params.from_smiles(GLUCOSE_SMILES, name="GLC")
-    return p  # type: ignore[return-value]  # ← from_smiles returns mixin type
+    return cast(Params, Params.from_smiles(GLUCOSE_SMILES, name="GLC"))
 
 
 @pytest.fixture
 def thf_params() -> Params:
     """Tetrahydrofuran params with virtual shadow atoms."""
-    p = Params.from_smiles(THF_SMILES, name="THF")
-    return p  # type: ignore[return-value]
+    return cast(Params, Params.from_smiles(THF_SMILES, name="THF"))
 
 
 @pytest.fixture
 def benzene_params() -> Params:
     """Benzene params — aromatic ring, should NOT get virtual shadows by default."""
-    p = Params.from_smiles(BENZENE_SMILES, name="BNZ")
-    return p  # type: ignore[return-value]
+    return cast(Params, Params.from_smiles(BENZENE_SMILES, name="BNZ"))
 
 
 # ### TestMakeVirtualName ##############################################################
