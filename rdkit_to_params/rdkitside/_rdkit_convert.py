@@ -48,6 +48,8 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         "#", "TYPE", "comment", "IO_STRING", "ROTAMER_AA",
         "AA", "PROPERTIES", "VARIANT", "<UNKNOWN>",
     })
+    # ↓ backbone atoms that should never appear in CHI entries for amino acids
+    _BACKBONE_ATOMS = frozenset({"N", "CA", "C", "O", "H", "HA", "UPPER", "LOWER", "OXT"})
 
     def convert_mol(self, pcharge_prop_name: str = "_GasteigerCharge") -> None:
         """Convert the RDKit mol into Rosetta params entries."""
@@ -372,17 +374,28 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
 
     def _is_chi_eligible_bond(self, bond: Chem.Bond, ring_idxs: set[int],
                               ordered_set: set[int]) -> bool:
-        """Return True if bond is a rotatable single bond between non-ring heavy atoms."""
+        """Return True if bond is a rotatable single bond between non-ring heavy atoms.
+
+        For amino acids, bonds where both atoms are backbone are excluded —
+        backbone torsions (e.g. N-CA-C-O) should never produce CHI entries.
+        """
         if bond.GetBondType() != Chem.BondType.SINGLE:
             return False
         ai, bi = bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()
         if ai in ring_idxs or bi in ring_idxs:
             return False
-        a_num = bond.GetBeginAtom().GetAtomicNum()
-        b_num = bond.GetEndAtom().GetAtomicNum()
-        if a_num in (0, 1) or b_num in (0, 1):
+        a_atom, b_atom = bond.GetBeginAtom(), bond.GetEndAtom()
+        if a_atom.GetAtomicNum() in (0, 1) or b_atom.GetAtomicNum() in (0, 1):
             return False
-        return ai in ordered_set and bi in ordered_set
+        if not (ai in ordered_set and bi in ordered_set):
+            return False
+        # ↓ reject backbone-only bonds for amino acids (e.g. N-CA, CA-C)
+        if self.is_aminoacid():
+            a_name = self._get_PDBInfo_atomname(a_atom).strip()
+            b_name = self._get_PDBInfo_atomname(b_atom).strip()
+            if a_name in self._BACKBONE_ATOMS and b_name in self._BACKBONE_ATOMS:
+                return False
+        return True
 
     def _orient_bond_by_icoor(self, bond: Chem.Bond,
                               icoor_parent: dict[int, int]) -> tuple[Chem.Atom, Chem.Atom] | None:
@@ -420,6 +433,14 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         results.sort(key=lambda t: t[0])
         return [(b, c) for _, b, c in results]
 
+    @staticmethod
+    def _is_terminal_methyl(c_atom: Chem.Atom, b_idx: int) -> bool:
+        """True if c is a carbon whose only non-b neighbours are H (CH3 rotation)."""
+        if c_atom.GetAtomicNum() != 6:
+            return False
+        return all(n.GetAtomicNum() == 1 or n.GetIdx() == b_idx
+                   for n in c_atom.GetNeighbors())
+
     def _emit_chi(self, b_atom: Chem.Atom, c_atom: Chem.Atom,
                   ring_idxs: set[int], icoor_parent: dict[int, int]) -> None:
         """Build CHI quadruplet a-b-c-d and append. Also emits PROTON_CHI if applicable.
@@ -429,6 +450,9 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         Follows the canonical pattern: SER ``CA CB OG HG`` + ``PROTON_CHI 2``,
         LYS ``CG CD CE NZ`` + ``PROTON_CHI 4``.
         """
+        # ↓ terminal methyl rotations (C→H only) are never meaningful CHIs
+        if self._is_terminal_methyl(c_atom, b_atom.GetIdx()):
+            return
         a_atom = self._pick_flanking_atom(
             b_atom, exclude={c_atom.GetIdx()}, ring_idxs=ring_idxs,
             prefer_heavy=True, icoor_parent=icoor_parent, want_child_of=None,

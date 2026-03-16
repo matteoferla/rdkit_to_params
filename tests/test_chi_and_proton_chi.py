@@ -165,6 +165,36 @@ class TestChiGeneration:
         amine_pchis = [pc for pc in p.PROTON_CHI if len(pc.samples) == 2]
         assert len(amine_pchis) >= 1, "Expected amine PROTON_CHI with 2 samples"
 
+    def test_aib_no_chi(self):
+        """AIB (gem-dimethyl) should produce 0 CHI and 0 PROTON_CHI.
+
+        Both methyl groups are terminal (all non-parent neighbours are H),
+        and the backbone N-CA-C bond must not leak through either.
+        """
+        p = Params.from_smiles("CC(C)(N*)C(*)=O", name="AIB")
+        assert len(p.CHI) == 0, f"AIB should have 0 CHI, got {len(p.CHI)}: {[str(c) for c in p.CHI]}"
+        assert len(p.PROTON_CHI) == 0, f"AIB should have 0 PROTON_CHI, got {len(p.PROTON_CHI)}"
+
+    def test_valine_one_chi(self):
+        """Valine-like should produce exactly 1 CHI (N-CA-CB-CG1), no PROTON_CHI.
+
+        The isopropyl sidechain has one heavy-atom rotatable bond (CA-CB).
+        The two terminal methyl groups (CG1, CG2) should be skipped.
+        """
+        p = Params.from_smiles("*[NH]C(C(*)=O)C(C)C", name="VAX")
+        assert len(p.CHI) == 1, f"VAL-like should have 1 CHI, got {len(p.CHI)}: {[str(c) for c in p.CHI]}"
+        assert len(p.PROTON_CHI) == 0, f"VAL-like should have 0 PROTON_CHI, got {len(p.PROTON_CHI)}"
+
+    def test_no_backbone_chi_for_aminoacids(self):
+        """Amino acid backbone bonds (N-CA, CA-C) must never appear as CHI."""
+        p = Params.from_smiles("*C(=O)C(CO)[NH]*", name="SRX")
+        backbone = {"N", "CA", "C", "O"}
+        for chi in p.CHI:
+            bc = {chi.second.strip(), chi.third.strip()}
+            assert not bc.issubset(backbone), (
+                f"CHI {chi} has both central atoms in backbone: {bc}"
+            )
+
 
 # ### dumps() includes PROTON_CHI -----------------------------------------------------------------------
 

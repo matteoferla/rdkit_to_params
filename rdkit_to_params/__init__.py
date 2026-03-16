@@ -451,7 +451,11 @@ class Params(_ParamsIoMixin, _RDKitMixin, _PoserMixin):  # type: ignore[misc]
         """
         if ref_value is None:
             ref_value = self.estimate_ref_energy()
-            self.comments.append('Estimated REF (ref_nc): formula-based, LOO R²=0.65, RMSE≈1.0 REU')
+            self.comments.append(
+                'Estimated REF (ref_nc): -5.01 + 1.97*MR/heavy - 1.28*NOCount'
+                ' + 1.32*NumHBD - 1.48*|Charge| [-2.8 if aliphatic ring]'
+                ' (LOO R²=0.65, RMSE≈1.0 REU)'
+            )
         # remove any existing REFERENCE entry
         self.NUMERIC_PROPERTY.data = [
             e for e in self.NUMERIC_PROPERTY.data if e.tag != 'REFERENCE'
