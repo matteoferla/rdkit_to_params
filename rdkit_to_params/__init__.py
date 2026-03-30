@@ -38,11 +38,14 @@ __all__ = [
 ]
 
 #################### pyrosetta #########################################################################################
-try:
+# ↓ guard with find_spec so the mock from Fragmenstein does not trick the try/except
+from importlib.util import find_spec as _find_spec
+
+if _find_spec("pyrosetta"):
     from rdkit_to_params._pyrosetta_mixin import _PoserMixin
-except ImportError as pyrosetta_error:
+else:
     warn(
-        f"PyRosetta is required for the ``test`` method (ImportError: {pyrosetta_error})",
+        "PyRosetta is not installed — the ``test`` method will be unavailable",
         category=ImportWarning,
     )
 
@@ -428,6 +431,7 @@ class Params(_ParamsIoMixin, _RDKitMixin, _PoserMixin):  # type: ignore[misc]
         if self.mol is None:
             raise ValueError("Cannot estimate ref energy without an RDKit mol (self.mol is None)")
         from rdkit.Chem import Crippen, Descriptors, rdMolDescriptors
+
         heavy = self.mol.GetNumHeavyAtoms()
         if heavy == 0:
             raise ValueError("Molecule has no heavy atoms")
@@ -452,16 +456,14 @@ class Params(_ParamsIoMixin, _RDKitMixin, _PoserMixin):  # type: ignore[misc]
         if ref_value is None:
             ref_value = self.estimate_ref_energy()
             self.comments.append(
-                'Estimated REF (ref_nc): -5.01 + 1.97*MR/heavy - 1.28*NOCount'
-                ' + 1.32*NumHBD - 1.48*|Charge| [-2.8 if aliphatic ring]'
-                ' (LOO R²=0.65, RMSE≈1.0 REU)'
+                "Estimated REF (ref_nc): -5.01 + 1.97*MR/heavy - 1.28*NOCount"
+                " + 1.32*NumHBD - 1.48*|Charge| [-2.8 if aliphatic ring]"
+                " (LOO R²=0.65, RMSE≈1.0 REU)"
             )
         # remove any existing REFERENCE entry
-        self.NUMERIC_PROPERTY.data = [
-            e for e in self.NUMERIC_PROPERTY.data if e.tag != 'REFERENCE'
-        ]
+        self.NUMERIC_PROPERTY.data = [e for e in self.NUMERIC_PROPERTY.data if e.tag != "REFERENCE"]
         ref_value = round(ref_value, 3)
-        self.NUMERIC_PROPERTY.append(f'REFERENCE {ref_value}')
+        self.NUMERIC_PROPERTY.append(f"REFERENCE {ref_value}")
         return ref_value
 
     # ==== extras for cap
