@@ -41,8 +41,23 @@ __all__ = [
 # ↓ guard with find_spec so the mock from Fragmenstein does not trick the try/except
 from importlib.util import find_spec as _find_spec
 
-if _find_spec("pyrosetta"):
-    from rdkit_to_params._pyrosetta_mixin import _PoserMixin
+_has_pyrosetta = False
+try:
+    _has_pyrosetta = _find_spec("pyrosetta") is not None
+except (ValueError, ModuleNotFoundError):
+    pass  # ↑ ValueError when a mock with __spec__=None is already in sys.modules
+
+if _has_pyrosetta:
+    try:
+        from rdkit_to_params._pyrosetta_mixin import _PoserMixin
+    except ImportError as pyrosetta_error:
+        warn(
+            f"PyRosetta found but failed to import ({pyrosetta_error})",
+            category=ImportWarning,
+        )
+
+        class _PoserMixin:  # type: ignore[no-redef]
+            pass
 else:
     warn(
         "PyRosetta is not installed — the ``test`` method will be unavailable",
