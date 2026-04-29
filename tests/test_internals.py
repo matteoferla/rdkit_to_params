@@ -1,4 +1,5 @@
 """Test internal functionality of rdkit_to_params package."""
+
 import re
 from pathlib import Path
 
@@ -190,6 +191,38 @@ class TestCHARGEEntry:
         assert entry.atom == "OD1"
         assert entry.charge == "-1"
 
+    def test_charge_entry_from_str_multi_space(self):
+        """Multi-space gaps within the body (as produced by the bare
+        f-string dump when ``self.atom`` carries PDB-style padding —
+        e.g. ``CHARGE OA   FORMAL -1``, body becomes ``OA   FORMAL -1``)
+        must round-trip cleanly.
+        """
+        text = "OA   FORMAL  -1"
+        entry = CHARGEEntry.from_str(text)
+        assert entry.atom == "OA"
+        assert entry.charge == "-1"
+
+    def test_charge_entry_from_str_multi_digit(self):
+        """Multi-digit formal charges (e.g. ``-12``) must parse."""
+        entry = CHARGEEntry.from_str("FE FORMAL -12")
+        assert entry.atom == "FE"
+        assert entry.charge == "-12"
+
+    def test_charge_entry_str_strips_padding(self):
+        """``__str__`` must emit a single-space-separated line even when the
+        atom name carries PDB-style 4-char padding — otherwise the result
+        is unparseable by ``from_str``.
+        """
+        entry = CHARGEEntry(atom=" OA ", charge="-1")
+        assert str(entry) == "CHARGE OA FORMAL -1"
+
+    def test_charge_entry_roundtrip_padded(self):
+        """Padded-atom dump → load → equal atom (stripped) and charge."""
+        original = CHARGEEntry(atom=" OA ", charge="-1")
+        reparsed = CHARGEEntry.from_str(str(original).removeprefix("CHARGE "))
+        assert reparsed.atom == "OA"
+        assert reparsed.charge == "-1"
+
 
 class TestIO_STRINGEntry:
     """Test IO_STRING entry parsing."""
@@ -232,17 +265,14 @@ class TestParamsInit:
         """Test creating an empty Params instance."""
         params = Params()
         assert isinstance(params, Params)
-        assert hasattr(params, 'ATOM')
-        assert hasattr(params, 'BOND')
-        assert hasattr(params, 'CHI')
+        assert hasattr(params, "ATOM")
+        assert hasattr(params, "BOND")
+        assert hasattr(params, "CHI")
 
     def test_params_has_attributes(self):
         """Test that Params has expected attributes."""
         params = Params()
-        expected_attrs = [
-            'ATOM', 'BOND', 'CHI', 'ICOOR_INTERNAL',
-            'IO_STRING', 'CONNECT', 'NAME'
-        ]
+        expected_attrs = ["ATOM", "BOND", "CHI", "ICOOR_INTERNAL", "IO_STRING", "CONNECT", "NAME"]
         for attr in expected_attrs:
             assert hasattr(params, attr), f"Missing attribute: {attr}"
 
@@ -330,14 +360,14 @@ class TestParamsAtomRenaming:
         params = Params.load(str(official_phe_params))
 
         # Find a bond with CA
-        ca_bonds_before = [b for b in params.BOND if ' CA ' in (b.first, b.second)]
+        ca_bonds_before = [b for b in params.BOND if " CA " in (b.first, b.second)]
         assert len(ca_bonds_before) > 0, "PHE should have bonds with CA"
 
         params.rename_atom(" CA ", " CX ")
 
         # CA should be gone, CX should exist
-        ca_bonds_after = [b for b in params.BOND if ' CA ' in (b.first, b.second)]
-        cx_bonds_after = [b for b in params.BOND if ' CX ' in (b.first, b.second)]
+        ca_bonds_after = [b for b in params.BOND if " CA " in (b.first, b.second)]
+        cx_bonds_after = [b for b in params.BOND if " CX " in (b.first, b.second)]
 
         assert len(ca_bonds_after) == 0
         assert len(cx_bonds_after) == len(ca_bonds_before)
@@ -347,17 +377,20 @@ class TestParamsAtomRenaming:
         params = Params.load(str(official_phe_params))
 
         # Find CHI entries with CA
-        chi_with_ca_before = sum(1 for chi in params.CHI
-                                  if ' CA ' in (chi.first, chi.second, chi.third, chi.fourth))
+        chi_with_ca_before = sum(
+            1 for chi in params.CHI if " CA " in (chi.first, chi.second, chi.third, chi.fourth)
+        )
 
         if chi_with_ca_before > 0:
             params.rename_atom(" CA ", " CX ")
 
             # CA should be replaced with CX
-            chi_with_ca_after = sum(1 for chi in params.CHI
-                                     if ' CA ' in (chi.first, chi.second, chi.third, chi.fourth))
-            chi_with_cx_after = sum(1 for chi in params.CHI
-                                     if ' CX ' in (chi.first, chi.second, chi.third, chi.fourth))
+            chi_with_ca_after = sum(
+                1 for chi in params.CHI if " CA " in (chi.first, chi.second, chi.third, chi.fourth)
+            )
+            chi_with_cx_after = sum(
+                1 for chi in params.CHI if " CX " in (chi.first, chi.second, chi.third, chi.fourth)
+            )
 
             assert chi_with_ca_after == 0
             assert chi_with_cx_after == chi_with_ca_before
@@ -371,7 +404,6 @@ class TestParamsAtomRenaming:
         assert params.get_correct_atomname(" CA") == " CA "
         assert params.get_correct_atomname("CA ") == " CA "
         assert params.get_correct_atomname(" CA ") == " CA "
-
 
 
 class TestParamsFields:
@@ -392,9 +424,9 @@ class TestParamsFields:
         params = Params.load(str(official_phe_params))
 
         # These should all work
-        assert hasattr(params, 'ATOM')
-        assert hasattr(params, 'BOND')
-        assert hasattr(params, 'NAME')
+        assert hasattr(params, "ATOM")
+        assert hasattr(params, "BOND")
+        assert hasattr(params, "NAME")
 
 
 class TestParamsComments:
@@ -424,7 +456,9 @@ class TestRegexPatterns:
 
     def test_atom_pattern_matches(self):
         """Test ATOM entry regex pattern."""
-        pattern = r"(?P<name>.{1,4})\s*(?P<rtype>.{1,4})\s*(?P<mtype>.{1,4})\s*(?P<partial>[-\d\.]+)"
+        pattern = (
+            r"(?P<name>.{1,4})\s*(?P<rtype>.{1,4})\s*(?P<mtype>.{1,4})\s*(?P<partial>[-\d\.]+)"
+        )
         text = " CA  CT1 CT  0.07"
         match = re.match(pattern, text.rstrip())
         assert match is not None
@@ -448,12 +482,23 @@ class TestRegexPatterns:
         assert match.group(1) == "1"
 
     def test_charge_pattern_matches(self):
-        """Test CHARGE entry regex pattern."""
-        pattern = r"(?P<atom>\S+) FORMAL (?P<charge>\-?\+?\d)"
+        """Test CHARGE entry regex pattern.
+
+        Tolerant of any whitespace between tokens (so PDB-padded atom
+        names round-trip after ``__str__``) and accepts multi-digit
+        signed charges.
+        """
+        pattern = r"(?P<atom>\S+)\s+FORMAL\s+(?P<charge>[+-]?\d+)"
         text = "NZ FORMAL +1"
         match = re.match(pattern, text.rstrip())
         assert match is not None
         assert match.group("charge") == "+1"
+
+        text = "OA   FORMAL  -12"
+        match = re.match(pattern, text.rstrip())
+        assert match is not None
+        assert match.group("atom") == "OA"
+        assert match.group("charge") == "-12"
 
 
 class TestParamsIntegration:
@@ -487,15 +532,15 @@ class TestParamsIntegration:
         params = Params.load(str(official_phe_params))
 
         # Get original bond involving CA
-        ca_bonds = [b for b in params.BOND if ' CA ' in (b.first, b.second)]
+        ca_bonds = [b for b in params.BOND if " CA " in (b.first, b.second)]
         assert len(ca_bonds) > 0
 
         # Rename CA to CX
-        params.rename_atom(' CA ', ' CX ')
+        params.rename_atom(" CA ", " CX ")
 
         # Verify all CA references are now CX
-        ca_bonds_after = [b for b in params.BOND if ' CA ' in (b.first, b.second)]
-        cx_bonds_after = [b for b in params.BOND if ' CX ' in (b.first, b.second)]
+        ca_bonds_after = [b for b in params.BOND if " CA " in (b.first, b.second)]
+        cx_bonds_after = [b for b in params.BOND if " CX " in (b.first, b.second)]
 
         assert len(ca_bonds_after) == 0
         assert len(cx_bonds_after) == len(ca_bonds)
@@ -533,7 +578,6 @@ class TestEdgeCases:
         # This should raise an error since ZZ doesn't exist
         with pytest.raises(ValueError, match="not a valid atom name"):
             params.rename_atom(" ZZ ", " XX ")
-
 
     def test_load_nonexistent_file(self):
         """Test loading a nonexistent file raises appropriate error."""
@@ -604,4 +648,3 @@ class TestOHIRoundtrip:
 
 
 # Run with: pytest tests/test_internals.py -v
-

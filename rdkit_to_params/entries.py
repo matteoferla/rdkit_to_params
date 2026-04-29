@@ -395,6 +395,7 @@ class PROTON_CHIEntry:
     Proton chi sampling specification for polar hydrogens (hydroxyl, thiol, amine).
     E.g. ``PROTON_CHI 3 SAMPLES 18 0 20 40 60 80 100 120 140 160 180 200 220 240 260 280 300 320 340 EXTRA 0``
     """
+
     chi_index: int
     samples: list[int]
     extra: list[int]
@@ -420,7 +421,7 @@ class PROTON_CHIEntry:
         n_samples = int(rex.group(2))
         samples = [int(x) for x in rex.group(3).split()]
         if len(samples) != n_samples:
-            raise ValueError(f'PROTON_CHI expected {n_samples} samples, got {len(samples)}')
+            raise ValueError(f"PROTON_CHI expected {n_samples} samples, got {len(samples)}")
         extra = [int(x) for x in rex.group(4).split()]
         return cls(chi_index=chi_index, samples=samples, extra=extra)
 
@@ -659,21 +660,33 @@ Entries.choices["CUT_BOND"] = (CUT_BONDEntry, Singletony.multiton)
 @dataclass
 class CHARGEEntry:
     """
-    No idea if anything respects this.
+    Per-atom formal charge entry, written by Rosetta as e.g.
+
+        CHARGE OA FORMAL -1
+
+    ``self.atom`` may be a PDB-padded atom name (4-char, e.g. ``" OA "``)
+    or pre-stripped — the dump strips so that the on-disk format always
+    has single-space separators (round-trip-safe with ``from_str``).
     """
 
     atom: str
-    charge: str  # e.g. "+1" or "-1"
+    charge: str  # e.g. "+1", "-1", "-12"
 
     def __str__(self) -> str:
-        return f"CHARGE {self.atom} FORMAL {self.charge}"
+        # ↓ Strip the atom name on dump so multi-space PDB padding doesn't
+        #   sneak into the output and break re-parsing. See from_str regex.
+        return f"CHARGE {self.atom.strip()} FORMAL {self.charge}"
 
     def _repr_html_(self):
         return f"{html_span('CHARGE')} {self.atom} {html_span(self.charge)}"
 
     @classmethod
     def from_str(cls, text: str):
-        rex = re.match(r"(?P<atom>\S+) FORMAL (?P<charge>\-?\+?\d)", text.rstrip())
+        # ↓ Tolerate any whitespace between the three tokens (PDB-padded
+        #   atom names produce multi-space gaps after the bare ``__str__``
+        #   join). Sign is one of ``+/-`` (or none); charge digits are
+        #   one-or-more so multi-digit charges (e.g. ``-12``) parse too.
+        rex = re.match(r"(?P<atom>\S+)\s+FORMAL\s+(?P<charge>[+-]?\d+)", text.rstrip())
         if rex is None:
             raise ValueError(f'CHARGE entry "{text}" is not formatted correctly')
         data = rex.groupdict()
@@ -808,6 +821,7 @@ class RAMA_PREPRO_FILENAMEEntry:
     Two database-relative paths: the general table and the pre-proline table.
     E.g. ``RAMA_PREPRO_FILENAME scoring/…/AIB_general.rama scoring/…/AIB_prepro.rama``
     """
+
     general: str
     prepro: str
 
@@ -824,9 +838,7 @@ class RAMA_PREPRO_FILENAMEEntry:
         return f"RAMA_PREPRO_FILENAME {self.general} {self.prepro}"
 
     def _repr_html_(self):
-        return (
-            f"{html_span('RAMA_PREPRO_FILENAME')} general:{self.general} prepro:{self.prepro}"
-        )
+        return f"{html_span('RAMA_PREPRO_FILENAME')} general:{self.general} prepro:{self.prepro}"
 
     @classmethod
     def from_str(cls, text: str):
@@ -854,6 +866,7 @@ class RAMA_PREPRO_RESNAMEEntry(GenericEntry):
 
     E.g. ``RAMA_PREPRO_RESNAME GENERIC_ALPHA_AMINOISOBUTYRIC_AA``
     """
+
     def __init__(self, body: str):
         super().__init__(header="RAMA_PREPRO_RESNAME", body=body)
 
@@ -1124,6 +1137,7 @@ class NUMERIC_PROPERTYEntry:
     Numeric property for a residue type, e.g. ``NUMERIC_PROPERTY REFERENCE -1.5``.
     Used by Rosetta score terms like ``ref_nc`` to assign reference energies to ncAAs.
     """
+
     tag: str
     value: float
 
@@ -1137,7 +1151,9 @@ class NUMERIC_PROPERTYEntry:
     def from_str(cls, text: str):
         parts = text.split(None, 1)
         if len(parts) != 2:
-            raise ValueError(f'NUMERIC_PROPERTY entry "{text}" should have a tag and a numeric value')
+            raise ValueError(
+                f'NUMERIC_PROPERTY entry "{text}" should have a tag and a numeric value'
+            )
         return cls(tag=parts[0], value=float(parts[1]))
 
 
@@ -1152,6 +1168,7 @@ class STRING_PROPERTYEntry:
     """
     String property for a residue type, e.g. ``STRING_PROPERTY SOME_TAG some_value``.
     """
+
     tag: str
     value: str
 
