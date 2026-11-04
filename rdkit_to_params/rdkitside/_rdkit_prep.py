@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 import os
 import re
 import string
@@ -179,6 +180,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
     PROPERTIES: Entries
     FIRST_SIDECHAIN_ATOM: Entries
     BACKBONE_AA: Entries
+    NET_FORMAL_CHARGE: Entries
     greekification: bool
 
     def __init__(self) -> None:  # noqa
@@ -188,6 +190,21 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         self.mol: Chem.Mol = None  # type: ignore[assignment]  # Set by load_mol/load_smiles
         self.generic = False
         self._rtype: list[Any] = []
+
+    @staticmethod
+    def _get_net_formal_charge(mol: Chem.Mol) -> int:
+        """Return net formal charge, excluding neutral connection dummy atoms."""
+        charged_dummy_indices = [
+            atom.GetIdx()
+            for atom in mol.GetAtoms()
+            if atom.GetAtomicNum() == 0 and atom.GetFormalCharge() != 0
+        ]
+        if charged_dummy_indices:
+            raise ValueError(
+                "Molecules with charged dummy atoms are unsupported; "
+                f"found charged dummy atom indices {charged_dummy_indices}"
+            )
+        return sum(atom.GetFormalCharge() for atom in mol.GetAtoms() if atom.GetAtomicNum() != 0)
 
     @classmethod
     def load_mol(
@@ -209,6 +226,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         """
         self = cls()
         self.log.debug("`load_mol` called...")
+        cls._get_net_formal_charge(mol)
         self.mol = mol
         self.generic = generic
         self.TYPE.append("LIGAND")
@@ -237,6 +255,7 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         mol = Chem.MolFromSmiles(smiles)
         if mol is None:
             raise ValueError("The SMILES string could not be converted")
+        cls._get_net_formal_charge(mol)
         mol.SetProp("_Name", name if name else "LIG")
         mol = Chem.AddHs(mol, addCoords=bool(mol.GetNumConformers()))
         # cannot embed more than one dummy
@@ -774,8 +793,10 @@ class _RDKitPrepMixin(_RDKitRenameMixin):
         for i, atom in enumerate(self.mol.GetAtoms()):
             if i in changed:
                 atom.SetAtomicNum(0)
+                atom.SetDoubleProp(pcharge_prop_name, 0.0)
+                continue
             gc = atom.GetDoubleProp(pcharge_prop_name)
-            if str(gc) != "nan":
+            if not math.isfinite(gc):
                 atom.SetDoubleProp(pcharge_prop_name, 0.0)
 
     def set_partial_charges_from_list(
