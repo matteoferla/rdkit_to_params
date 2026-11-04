@@ -673,7 +673,7 @@ class CHARGEEntry:
 
     @classmethod
     def from_str(cls, text: str):
-        rex = re.match(r"(?P<atom>\S+) FORMAL (?P<charge>\-?\+?\d)", text.rstrip())
+        rex = re.fullmatch(r"(?P<atom>\S+)\s+FORMAL\s+(?P<charge>[+-]?\d+)", text.strip())
         if rex is None:
             raise ValueError(f'CHARGE entry "{text}" is not formatted correctly')
         data = rex.groupdict()

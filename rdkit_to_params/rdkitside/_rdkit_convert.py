@@ -45,7 +45,7 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
     auto_ref = True  # auto-add NUMERIC_PROPERTY REFERENCE for ncAAs
 
     _CONVERT_SKIP = frozenset({
-        "#", "TYPE", "comment", "IO_STRING", "ROTAMER_AA",
+        "#", "TYPE", "comment", "IO_STRING", "ROTAMER_AA", "NET_FORMAL_CHARGE",
         "AA", "PROPERTIES", "VARIANT", "<UNKNOWN>",
         "RAMA_PREPRO_FILENAME", "RAMA_PREPRO_RESNAME",
     })
@@ -58,6 +58,8 @@ class _RDKitCovertMixin(_RDKitPrepMixin):
         title = self._resolve_name()
         self.log.debug(f"{title} is being converted (`.convert_mol`)")
         self._handle_fragments(title)
+        if not self.NET_FORMAL_CHARGE:
+            self.NET_FORMAL_CHARGE.append(self._get_net_formal_charge(self.mol))
         self.comments.append(Chem.MolToSmiles(self.mol))
         if len(self.TYPE) == 0:
             self.TYPE.append("LIGAND")

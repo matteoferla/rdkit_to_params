@@ -190,6 +190,18 @@ class TestCHARGEEntry:
         assert entry.atom == "OD1"
         assert entry.charge == "-1"
 
+    def test_charge_entry_from_str_padded_atom_name(self):
+        """Test parsing the padded atom field emitted by Params.dumps()."""
+        entry = CHARGEEntry.from_str(" O2  FORMAL -1")
+        assert entry.atom == "O2"
+        assert entry.charge == "-1"
+
+    @pytest.mark.parametrize("text", ["O2 FORMAL -1 trailing", "O2 FORMAL --1"])
+    def test_charge_entry_from_str_rejects_trailing_or_malformed_charge(self, text):
+        """Reject trailing text and invalid signed-integer syntax."""
+        with pytest.raises(ValueError, match="not formatted correctly"):
+            CHARGEEntry.from_str(text)
+
 
 class TestIO_STRINGEntry:
     """Test IO_STRING entry parsing."""
